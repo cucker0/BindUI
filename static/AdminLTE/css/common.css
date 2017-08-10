@@ -1,0 +1,107 @@
+.dd-left{
+    float: left;
+    width: 40%;
+    /*border-right: 1px solid #DDD;*/
+}
+
+.dd-middle{
+    float: left;
+    width: 30%;
+}
+
+.dd-right{
+    float: left;
+    width: 30%;
+}
+
+.cursor1{
+    cursor: pointer;
+}
+
+.dd-middle label{
+    font-weight: normal;
+    margin-bottom: 0;
+}
+
+.dd-subdiv{
+    width: 46%;
+    margin-top: 10px;
+    margin-left: 30px;
+}
+
+.green{
+    color: #008d4c; !important;
+}
+
+.orange{
+    color: darkorange; !important;
+}
+
+.red{
+    color: red; !important;
+}
+
+.margin-t10{
+    margin-top: 10px;
+}
+
+.margin-t30{
+    margin-top: 30px;
+}
+
+.margin-t50{
+    margin-top: 50px;
+}
+
+.width-50{
+    width: 50px;
+}
+
+.margin-L10{
+    margin-left: 10px;
+}
+
+.margin-L30{
+    margin-left: 30px;
+}
+
+.margin-L50{
+    margin-left: 50px;
+}
+
+.site_active{
+    color: #1ab7ea;
+}
+
+.site_box{
+    margin-top: 10px;
+}
+
+table{
+    cursor: default;
+}
+
+.maintain_group_select{
+    height: 34px;
+}
+
+.mygray-light{
+    color: #999 !important;
+}
+
+.mywidth95{
+    width: 95% !important;
+}
+
+input.upload{
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    height: 32px;
+    cursor: pointer;
+    opacity: 0;
+}
+

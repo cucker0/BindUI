@@ -1,0 +1,114 @@
+{% extends 'nginx/tmp/index_tmp.html' %}
+{% load static %}
+{% load MyTemplate %}
+
+{% block head %}
+    <link rel="stylesheet" href="/static/AdminLTE/css/common.css">
+    <script src="/static/AdminLTE/js/myjs.js"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="col-xs-12"><h3>用户设置</h3></div>
+    <div class="col-md-9">
+        <div class="nav-tabs-custom">
+            <ul class="nav nav-tabs">
+                <li class="active"><a href="#profile" data-toggle="tab" aria-expanded="true">基本资料</a></li>
+                <li class=""><a href="#head_portrait" data-toggle="tab" aria-expanded="false">修改头像</a></li>
+                <li class=""><a href="#security" data-toggle="tab" aria-expanded="false">修改密码</a></li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane active" id="profile">
+                    <form class="form-horizontal">
+                        <div class="form-group">
+                            <label for="nickname" class="col-sm-2 control-label">昵称</label>
+
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" name="nickname" id="nickname" placeholder="{{ request.user.userprofile.name }}">
+                            </div>
+                            <div class="col-sm-4 message"></div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <button type="button" class="btn btn-primary" onclick="ChangeNickname('#nickname',1);">确定</button>
+                                <button type="button" class="btn btn-primary" onclick="ChangeNickname('#nickname',2);">取消</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <!-- /.tab-pane -->
+                <div class="tab-pane" id="head_portrait">
+                    <!-- The timeline -->
+                    <div class="user-block">
+                        <div class="col-sm-2">
+                            <img class="img-circle img-bordered-sm" src="{% static ""%}{% truncate_url request.user.userprofile.head_portrait %}" alt="user image">
+                        </div>
+                        <div class="col-sm-6">
+{#                            <input type="file" class="hidden">#}
+{#                            <button class="btn btn-primary btn-block" onclick="$(this).prev().filter('input').click();"><b>选择本地图片</b></button>#}
+                            <form class="form-horizontal ng-pristine ng-valid" role="form" novalidate="" name="form">
+                                <div class="avatar-local-wrap">
+                                    <p style="margin-bottom: 0">从电脑里挑选一张好图作为头像吧</p>
+                                    <div class="clearfix">
+                                        <input placeholder="选择一个文件" disabled="disabled" class="form-control" style="width: 176px;display: inline-block">
+                                        <div class="btn btn-default">
+                                            <span func="select_upload_file">上传</span>
+                                            <input name="file00" type="file" class="hide" form-data="formData" id="startUploadBtn" file-reader="" accept=".jpg,.png,.gif">
+                                        </div>
+                                    </div>
+                                    <div func="msg_error1" class="text-danger hide">对不起，格式错误或文件大小超过2M</div>
+                                    <p>支持jpg/png/gif格式图片，文件需小于2M</p>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-offset-0 col-sm-10">
+                                        <button type="button" class="btn btn-primary" name="confirm" onclick="UploadFile('#startUploadBtn', 1);">确定</button>
+                                        <button type="button" class="btn btn-primary" name="cancel" onclick="UploadFile('#startUploadBtn', 2);">取消</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+                <!-- /.tab-pane -->
+
+                <div class="tab-pane" id="security">
+                    <form class="form-horizontal">
+                        <div class="form-group">
+                            <label for="current_password" class="col-sm-2 control-label">当前密码</label>
+
+                            <div class="col-sm-4">
+                                <input type="password" class="form-control" name="current_password" id="current_password" placeholder="Current password">
+                            </div>
+                            <div class="col-sm-4 message"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="new_password" class="col-sm-2 control-label">新密码</label>
+
+                            <div class="col-sm-4">
+                                <input type="password" class="form-control" name="new_password" id="new_password" placeholder="New password">
+                            </div>
+                            <div class="col-sm-4 message"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="retype_new_password" class="col-sm-2 control-label">确认密码</label>
+
+                            <div class="col-sm-4">
+                                <input type="password" class="form-control" name="retype_new_password" id="retype_new_password" placeholder="Retype new password">
+                            </div>
+                            <div class="col-sm-4 message"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <button type="button" class="btn btn-primary" onclick="ChangePassword();">确定</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <!-- /.tab-pane -->
+            </div>
+            <!-- /.tab-content -->
+        </div>
+        <!-- /.nav-tabs-custom -->
+    </div>
+{% endblock %}

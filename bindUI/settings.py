@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'DnsRecord',
+    'authentication',
 ]
 
 MIDDLEWARE = [
@@ -141,3 +142,18 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR,'static'),
+    os.path.join(BASE_DIR,'upload'),
+)
+
+# # upstream源站上线前是否需要测试连接源站URL
+# UPSTREAM_UP_REALSERVER_TEST = {'test':False, 'url':'/do_not_delete/check.html'}
+
+# 指定全局要求登录的 URL
+LOGIN_URL = '/auth/login/'
+
+# 会话超时设置
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_COOKIE_AGE = 60*60*24*3              # session超时时间。默认是好多天
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False   # 会话cookie可以在用户浏览器中保持有效期。True：关闭浏览器，则Cookie失效。
