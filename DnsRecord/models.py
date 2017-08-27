@@ -1,4 +1,10 @@
 from django.db import models
+import sys, os
+BASIC_DIR = os.path.dirname(os.path.dirname(__file__))
+sys.path.append(BASIC_DIR)
+from bindUI import dns_conf
+
+
 
 # Create your models here.
 
@@ -41,7 +47,8 @@ class Record(models.Model):
     create_time = models.DateTimeField('create_time', auto_now_add=True)
     update_time = models.DateTimeField('update_time', auto_now=True)
     comment = models.CharField('comment', max_length=255, null=True, blank=True, default=None, help_text='备注')
-    zone_tag = models.ForeignKey('ZoneTag')
+    resolution_line = models.IntegerField('resolution_line', choices=dns_conf.DNS_RESOLUTION_LINE, default=0, help_text='解析线路')
+    zone_tag = models.ForeignKey('ZoneTag', related_name='ZoneTag_Record')
 
     def __str__(self):
         return(self.host)

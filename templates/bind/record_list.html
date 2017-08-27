@@ -1,0 +1,81 @@
+{% extends "bind/tmp/index_tmp.html" %}
+
+{% block head %}
+    <link rel="stylesheet" href="/static/AdminLTE/css/common.css">
+    <script src="/static/AdminLTE/js/myjs.js"></script>
+{% endblock %}
+
+
+{% block content %}
+    <div class="nav nav-pills"><h2>{{ zone_tag_obj.zone_name }}</h2></div>
+
+
+{#    <div class="nav nav-pills">#}
+{#        <h3><button type="button" class="btn btn-success">添加域名</button></h3>#}
+{#    </div>#}
+    <div>
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    <h2 class="box-title">
+                        <button type="button" class="btn btn-primary">+ 添加记录</button>
+                        <button type="button" class="btn btn-default">暂停</button>
+                        <button type="button" class="btn btn-default">启动</button>
+                        <button type="button" class="btn btn-default">删除</button>
+                    </h2>
+
+                    <div class="box-tools">
+                        <div class="input-group input-group-sm" style="width: 300px;">
+                            <input type="text" name="table_search" class="form-control pull-right" placeholder="Search">
+
+                            <div class="input-group-btn">
+                                <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body table-responsive no-padding">
+                    <table id="table_record_list" class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th><input type="checkbox" data-check-all onclick="SelectAll('#table_record_list' )"></th>
+                            <th>主机记录</th>
+                            <th>记录类型</th>
+                            <th>解析线路</th>
+                            <th>记录值</th>
+                            <th>MX优先级</th>
+                            <th>TTL</th>
+                            <th>最后操作时间</th>
+                            <th>操作</th>
+                            <th>备注</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for record_obj in record_obj_list %}
+                            <tr>
+                                <td><input type="checkbox" id="{{ record_obj.id }}"></td>
+                                <td>{{ record_obj.host }}</td>
+                                <td>{{ record_obj.type }}</td>
+                                <td>{{ record_obj.resolution_line }}</td>
+                                <td>{{ record_obj.data }}</td>
+                                <td>{{ record_obj.mx_priority }}</td>
+                                <td>{{ record_obj.ttl }}</td>
+                                <td>{{ record_obj.update_time }}</td>
+                                <td><a>修改</a> <a>暂时</a> <a>删除</a></td>
+                                <td>{{ record_obj.comment }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+
+                    </table>
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+        </div>
+
+
+    </div>
+
+{% endblock %}

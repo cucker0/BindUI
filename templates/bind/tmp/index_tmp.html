@@ -1,11 +1,12 @@
 {% load static %}
 {% load MyTemplate %}
+
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>MiliOPS</title>
+    <title>BindUI</title>
     <link href="{% static 'favicon.ico' %}" rel="shortcut icon" type="image/x-icon"/>
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
@@ -101,30 +102,43 @@
     </header>
     <!-- Left side column. contains the logo and sidebar -->
 {% block left-side %}
-    <aside class="main-sidebar">
+ <aside class="main-sidebar">
         <!-- sidebar: style can be found in sidebar.less -->
         <section class="sidebar">
             <!-- search form -->
-            <form action="#" method="get" class="sidebar-form">
+            <div class="sidebar-form">
                 <div class="input-group">
                     <input type="text" name="q" class="form-control" placeholder="Search...">
-              <span class="input-group-btn">
-                <button type="submit" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
-                </button>
-              </span>
+                  <span class="input-group-btn">
+                      <button type="submit" name="search" id="search-btn" class="btn btn-flat"><i
+                              class="fa fa-search"></i></button>
+                  </span>
                 </div>
-            </form>
+            </div>
             <!-- /.search form -->
             <!-- sidebar menu: : style can be found in sidebar.less -->
             <ul class="sidebar-menu">
                 <li class="header">MAIN NAVIGATION</li>
                 <li class="active treeview">
-                    <a href="/nginx/index/" target="_self">
-                        <i class="fa fa-dashboard"></i> <span>WEB站点上下线</span>
+                    <a href="/">
+                        <i class="fa fa-dashboard"></i>
+                        <span>域名服务</span>
                         <span class="pull-right-container">
                             <i class="fa fa-angle-left pull-right"></i>
                         </span>
                     </a>
+                    <ul class="treeview-menu" name="dynamic_upstream">
+                        <li><a href="{% url 'domain_list' %}">
+                                <i class="fa fa-circle-o"></i>我的域名
+                            </a>
+                        </li>
+                    </ul>
+                    <ul class="treeview-menu" name="dynamic_upstream">
+                        <li><a href="{% url 'domain_resolution_list' %}">
+                                <i class="fa fa-circle-o"></i>域名解析
+                            </a>
+                        </li>
+                    </ul>
                 </li>
                 <li>
                     <a href="/admin" target="_blank">
@@ -134,6 +148,7 @@
 
             </ul>
         </section>
+
         <!-- /.sidebar -->
     </aside>
 {% endblock %}

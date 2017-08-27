@@ -144,16 +144,15 @@ function GetCheckboxValue(selector){
     return _checkbox_val;
 }
 
-function SelectAll(ths, selector){
+function SelectAll(selector){
     //选择/取消所有
-    var status = $(ths).attr('status');
-    var _target = selector + ' input[name!="ckSelectAll"]:checkbox';
-    if(status == '0'){
+    var _check_all = selector + " input[type=checkbox][data-check-all='']";
+    var check_all_status = $(_check_all).is(':checked');
+    var _target = selector + " input[type=checkbox][data-check-all!='']";
+    if(check_all_status){
         $(_target).prop("checked",true);
-        $(ths).attr('status',1);
     }else{
         $(_target).removeAttr("checked");
-        $(ths).attr('status',0);
     }
 }
 
