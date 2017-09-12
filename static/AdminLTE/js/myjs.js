@@ -248,6 +248,10 @@ function ChangePassword(){
 $(function(){
     //DOM加载后执行
 
+    //添加DNS记录 Placeholder 提示
+    //$(".form-horizontal select[name=type]").change(ChangePlaceholder);
+    $(".form-horizontal select[name=type]").bind('change', ChangePlaceholder);
+
     //搜索按键
     //通过proxy_server_id与site_name搜索site
     $('#search-btn').bind('click', function(){
@@ -281,6 +285,9 @@ $(function(){
     );
 
 });
+
+
+
 
 function UploadFile(selector, action){
     //上传文件
@@ -363,3 +370,123 @@ function ChangeNickname(selector, action){
 
 //禁止双击选中文字
 //document.onselectstart=function(){return false;}
+
+function ChangePlaceholder(){
+    //添加DNS记录选择记录类型时，自动调整相应的Placeholder提示内容
+    var type_val = $(".form-horizontal select[name=type]").val();
+    switch(type_val){
+        case 'CNAME':
+            $(".form-horizontal input[name=host]").attr("placeholder", "填写子域名（如www），不填写默认保存为@");
+            $(".form-horizontal input[name=data]").attr("palceholder", "填写一个域名，例如：www.dns.com");
+            $(".form-horizontal input[name=mx]").parent().parent().hide();
+            break;
+        case 'MX':
+            $(".form-horizontal input[name=host]").attr("placeholder", "通常填写@、mail，不填写默认保存为@");
+            $(".form-horizontal input[name=data]").attr("placeholder", "填写邮件服务器地址");
+            $(".form-horizontal input[name=mx]").parent().parent().show();
+            $(".form-horizontal input[name=mx]").val('5');
+            break;
+        case 'TXT':
+            $(".form-horizontal input[name=host]").attr("placeholder", "填写子域名，不填写默认保存为@");
+            $(".form-horizontal input[name=data]").attr("placeholder", "填写文本，字符长度限制255");
+            $(".form-horizontal input[name=mx]").parent().parent().hide();
+            break;
+        case 'NS':
+            $(".form-horizontal input[name=host]").attr("placeholder", "填写子域名（如www），不可填写@");
+            $(".form-horizontal input[name=data]").attr("placeholder", "填写DNS域名，例如：f1g1ns1.dnspod.net");
+            $(".form-horizontal input[name=mx]").parent().parent().hide();
+            break;
+        case 'AAAA':
+            $(".form-horizontal input[name=host]").attr("placeholder", "填写子域名，不填写默认保存为@");
+            $(".form-horizontal input[name=data]").attr("placeholder", "填写一个IPv6地址，例如：ff06:0:0:0:0:0:0:c3");
+            $(".form-horizontal input[name=mx]").parent().parent().hide();
+            break;
+        case 'SRV':
+            $(".form-horizontal input[name=host]").attr("placeholder", "填写格式为：服务.协议（如_ldap._tcp）");
+            $(".form-horizontal input[name=data]").attr("placeholder", "例如：5 0 5269 example.dns.com");
+            $(".form-horizontal input[name=mx]").parent().parent().hide();
+            break;
+        case 'PTR':
+            $(".form-horizontal input[name=host]").attr("placeholder", "填写IP主机位数字（如反向解析IP 192.168.1.11，则填写11）");
+            $(".form-horizontal input[name=data]").attr("placeholder", "填写对应的正向解析域名，例如：www.dns.com.");
+            $(".form-horizontal input[name=mx]").parent().parent().hide();
+            break;
+        case 'SOA':
+            $(".form-horizontal input[name=host]").attr("placeholder", "填写@");
+            $(".form-horizontal input[name=data]").attr("placeholder", "填写一个域名，例如：ns1.dns.com.");
+            $(".form-horizontal input[name=mx]").parent().parent().hide();
+            break;
+        case 'REDIRECT_URL':
+            $(".form-horizontal input[name=host]").attr("placeholder", "填写子域名（如www），不填写默认保存为@");
+            $(".form-horizontal input[name=data]").attr("placeholder", "填写要跳转到的网址，如：http://www.qq.com");
+            $(".form-horizontal input[name=mx]").parent().parent().hide();
+            break;
+        case 'FORWARD_URL':
+            $(".form-horizontal input[name=host]").attr("placeholder", "填写子域名（如www），不填写默认保存为@");
+            $(".form-horizontal input[name=data]").attr("placeholder", "填写要跳转到的网址，如：http://www.qq.com");
+            $(".form-horizontal input[name=mx]").parent().parent().hide();
+            break;
+        default:
+            // case '0':
+            $(".form-horizontal input[name=host]").attr("placeholder", "填写子域名（如www），不填写默认保存为@");
+            $(".form-horizontal input[name=data]").attr("palceholder", "填写一个IPv4地址，例如：8.8.8.8");
+            $(".form-horizontal input[name=mx]").parent().parent().hide();
+
+    }
+
+}
+
+function DnsRecordDefaultSelect(){
+    //每次点击 添加记录 重置记录类型
+    $(".form-horizontal input[name=mx]").parent().parent().hide();
+    var _domain_name = $("div .nav h2").text();
+    if (_domain_name.endsWith('in-addr.arpa')) {
+        $(".form-horizontal select[name=type]").val('PTR');
+        //$(".form-horizontal input[name=host]").attr("placeholder", "填写IP主机位数字（如反向解析IP 192.168.1.11，则填写11）");
+        //$(".form-horizontal input[name=data]").attr("placeholder", "填写对应的正向解析域名，例如：www.dns.com.");
+    }else{
+        $(".form-horizontal select[name=type]").val('A');
+        //$(".form-horizontal input[name=host]").attr("placeholder", "填写子域名（如www），不填写默认保存为@");
+        //$(".form-horizontal input[name=data]").attr("palceholder", "填写一个IPv4地址，例如：8.8.8.8");
+    }
+}
+
+function SaveAction(){
+    //点击 保存按键
+    var _type = $(".modal-body select[name=type]").val();
+    var _host = $(".modal-body input[name=host]").val();
+    var _resolution_line = $(".modal-body select[name=resolution_line]").val();
+    var _data = $(".modal-body input[name=data]").val();
+    var _mx = $(".modal-body input[name=mx]").val();
+    var _ttl = $(".modal-body select[name=ttl]").val();
+    var _zone_tag_name = $("[zone_tag_name]").text();
+    var senddata = {"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data, "mx_priority":_mx, "ttl":_ttl, "zone":_zone_tag_name }
+
+    $.ajax({
+        url: "/dns/add.html",
+        type: "POST",        //请求类型
+        data: {'data': JSON.stringify(senddata)},
+        dataType: "json",
+        success: function (callback) {
+            //当向服务端发起的请求执行成功完成后，自动调用
+            if (callback['status'] == 200){
+                location.reload(true);      //刷新当前页面
+            }
+        },
+        error: function () {
+            //当请求错误之后，自动调用
+        }
+    });
+
+}
+
+
+$(document).ready(function(){
+    //文件加载后执行
+
+    //点击 添加记录 按键绑定事件
+    $("button[data-toggle=modal]").bind('click', DnsRecordDefaultSelect, ChangePlaceholder);
+
+    //添加记录时点击 保存 按键绑定事件
+    $(".modal-footer  button[name=_save]").bind('click', SaveAction);
+});

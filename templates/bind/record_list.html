@@ -1,24 +1,152 @@
 {% extends "bind/tmp/index_tmp.html" %}
+{% load MyTemplate %}
 
 {% block head %}
     <link rel="stylesheet" href="/static/AdminLTE/css/common.css">
     <script src="/static/AdminLTE/js/myjs.js"></script>
+    <script>
+        $(function () {
+            $('[data-toggle="popover"]').popover()
+        })
+    </script>
 {% endblock %}
 
 
 {% block content %}
-    <div class="nav nav-pills"><h2>{{ zone_tag_obj.zone_name }}</h2></div>
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">添加记录</h4>
+                </div>
 
+                <div class="modal-body">
 
-{#    <div class="nav nav-pills">#}
-{#        <h3><button type="button" class="btn btn-success">添加域名</button></h3>#}
-{#    </div>#}
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">记录类型</label>
+                            <div class="col-sm-10">
+                                {% if zone_tag_obj.zone_name|is_reverse_resulution_domain  %}
+                                    <select name="type">
+                                        <option value="PTR">PTR</option>
+                                    </select>
+                                {% else %}
+                                    <select name="type">
+                                        <option value="A">A</option>
+                                        <option value="CNAME">CNAME</option>
+                                        <option value="MX">MX</option>
+                                        <option value="TXT">TXT</option>
+                                        <option value="NS">NS</option>
+                                        <option value="AAAA">AAAA</option>
+                                        <option value="SRV">SRV</option>
+                                        <option value="SOA">SOA</option>
+                                        <option value="REDIRECT_URL">显性URL</option>
+                                        <option value="FORWARD_URL">隐性URL</option>
+                                    </select>
+                                {% endif %}
+                                <a tabindex="0" class="glyphicon glyphicon-question-sign" role="button"
+                                   data-toggle="popover"
+                                   data-trigger="focus"
+                                   data-content="A记录： 将域名指向一个IPv4地址（例如：8.8.8.8）
+CNAME：将域名指向另一个域名（例如www.qcloud.com）
+MX： 将域名指向邮件服务器地址
+TXT： 可任意填写，长度限制255，通常做SPF记录（反垃圾邮件）
+NS： 域名服务器记录，将子域名指定其他DNS服务器解析
+AAAA：将域名指向一个iPv6地址（例如：ff06:0:0:0:0:0:0:c3）
+SRV：记录提供特定服务的服务器（例如_xmpp-server._tcp）
+显性URL：将域名301重定向到另一个地址
+隐性URL：类似显性URL，但是会隐藏真实目标地址"></a>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">主机记录</label>
+                            <div class="col-sm-10">
+                                <input type="text" name="host" class="form-control" style="column-count: 10" placeholder="填写子域名（如www），不填写默认保存为@">
+                                <a tabindex="0" class="glyphicon glyphicon-question-sign" role="button"
+                                   data-toggle="popover"
+                                   data-trigger="focus"
+                                   data-content="要解析www.qcloud.com，请填写www。
+主机记录就是域名前缀，常见用法有：
+
+www： 解析后的域名为www.qcloud.com。
+@： 直接解析主域名 qcloud.com。
+*： 泛解析，匹配其他所有域名 *.qcloud.com。
+mail： 将域名解析为mail.qcloud.com，通常用于解析邮箱服务器。
+二级域名： 如：abc.qcloud.com，填写abc。
+手机网站： 如：m.qcloud.com，填写m。"><span class="icon-question-sign"></span></a>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">解析线路</label>
+                            <div class="col-sm-10">
+                                <select name="resolution_line">
+                                    {% for i in DNS_RESOLUTION_LINE %}
+                                        <option value="{{ i.0 }}">{{ i.1 }}</option>
+                                    {% endfor %}
+
+                                </select>
+
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">记录值</label>
+                            <div class="col-sm-10">
+                                <input type="text" name="data" class="form-control" placeholder="填写一个IPv4地址，例如：8.8.8.8">
+                            </div>
+                        </div>
+                        <div class="form-group" style="display:none">
+                            <label class="col-sm-2 control-label">MX优先级</label>
+                            <div class="col-sm-10">
+                                <input type="text" name="mx" value="5" class="form-control" placeholder="输入0-50范围数值，越小优先级越高">
+
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">TTL</label>
+                            <div class="col-sm-10">
+                                <select name="ttl">
+                                    <option value="60">1分钟</option>
+                                    <option value="600" selected="selected">10分钟</option>
+                                    <option value="1800">30分钟</option>
+                                    <option value="3600">1小时</option>
+                                    <option value="43200">12小时</option>
+                                    <option value="86400">24小时</option>
+                                </select>
+                                <a tabindex="0" class="glyphicon glyphicon-question-sign" role="button"
+                                   data-toggle="popover"
+                                   data-trigger="focus"
+                                   data-content="各地DNS服务器缓存解析记录时长，缓存失效后才会重新获取记录值。<br>建议正常情况下设定10分钟即可。"></a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" name="_save" class="btn btn-primary">保存</button>
+                    <button type="button" name="_cancel" class="btn btn-default" data-dismiss="modal">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal  end -->
+
+    <div class="nav nav-pills"><h2 zone_tag_name="">{{ zone_tag_obj.zone_name }}</h2></div>
+
+    {#    <div class="nav nav-pills">#}
+    {#        <h3><button type="button" class="btn btn-success">添加域名</button></h3>#}
+    {#    </div>#}
     <div>
         <div class="col-xs-12">
             <div class="box">
                 <div class="box-header">
                     <h2 class="box-title">
-                        <button type="button" class="btn btn-primary">+ 添加记录</button>
+                        <!-- Button trigger modal -->
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">+ 添加记录</button>
                         <button type="button" class="btn btn-default">暂停</button>
                         <button type="button" class="btn btn-default">启动</button>
                         <button type="button" class="btn btn-default">删除</button>
@@ -57,13 +185,13 @@
                                 <td><input type="checkbox" id="{{ record_obj.id }}"></td>
                                 <td>{{ record_obj.host }}</td>
                                 <td>{{ record_obj.type }}</td>
-                                <td>{{ record_obj.resolution_line }}</td>
+                                <td>{% dns_resolution_line_fileter record_obj.resolution_line %}</td>
                                 <td>{{ record_obj.data }}</td>
-                                <td>{{ record_obj.mx_priority }}</td>
-                                <td>{{ record_obj.ttl }}</td>
+                                <td>{% val_none_to_blank record_obj.mx_priority '-' %}</td>
+                                <td>{% ttl_convert record_obj.ttl %}</td>
                                 <td>{{ record_obj.update_time }}</td>
                                 <td><a>修改</a> <a>暂时</a> <a>删除</a></td>
-                                <td>{{ record_obj.comment }}</td>
+                                <td>{% val_none_to_blank record_obj.comment %}</td>
                             </tr>
                         {% endfor %}
                         </tbody>

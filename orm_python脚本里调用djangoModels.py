@@ -22,4 +22,5 @@ record_obj_list = zone_tag_obj.ZoneTag_Record.all()
 print(zone_tag_obj)
 print(record_obj_list)
 for i in record_obj_list:
-    print(i)
+    print(i.host, i.type, i.data, i.comment, i.mx_priority)
+
