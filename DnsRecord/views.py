@@ -16,6 +16,8 @@ code 值含义
     500：失败
 """
 
+COMMON_MSG = {'req_use_post':'use POST request method please.'}
+
 def root(req):
     return redirect('/')
 
@@ -89,20 +91,20 @@ def record_add(req):
             print(e)
         return HttpResponse(json.dumps(msg))
     else:
-        return HttpResponse('use POST request method please.')
+        return HttpResponse(COMMON_MSG['req_use_post'])
 
 
 
 record_key = ['zone', 'host', 'type', 'data', 'ttl', 'mx_priority', 'refresh', 'retry', 'expire', 'minimum', 'serial', 'resp_person', 'primary_ns', 'comment',]
 record_request_field = {
-    'A':['zone', 'host', 'type', 'data', 'ttl', 'resolution_line'],
-    'CNAME':['zone', 'host', 'type', 'data', 'ttl', 'resolution_line'],
-    'MX':['zone', 'host', 'type', 'data', 'ttl', 'resolution_line', 'mx_priority'],
-    'TXT':['zone', 'host', 'type', 'data', 'ttl', 'resolution_line'],
-    'NS':['zone', 'host', 'type', 'data', 'resolution_line'],
-    'AAAA':['zone', 'host', 'type', 'data', 'ttl', 'resolution_line'],
-    'SRV':['zone', 'host', 'type', 'data', 'ttl', 'resolution_line'],
-    'PTR':['zone', 'host', 'type', 'data', 'ttl', 'resolution_line'],
+    'A':['zone', 'host', 'type', 'data', 'ttl', 'resolution_line', 'comment'],
+    'CNAME':['zone', 'host', 'type', 'data', 'ttl', 'resolution_line', 'comment'],
+    'MX':['zone', 'host', 'type', 'data', 'ttl', 'resolution_line', 'mx_priority', 'comment'],
+    'TXT':['zone', 'host', 'type', 'data', 'ttl', 'resolution_line', 'comment'],
+    'NS':['zone', 'host', 'type', 'data', 'resolution_line', 'comment'],
+    'AAAA':['zone', 'host', 'type', 'data', 'ttl', 'resolution_line', 'comment'],
+    'SRV':['zone', 'host', 'type', 'data', 'ttl', 'resolution_line', 'comment'],
+    'PTR':['zone', 'host', 'type', 'data', 'ttl', 'resolution_line', 'comment'],
     'SOA':['zone', 'host', 'type', 'data', 'refresh', 'retry', 'expire', 'minimum', 'serial', 'resp_person', 'primary_ns'],
 }
 
@@ -115,7 +117,6 @@ def record_data_filter(data):
     if type(data) == dict:
         if data['type'] in record_request_field.keys():
             diff_set = set(record_key) - set(record_request_field[data['type']])
-            print(diff_set)
             for i in diff_set:
                 data[i] = None
             return data
@@ -126,3 +127,28 @@ def record_data_filter(data):
 
 
 
+def record_del(req):
+    """
+
+    :param req:
+    :return:
+    """
+    if req.method == 'POST':
+        msg = {'status': 500}
+        data = json.loads(req.POST.get('data'))
+        success_count = 0
+        total_count = len(data)
+        for i in data:
+            try:
+                record_obj = models.Record.objects.get(id=i)
+                record_obj.delete()
+                success_count += 1
+            except Exception as e:
+                print(e)
+        if success_count == total_count:
+            msg['status'] = 200
+            msg['total_count'] = total_count
+            msg['success_count'] = success_count
+        return HttpResponse(json.dumps(msg))
+    else:
+        return HttpResponse(COMMON_MSG['req_use_post'])

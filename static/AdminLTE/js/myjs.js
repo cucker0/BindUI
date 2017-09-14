@@ -144,15 +144,16 @@ function GetCheckboxValue(selector){
     return _checkbox_val;
 }
 
-function SelectAll(selector){
-    //选择/取消所有
-    var _check_all = selector + " input[type=checkbox][data-check-all='']";
-    var check_all_status = $(_check_all).is(':checked');
-    var _target = selector + " input[type=checkbox][data-check-all!='']";
+
+function SelectAll(){
+    //选择/取消所有项
+    var check_all_status = $(this).is(':checked');
+    var _tag_input = $(this).parent().parent().parent().siblings().find("input");
+
     if(check_all_status){
-        $(_target).prop("checked",true);
+        $(_tag_input).prop("checked",true);
     }else{
-        $(_target).removeAttr("checked");
+        $(_tag_input).removeAttr("checked");
     }
 }
 
@@ -372,10 +373,15 @@ function ChangeNickname(selector, action){
 //document.onselectstart=function(){return false;}
 
 function ChangePlaceholder(){
+    // 清空host，data值
+    $(".form-horizontal input[name=host]").val("");
+    $(".form-horizontal input[name=data]").val("");
+    $(".form-horizontal input[name=comment]").val("");
     //添加DNS记录选择记录类型时，自动调整相应的Placeholder提示内容
     var type_val = $(".form-horizontal select[name=type]").val();
     switch(type_val){
         case 'CNAME':
+
             $(".form-horizontal input[name=host]").attr("placeholder", "填写子域名（如www），不填写默认保存为@");
             $(".form-horizontal input[name=data]").attr("palceholder", "填写一个域名，例如：www.dns.com");
             $(".form-horizontal input[name=mx]").parent().parent().hide();
@@ -437,7 +443,7 @@ function ChangePlaceholder(){
 }
 
 function DnsRecordDefaultSelect(){
-    //每次点击 添加记录 重置记录类型
+    //每次点击 添加记录 重置记录类型,并改变Placeholder值
     $(".form-horizontal input[name=mx]").parent().parent().hide();
     var _domain_name = $("div .nav h2").text();
     if (_domain_name.endsWith('in-addr.arpa')) {
@@ -449,10 +455,11 @@ function DnsRecordDefaultSelect(){
         //$(".form-horizontal input[name=host]").attr("placeholder", "填写子域名（如www），不填写默认保存为@");
         //$(".form-horizontal input[name=data]").attr("palceholder", "填写一个IPv4地址，例如：8.8.8.8");
     }
+    ChangePlaceholder();
 }
 
 function SaveAction(){
-    //点击 保存按键
+    //添加记录 点击 保存按键
     var _type = $(".modal-body select[name=type]").val();
     var _host = $(".modal-body input[name=host]").val();
     var _resolution_line = $(".modal-body select[name=resolution_line]").val();
@@ -460,7 +467,8 @@ function SaveAction(){
     var _mx = $(".modal-body input[name=mx]").val();
     var _ttl = $(".modal-body select[name=ttl]").val();
     var _zone_tag_name = $("[zone_tag_name]").text();
-    var senddata = {"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data, "mx_priority":_mx, "ttl":_ttl, "zone":_zone_tag_name }
+    var _comment = $(".modal-body input[name=comment]").val();
+    var senddata = {"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data, "mx_priority":_mx, "ttl":_ttl, "comment":_comment, "zone":_zone_tag_name }
 
     $.ajax({
         url: "/dns/add.html",
@@ -470,7 +478,7 @@ function SaveAction(){
         success: function (callback) {
             //当向服务端发起的请求执行成功完成后，自动调用
             if (callback['status'] == 200){
-                location.reload(true);      //刷新当前页面
+                location.reload(true);      //刷新当前页面,status=500 添加记录失败。
             }
         },
         error: function () {
@@ -481,12 +489,46 @@ function SaveAction(){
 }
 
 
+function RecordDel(ths){
+    //删除DNS记录
+    var tag_selector = $(this).parent().siblings().filter("input, :first");     //<td>...</td>
+    var select_id = tag_selector.children().attr("id");
+    tag_selector.children().prop("checked", true);      //当前行打勾
+    tag_selector.parent().siblings().find('input').removeAttr("checked");       //取消其他行的勾
+    $(this).parent().parent().parent().prev().find("input").removeAttr("checked");    //取消 selectAll 勾
+    var _checkbox_val = [];
+    _checkbox_val.push(select_id);
+    $.ajax({
+        url: "/dns/del.html",
+        type: "POST",        //请求类型
+        data: {'data': JSON.stringify(_checkbox_val)},
+        dataType: "json",
+        success: function (callback) {
+            //当向服务端发起的请求执行成功完成后，自动调用
+            if (callback['status'] == 200){
+                location.reload(true);      //刷新当前页面,status=500 添加记录失败。
+            }
+        },
+        error: function () {
+            //当请求错误之后，自动调用
+        }
+    });
+
+}
+
 $(document).ready(function(){
     //文件加载后执行
 
-    //点击 添加记录 按键绑定事件
-    $("button[data-toggle=modal]").bind('click', DnsRecordDefaultSelect, ChangePlaceholder);
+    //点击 添加记录 按钮绑定事件
+    //$("button[data-toggle=modal]").bind('click', DnsRecordDefaultSelect, ChangePlaceholder);
+    $("button[data-toggle=modal]").bind('click', DnsRecordDefaultSelect);
 
     //添加记录时点击 保存 按键绑定事件
     $(".modal-footer  button[name=_save]").bind('click', SaveAction);
+
+    // DNS记录展示页的操作绑定事件--删除
+    //$("table a[action_type=delete]").bind('click');
+
+    // 选择/取消 所有项
+    $("table tr input[data-check-all]").bind('click', SelectAll);
 });

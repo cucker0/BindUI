@@ -21,5 +21,6 @@ urlpatterns = [
     url(r'^domains/rlist', views.domain_resolution_list, name='domain_resolution_list'),
     url(r'^dns/(?P<domain_id>\d+)', views.record_list, name='record_list'),
     url(r'^dns/add.html', views.record_add, name='record_add'),
+    url(r'^dns/del.html', views.record_del, name='record_del'),
     url(r'^$', views.index),
 ]

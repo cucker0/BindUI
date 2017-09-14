@@ -13,7 +13,38 @@
 
 
 {% block content %}
-    <!-- Modal -->
+    <!-- Modal 1 -->
+    <div class="modal fade" id="gridSystemModalLabel" tabindex="-2" role="dialog"
+         aria-labelledby="gridSystemModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="gridSystemModalLabel">删除解析记录</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="ui-popmsg">
+                        <tbody>
+                        <tr>
+                            <td height="72" class="i"><i class="b-error-icon"></i></td>
+                            <td height="72" class="t"><span class="info"><span class="tit">确定删除所选择的解析记录吗？</span><p>
+                                删除后，所选记录将不再有效。</p></span></td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary">确定</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal 1-->
+
+
+    <!-- Modal 2 -->
     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -29,7 +60,7 @@
                         <div class="form-group">
                             <label class="col-sm-2 control-label">记录类型</label>
                             <div class="col-sm-10">
-                                {% if zone_tag_obj.zone_name|is_reverse_resulution_domain  %}
+                                {% if zone_tag_obj.zone_name|is_reverse_resulution_domain %}
                                     <select name="type">
                                         <option value="PTR">PTR</option>
                                     </select>
@@ -65,7 +96,8 @@ SRV：记录提供特定服务的服务器（例如_xmpp-server._tcp）
                         <div class="form-group">
                             <label class="col-sm-2 control-label">主机记录</label>
                             <div class="col-sm-10">
-                                <input type="text" name="host" class="form-control" style="column-count: 10" placeholder="填写子域名（如www），不填写默认保存为@">
+                                <input type="text" name="host" class="form-control" style="column-count: 10"
+                                       placeholder="填写子域名（如www），不填写默认保存为@">
                                 <a tabindex="0" class="glyphicon glyphicon-question-sign" role="button"
                                    data-toggle="popover"
                                    data-trigger="focus"
@@ -101,7 +133,8 @@ mail： 将域名解析为mail.qcloud.com，通常用于解析邮箱服务器。
                         <div class="form-group" style="display:none">
                             <label class="col-sm-2 control-label">MX优先级</label>
                             <div class="col-sm-10">
-                                <input type="text" name="mx" value="5" class="form-control" placeholder="输入0-50范围数值，越小优先级越高">
+                                <input type="text" name="mx" value="5" class="form-control"
+                                       placeholder="输入0-50范围数值，越小优先级越高">
 
                             </div>
                         </div>
@@ -122,6 +155,13 @@ mail： 将域名解析为mail.qcloud.com，通常用于解析邮箱服务器。
                                    data-content="各地DNS服务器缓存解析记录时长，缓存失效后才会重新获取记录值。<br>建议正常情况下设定10分钟即可。"></a>
                             </div>
                         </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">备注</label>
+                            <div class="col-sm-10">
+                                <input type="text" value="" name="comment" class="form-control" placeholder="可不填写">
+
+                            </div>
+                        </div>
                     </div>
 
                 </div>
@@ -133,9 +173,9 @@ mail： 将域名解析为mail.qcloud.com，通常用于解析邮箱服务器。
             </div>
         </div>
     </div>
-    <!-- Modal  end -->
+    <!-- Modal 2 end -->
 
-    <div class="nav nav-pills"><h2 zone_tag_name="">{{ zone_tag_obj.zone_name }}</h2></div>
+    <div class="nav nav-pills"><h2 zone_tag_name="" class="col-xs-12">{{ zone_tag_obj.zone_name }}</h2></div>
 
     {#    <div class="nav nav-pills">#}
     {#        <h3><button type="button" class="btn btn-success">添加域名</button></h3>#}
@@ -146,7 +186,9 @@ mail： 将域名解析为mail.qcloud.com，通常用于解析邮箱服务器。
                 <div class="box-header">
                     <h2 class="box-title">
                         <!-- Button trigger modal -->
-                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">+ 添加记录</button>
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">+
+                            添加记录
+                        </button>
                         <button type="button" class="btn btn-default">暂停</button>
                         <button type="button" class="btn btn-default">启动</button>
                         <button type="button" class="btn btn-default">删除</button>
@@ -167,7 +209,7 @@ mail： 将域名解析为mail.qcloud.com，通常用于解析邮箱服务器。
                     <table id="table_record_list" class="table table-hover">
                         <thead>
                         <tr>
-                            <th><input type="checkbox" data-check-all onclick="SelectAll('#table_record_list' )"></th>
+                            <th><input type="checkbox" data-check-all></th>
                             <th>主机记录</th>
                             <th>记录类型</th>
                             <th>解析线路</th>
@@ -190,8 +232,11 @@ mail： 将域名解析为mail.qcloud.com，通常用于解析邮箱服务器。
                                 <td>{% val_none_to_blank record_obj.mx_priority '-' %}</td>
                                 <td>{% ttl_convert record_obj.ttl %}</td>
                                 <td>{{ record_obj.update_time }}</td>
-                                <td><a>修改</a> <a>暂时</a> <a>删除</a></td>
-                                <td>{% val_none_to_blank record_obj.comment %}</td>
+                                <td><a action_type="modify" href="javascript:;">修改</a> <a action_type="status"
+                                                                                          href="javascript:;">暂停</a> <a
+                                        action_type="delete" data-toggle="modal"
+                                        data-target="#gridSystemModalLabel">删除</a></td>
+                                <td>{% val_none_to_blank record_obj.comment '' %}</td>
                             </tr>
                         {% endfor %}
                         </tbody>
