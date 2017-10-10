@@ -13,15 +13,15 @@
 
 
 {% block content %}
-    <!-- Modal 1 -->
-    <div class="modal fade" id="gridSystemModalLabel" tabindex="-2" role="dialog"
-         aria-labelledby="gridSystemModalLabel">
+    <!-- Modal 1  删除记录 -->
+    <div class="modal fade" id="DNSRecordDeleteModalLabel" tabindex="-10" role="dialog"
+         aria-labelledby="DNSRecordDeleteModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                             aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="gridSystemModalLabel">删除解析记录</h4>
+                    <h4 class="modal-title" id="DNSRecordDeleteModalLabel">删除解析记录</h4>
                 </div>
                 <div class="modal-body">
                     <table class="ui-popmsg">
@@ -37,21 +37,21 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-primary">确定</button>
+                    <button type="button" class="btn btn-primary" name="_delete_ok">确定</button>
                 </div>
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal 1-->
 
 
-    <!-- Modal 2 -->
-    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <!-- Modal 2 添加记录 -->
+    <div class="modal fade" id="DNSRecordAddOrModifyModalLabel" action_type="add" tabindex="-20" role="dialog" aria-labelledby="DNSRecordAddOrModifyModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                             aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">添加记录</h4>
+                    <h4 class="modal-title">添加记录</h4>
                 </div>
 
                 <div class="modal-body">
@@ -175,18 +175,43 @@ mail： 将域名解析为mail.qcloud.com，通常用于解析邮箱服务器。
     </div>
     <!-- Modal 2 end -->
 
-    <div class="nav nav-pills"><h2 zone_tag_name="" class="col-xs-12">{{ zone_tag_obj.zone_name }}</h2></div>
+        <!-- Modal 3 修改记录状态值 -->
+    <div class="modal fade" id="DNSRecordStatusModalLabel" tabindex="-30" role="dialog"
+         aria-labelledby="DNSRecordStatusModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="DNSRecordStatusModalLabel">记录状态操作</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="ui-popmsg">
+                        <tbody>
+                        <tr>
+                            <td height="72" class="i"><i class="b-error-icon"></i></td>
+                            <td height="72" class="t"><span class="info"></span><span class="tit"></span></td>
+                        </tr>
+                        </tbody>
+                    </table>
 
-    {#    <div class="nav nav-pills">#}
-    {#        <h3><button type="button" class="btn btn-success">添加域名</button></h3>#}
-    {#    </div>#}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" name="_modify_status_ok">确定</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal 3-->
+
+    <div class="nav nav-pills"><h2 zone_tag_name="" class="col-xs-12">{{ zone_tag_obj.zone_name }}</h2></div>
     <div>
         <div class="col-xs-12">
             <div class="box">
                 <div class="box-header">
                     <h2 class="box-title">
                         <!-- Button trigger modal -->
-                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">+
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#DNSRecordAddOrModifyModalLabel">+
                             添加记录
                         </button>
                         <button type="button" class="btn btn-default">暂停</button>
@@ -227,15 +252,20 @@ mail： 将域名解析为mail.qcloud.com，通常用于解析邮箱服务器。
                                 <td><input type="checkbox" id="{{ record_obj.id }}"></td>
                                 <td>{{ record_obj.host }}</td>
                                 <td>{{ record_obj.type }}</td>
-                                <td>{% dns_resolution_line_fileter record_obj.resolution_line %}</td>
+                                <td line="{{ record_obj.resolution_line }}">{% dns_resolution_line_fileter record_obj.resolution_line %}</td>
                                 <td>{{ record_obj.data }}</td>
                                 <td>{% val_none_to_blank record_obj.mx_priority '-' %}</td>
-                                <td>{% ttl_convert record_obj.ttl %}</td>
+                                <td ttl="{{ record_obj.ttl }}">{% ttl_convert record_obj.ttl %}</td>
                                 <td>{{ record_obj.update_time }}</td>
-                                <td><a action_type="modify" href="javascript:;">修改</a> <a action_type="status"
-                                                                                          href="javascript:;">暂停</a> <a
-                                        action_type="delete" data-toggle="modal"
-                                        data-target="#gridSystemModalLabel">删除</a></td>
+                                <td><a action_type="modify" href="javascript:;">修改</a>
+{#                                    <a action_type="status" href="javascript:;">{% record_status_convert record_obj.status %}</a>#}
+                                    {% if record_obj.status == 'on' %}
+                                        <a action_type="status" name="_turnOff" href="javascript:;">暂停</a>
+                                    {% elif record_obj.status == 'off' %}
+                                        <a action_type="status" name="_turnOn" href="javascript:;">开启<span class="glyphicon glyphicon-pause orange"></span></a>
+                                    {% endif %}
+                                    <a action_type="delete" href="javascript:;">删除</a>
+                                </td>
                                 <td>{% val_none_to_blank record_obj.comment '' %}</td>
                             </tr>
                         {% endfor %}

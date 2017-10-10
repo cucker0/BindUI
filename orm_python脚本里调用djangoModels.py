@@ -24,3 +24,11 @@ print(record_obj_list)
 for i in record_obj_list:
     print(i.host, i.type, i.data, i.comment, i.mx_priority)
 
+print("#"*20)
+
+id_list_req = ['5', '6']
+r_obj_list = models.Record.objects.filter(id__in=id_list_req)
+# r_obj_list.update(status='off')
+for i in r_obj_list:
+    print(i.host, i.status)
+

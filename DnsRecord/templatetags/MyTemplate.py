@@ -108,3 +108,17 @@ def dns_resolution_line_fileter(data):
     else:
         line_name = '未知'
     return line_name
+
+@register.simple_tag
+def record_status_convert(status):
+    """
+    根据DNS记录status值显示相应的操作按钮，
+    如status为on时,记录状态操作按钮为暂停，反之为开启
+    :param status:记录status值
+    :return: status值对应的状态操作按钮
+    """
+    action = '开启'
+    if status  == 'on':
+        action = '暂停'
+    return action
+

@@ -16,7 +16,9 @@ code 值含义
     500：失败
 """
 
-COMMON_MSG = {'req_use_post':'use POST request method please.'}
+COMMON_MSG = {'req_use_post':'use POST request method please.',
+              'data_type_error':'data type is error!',
+              }
 
 def root(req):
     return redirect('/')
@@ -121,7 +123,7 @@ def record_data_filter(data):
                 data[i] = None
             return data
         else:
-            return "data type error"
+            return COMMON_MSG['data_type_error']
     else:
         return "update or create record data type is not dict"
 
@@ -149,6 +151,36 @@ def record_del(req):
             msg['status'] = 200
             msg['total_count'] = total_count
             msg['success_count'] = success_count
+        return HttpResponse(json.dumps(msg))
+    else:
+        return HttpResponse(COMMON_MSG['req_use_post'])
+
+
+def record_mod(req):
+    """
+    修改DNS记录状态
+    :param req:
+    :return:
+    """
+    msg = {'status': 500}
+    type = req.GET.get('type')      #  <==>  type = req.GET['type'] ,两种用法都可以
+    if req.method == 'POST':
+        data = json.loads(req.POST.get('data'))
+        if data['id_list']:
+            record_obj_list = models.Record.objects.filter(id__in=data['id_list'])
+
+        if type == 'status':        # 修改staus
+            try:
+                if data['action'] == '_turnOff':
+                    record_obj_list.update(status='off')
+                else:
+                    record_obj_list.update(status='on')
+                msg['status'] = 200
+            except Exception as e:
+                print(e)
+
+        elif type == 'main':      # 修改DNS记录除staus外的项
+            pass
         return HttpResponse(json.dumps(msg))
     else:
         return HttpResponse(COMMON_MSG['req_use_post'])
