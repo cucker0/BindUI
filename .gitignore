@@ -1,3 +1,6 @@
 .idea
 *.pyc
 **/__pycache__
+/bindUI/__pycache__
+/DnsRecord/__pycache__
+/authentication/__pycache__
