@@ -8,3 +8,4 @@ migrations/*
 *.log
 .DS_Store
 
+/orm_python脚本里调用djangoModels.py
