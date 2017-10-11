@@ -495,7 +495,7 @@ function RecordAdd(){
             }
         });
     } else if (action_type == "modify"){        //修改记录
-        var _id = ("#DNSRecordAddOrModifyModalLabel .modal-title").attr("id");
+        var _id = $("#DNSRecordAddOrModifyModalLabel .modal-title").attr("id");
         senddata['id'] = _id;
         $.ajax({
             url: "/dns/mod.html?type=main",

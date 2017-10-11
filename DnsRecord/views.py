@@ -166,10 +166,10 @@ def record_mod(req):
     type = req.GET.get('type')      #  <==>  type = req.GET['type'] ,两种用法都可以
     if req.method == 'POST':
         data = json.loads(req.POST.get('data'))
-        if data['id_list']:
-            record_obj_list = models.Record.objects.filter(id__in=data['id_list'])
 
         if type == 'status':        # 修改staus
+            if data['id_list']:
+                record_obj_list = models.Record.objects.filter(id__in=data['id_list'])
             try:
                 if data['action'] == '_turnOff':
                     record_obj_list.update(status='off')
@@ -180,7 +180,18 @@ def record_mod(req):
                 print(e)
 
         elif type == 'main':      # 修改DNS记录除staus外的项
-            pass
+            try:
+                record_obj_set = models.Record.objects.filter(id=data['id'])
+
+                del(data['id'])     # data.pop('id') print key
+                # record_data_filter(data)
+                zone_tag_obj = models.ZoneTag.objects.get(zone_name=data['zone'])
+                data['zone_tag'] = zone_tag_obj
+                record_obj_set.update(**data)
+                msg['status'] = 200
+            except Exception as e:
+                print(e)
+
         return HttpResponse(json.dumps(msg))
     else:
         return HttpResponse(COMMON_MSG['req_use_post'])

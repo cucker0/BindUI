@@ -1,6 +1,10 @@
-.idea
+.idea/
+.cache/
 *.pyc
 **/__pycache__
-/bindUI/__pycache__
-/DnsRecord/__pycache__
-/authentication/__pycache__
+migrations/*
+**/migrations/*
+!__init__.py
+*.log
+.DS_Store
+
