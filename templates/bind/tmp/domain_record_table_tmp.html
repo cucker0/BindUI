@@ -1,0 +1,48 @@
+{% load MyTemplate %}
+                <div class="box-body table-responsive no-padding">
+                    <table id="table_record_list" class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th><input type="checkbox" data-check-all></th>
+                            <th>主机记录</th>
+                            <th>记录类型</th>
+                            <th>解析线路</th>
+                            <th>记录值</th>
+                            <th>MX优先级</th>
+                            <th>TTL</th>
+                            <th>最后操作时间</th>
+                            <th>操作</th>
+                            <th>备注</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for record_obj in record_obj_list %}
+                            <tr>
+                                <td><input type="checkbox" id="{{ record_obj.id }}"></td>
+                                <td>{{ record_obj.host }}</td>
+                                <td>{{ record_obj.type }}</td>
+                                <td line="{{ record_obj.resolution_line }}">{% dns_resolution_line_fileter record_obj.resolution_line %}</td>
+                                <td>{{ record_obj.data }}</td>
+                                <td>{% val_none_to_blank record_obj.mx_priority '-' %}</td>
+                                <td ttl="{{ record_obj.ttl }}">{% ttl_convert record_obj.ttl %}</td>
+                                <td>{{ record_obj.update_time }}</td>
+                                <td><a action_type="modify" href="javascript:;">修改</a>
+                                    {% if record_obj.status == 'on' %}
+                                        <a action_type="status" name="_turnOff" href="javascript:;">暂停</a>
+                                    {% elif record_obj.status == 'off' %}
+                                        <a action_type="status" name="_turnOn" href="javascript:;">开启<span class="glyphicon glyphicon-pause orange"></span></a>
+                                    {% endif %}
+                                    <a action_type="delete" href="javascript:;">删除</a>
+                                </td>
+                                <td>{% val_none_to_blank record_obj.comment '' %}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+
+                    </table>
+
+                </div>
+                {% autoescape off %}    {# 关闭特殊字符转换 #}
+                    {# 分页导航条 #}
+                    {{ pagination_html }}
+                {% endautoescape %}
