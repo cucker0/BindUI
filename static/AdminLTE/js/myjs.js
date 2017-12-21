@@ -241,13 +241,14 @@ function MXShowOrHide(){
             $(".form-horizontal input[name=mx]").val('5');
             break;
         default:
+            $(".form-horizontal input[name=mx]").val('');
             $(".form-horizontal input[name=mx]").parent().parent().hide();
 
     }
 }
 
 function ChangePlaceholder(){
-    var action_type = $("#DNSRecordAddOrModifyModalLabel").attr("action_type");
+    var action_type = $("#DNSRecordAddOrModifyModalLabel").prop("action_type");
     if(action_type == "add"){       // 添加记录，清空host，data值
         $(".form-horizontal input[name=host]").val("");
         $(".form-horizontal input[name=data]").val("");
@@ -261,49 +262,49 @@ function ChangePlaceholder(){
     switch(type_val){
         case 'CNAME':
 
-            $(".form-horizontal input[name=host]").attr("placeholder", "填写子域名（如www），不填写默认保存为@");
-            $(".form-horizontal input[name=data]").attr("palceholder", "填写一个域名，例如：www.dns.com");
+            $(".form-horizontal input[name=host]").prop("placeholder", "填写子域名（如www），不填写默认保存为@");
+            $(".form-horizontal input[name=data]").prop("placeholder", "填写一个域名，例如：www.dns.com");
             break;
         case 'MX':
-            $(".form-horizontal input[name=host]").attr("placeholder", "通常填写@、mail，不填写默认保存为@");
-            $(".form-horizontal input[name=data]").attr("placeholder", "填写邮件服务器地址");
+            $(".form-horizontal input[name=host]").prop("placeholder", "通常填写@、mail，不填写默认保存为@");
+            $(".form-horizontal input[name=data]").prop("placeholder", "填写邮件服务器地址");
             break;
         case 'TXT':
-            $(".form-horizontal input[name=host]").attr("placeholder", "填写子域名，不填写默认保存为@");
-            $(".form-horizontal input[name=data]").attr("placeholder", "填写文本，字符长度限制255");
+            $(".form-horizontal input[name=host]").prop("placeholder", "填写子域名，不填写默认保存为@");
+            $(".form-horizontal input[name=data]").prop("placeholder", "填写文本，字符长度限制255");
             //$(".form-horizontal input[name=mx]").parent().parent().hide();
             break;
         case 'NS':
-            $(".form-horizontal input[name=host]").attr("placeholder", "填写子域名（如www），不可填写@");
-            $(".form-horizontal input[name=data]").attr("placeholder", "填写DNS域名，例如：f1g1ns1.dnspod.net");
+            $(".form-horizontal input[name=host]").prop("placeholder", "填写子域名（如www），不可填写@");
+            $(".form-horizontal input[name=data]").prop("placeholder", "填写DNS域名，例如：f1g1ns1.dnspod.net");
             break;
         case 'AAAA':
-            $(".form-horizontal input[name=host]").attr("placeholder", "填写子域名，不填写默认保存为@");
-            $(".form-horizontal input[name=data]").attr("placeholder", "填写一个IPv6地址，例如：ff06:0:0:0:0:0:0:c3");
+            $(".form-horizontal input[name=host]").prop("placeholder", "填写子域名，不填写默认保存为@");
+            $(".form-horizontal input[name=data]").prop("placeholder", "填写一个IPv6地址，例如：ff06:0:0:0:0:0:0:c3");
             break;
         case 'SRV':
-            $(".form-horizontal input[name=host]").attr("placeholder", "填写格式为：服务.协议（如_ldap._tcp）");
-            $(".form-horizontal input[name=data]").attr("placeholder", "例如：5 0 5269 example.dns.com");
+            $(".form-horizontal input[name=host]").prop("placeholder", "填写格式为：服务.协议（如_ldap._tcp）");
+            $(".form-horizontal input[name=data]").prop("placeholder", "例如：5 0 5269 example.dns.com");
             break;
         case 'PTR':
-            $(".form-horizontal input[name=host]").attr("placeholder", "填写IP主机位数字（如反向解析IP 192.168.1.11，则填写11）");
-            $(".form-horizontal input[name=data]").attr("placeholder", "填写对应的正向解析域名，例如：www.dns.com.");
+            $(".form-horizontal input[name=host]").prop("placeholder", "填写IP主机位数字（如反向解析IP 192.168.1.11，则填写11）");
+            $(".form-horizontal input[name=data]").prop("placeholder", "填写对应的正向解析域名，例如：www.dns.com.");
             break;
         case 'SOA':
-            $(".form-horizontal input[name=host]").attr("placeholder", "填写@");
-            $(".form-horizontal input[name=data]").attr("placeholder", "填写一个域名，例如：ns1.dns.com.");
+            $(".form-horizontal input[name=host]").prop("placeholder", "填写@");
+            $(".form-horizontal input[name=data]").prop("placeholder", "填写一个域名，例如：ns1.dns.com.");
             break;
         case 'REDIRECT_URL':
-            $(".form-horizontal input[name=host]").attr("placeholder", "填写子域名（如www），不填写默认保存为@");
-            $(".form-horizontal input[name=data]").attr("placeholder", "填写要跳转到的网址，如：http://www.qq.com");
+            $(".form-horizontal input[name=host]").prop("placeholder", "填写子域名（如www），不填写默认保存为@");
+            $(".form-horizontal input[name=data]").prop("placeholder", "填写要跳转到的网址，如：http://www.qq.com");
             break;
         case 'FORWARD_URL':
-            $(".form-horizontal input[name=host]").attr("placeholder", "填写子域名（如www），不填写默认保存为@");
-            $(".form-horizontal input[name=data]").attr("placeholder", "填写要跳转到的网址，如：http://www.qq.com");
+            $(".form-horizontal input[name=host]").prop("placeholder", "填写子域名（如www），不填写默认保存为@");
+            $(".form-horizontal input[name=data]").prop("placeholder", "填写要跳转到的网址，如：http://www.qq.com");
             break;
         default:
-            $(".form-horizontal input[name=host]").attr("placeholder", "填写子域名（如www），不填写默认保存为@");
-            $(".form-horizontal input[name=data]").attr("placeholder", "填写一个IPv4地址，例如：8.8.8.8");
+            $(".form-horizontal input[name=host]").prop("placeholder", "填写子域名（如www），不填写默认保存为@");
+            $(".form-horizontal input[name=data]").prop("placeholder", "填写一个IPv4地址，例如：8.8.8.8");
             //$(".form-horizontal input[name=mx]").parent().parent().hide();
     }
 
@@ -514,7 +515,7 @@ function RecordModifyACK(){
     var _data = $(_tag_selector[4]).text();
     var _mx_priority = $(_tag_selector[5]).text();
     var _ttl = $(_tag_selector[6]).attr("ttl");
-    var _comment = $(_tag_selector[8]).text();
+    var _comment = $(_tag_selector[9]).text();
 
     $(".form-horizontal input[name=host]").val(_host);
     $(".form-horizontal select[name=type]").val(_type);

@@ -489,6 +489,8 @@ def record_data_filter(data):
             request_set = set(record_key) - set(record_request_field[data['type']])
             for i in request_set:
                 data[i] = None
+            if data['type'] != 'MX':
+                data['mx_priority'] = None
             return data
         else:
             return COMMON_MSG['data_type_error']
@@ -552,7 +554,7 @@ def record_mod(req):
                 record_obj_set = models.Record.objects.filter(id=data['id'])
 
                 del(data['id'])     # data.pop('id') print key
-                # record_data_filter(data)
+                record_data_filter(data)
                 zone_tag_obj = models.ZoneTag.objects.get(zone_name=data['zone'])
                 data['zone_tag'] = zone_tag_obj
                 record_obj_set.update(**data)
