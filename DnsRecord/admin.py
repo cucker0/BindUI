@@ -9,6 +9,7 @@ class RecordAdmin(admin.ModelAdmin):
     """
     list_display = ( 'host', 'zone', 'type', 'data', 'ttl', 'status', 'create_time', 'update_time')
     search_fields = ('host',)
+    raw_id_fields = ('zone_tag',)
 
 class ZoneTagAdmin(admin.ModelAdmin):
     list_display = ('zone_name', 'comment')

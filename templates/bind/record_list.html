@@ -14,7 +14,7 @@
 
 {% block content %}
     <!-- Modal 1  删除记录 -->
-    <div class="modal fade" id="DNSRecordDeleteModalLabel" tabindex="-10" role="dialog"
+    <div class="modal fade" id="DNSRecordDeleteModalLabel" multiple="" tabindex="-10" role="dialog"
          aria-labelledby="DNSRecordDeleteModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -44,7 +44,7 @@
     </div><!-- /.modal 1-->
 
 
-    <!-- Modal 2 添加记录 -->
+    <!-- Modal 2 添加记录/修改记录 -->
     <div class="modal fade" id="DNSRecordAddOrModifyModalLabel" action_type="add" tabindex="-20" role="dialog" aria-labelledby="DNSRecordAddOrModifyModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -176,7 +176,7 @@ mail： 将域名解析为mail.qcloud.com，通常用于解析邮箱服务器。
     <!-- Modal 2 end -->
 
         <!-- Modal 3 修改记录状态值 -->
-    <div class="modal fade" id="DNSRecordStatusModalLabel" tabindex="-30" role="dialog"
+    <div class="modal fade" id="DNSRecordStatusModalLabel" multiple="" name="" tabindex="-30" role="dialog"
          aria-labelledby="DNSRecordStatusModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -214,17 +214,17 @@ mail： 将域名解析为mail.qcloud.com，通常用于解析邮箱服务器。
                         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#DNSRecordAddOrModifyModalLabel">+
                             添加记录
                         </button>
-                        <button type="button" class="btn btn-default">暂停</button>
-                        <button type="button" class="btn btn-default">启动</button>
-                        <button type="button" class="btn btn-default">删除</button>
+                        <button type="button" action_type="status" name="_turnOff" class="btn btn-default">暂停</button>
+                        <button type="button" action_type="status" name="_turnOn" class="btn btn-default">启动</button>
+                        <button type="button" action_type="delete" class="btn btn-default">删除</button>
                     </h2>
 
                     <div class="box-tools">
                         <div class="input-group input-group-sm" style="width: 300px;">
-                            <input type="text" name="table_search" class="form-control pull-right" placeholder="Search">
+                            <input type="text" name="dns_record_search" class="form-control pull-right" placeholder="Search">
 
                             <div class="input-group-btn">
-                                <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+                                <button type="submit" name="dns_record_search_submit" class="btn btn-default"><i class="fa fa-search"></i></button>
                             </div>
                         </div>
                     </div>

@@ -1,12 +1,14 @@
 from django.shortcuts import render, redirect, HttpResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from . import models
+from django.db.models import Q
 
 import sys, os
 BASIC_DIR = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(BASIC_DIR)
 from bindUI import dns_conf
 import json
+from .utils import serial
 
 # Create your views here.
 
@@ -41,13 +43,64 @@ def domain_list(req):
     zone_obj_list = models.ZoneTag.objects.all()
     return render(req, 'bind/domain_list.html', {'zone_obj_list': zone_obj_list})
 
-def domain_add(req):
+def domain_curd(req):
     """
-
+    域名增改查山野
     :param req:
     :return:
     """
-    pass
+    resp = ''
+    type = req.GET.get('type').strip()
+    if type == 'c':
+        resp = domain_add(req)
+    return HttpResponse(resp)
+
+
+
+def domain_add(req):
+    """
+    新增域名
+    :param req:
+    :return:
+    """
+    msg = {'status': 500, 'msg':''}
+    try:
+        data = json.loads(req.GET.get('data'))
+    except Exception as e:
+        print(e)
+
+    data['type'] = 'SOA'
+    data['basic'] = 2       # 标识为不可重复基础记录
+    data['host'] = '@'
+    data['serial'] = serial()
+    data = record_data_filter(data)
+    record_set = models.Record.objects.filter(Q(type='SOA') & Q(zone=data['zone'].strip()) )
+    zone_tag_set = models.ZoneTag.objects.filter(zone_name=data['zone'].strip())
+
+    if zone_tag_set:
+        msg['msg'] += "zone_tag:%s exist; " %(data['zone'])
+    else:
+        zone_tag_ins = { 'zone_name':data['zone'] }
+        try:
+            if data['comment']:
+                zone_tag_ins['comment'] = data['comment']
+        except KeyError:
+            zone_tag_ins['comment'] = None
+
+        models.ZoneTag.objects.create(**zone_tag_ins)
+
+    if record_set:
+        msg['msg'] += "record SOA:%s exist!; " %(data['zone'])
+    else:
+        try:
+            zone_tag_obj = models.ZoneTag.objects.get(zone_name=data['zone'].strip())
+            data['zone_tag'] = zone_tag_obj
+            models.Record.objects.create(**data)
+            msg['status'] = 200
+            msg['msg'] = "%s create success." %(data['zone'])
+        except Exception as e:
+            print(e)
+    return json.dumps(msg)
 
 
 def domain_resolution_list(req):
@@ -61,7 +114,7 @@ def domain_resolution_list(req):
 
 
 
-def  MyPaginator(obj_set, page=1, perpage_num=5, pagiformart=[1, 2, 1]):
+def  MyPaginator(obj_set, page=1, perpage_num=10, pagiformart=[1, 3, 1]):
     """
     自定义分页器
 
@@ -78,7 +131,11 @@ def  MyPaginator(obj_set, page=1, perpage_num=5, pagiformart=[1, 2, 1]):
     M_NUM = pagiformart[1]//2 * 2 + 1     # 导航条中间显示个数，只能为大于1的奇数,如3、5、7 ...
     R_NUM = pagiformart[2]       # 导航条左边显示个数
     if type(page) == str:
-        page = int(page)
+        try:
+            page = int(page)
+        except ValueError:
+            page = 1
+
 
     paginator = Paginator(obj_set, perpage_num)
 
@@ -89,7 +146,9 @@ def  MyPaginator(obj_set, page=1, perpage_num=5, pagiformart=[1, 2, 1]):
         sub_obj_set = paginator.page(1)
     except EmptyPage:
         # If page is out of range (e.g. 9999), deliver last page of results.
+        page = paginator.num_pages
         sub_obj_set = paginator.page(paginator.num_pages)
+
 
     # 拼接前端的分页导航条html
     # 分成 上一页、中间页码、下一页 3个部分
@@ -273,17 +332,45 @@ def  MyPaginator(obj_set, page=1, perpage_num=5, pagiformart=[1, 2, 1]):
 
     #-- end 导航条数字部分 --#
 
+    input_page = '''
+<div class="form-inline">
+    <input type="text" size="4" class="form-control" id="input_page" placeholder="输入页码">
+    <button type="submit" name="jump-page" class="btn btn-primary">跳转</button>
+</div>
+'''
+
+    per_page = '''
+<div class="dropup">
+    <button class="btn btn-default dropdown-toggle" value="%s" type="button" id="perpage-dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <span>%s条/页</span>
+        <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="perpage-dropdownMenu">
+        <li value="10"><a href="#">10条/页</a></li>
+        <li value="20"><a href="#">20条/页</a></li>
+        <li value="50"><a href="#">50条/页</a></li>
+        <li value="100"><a href="#">100条/页</a></li>
+    </ul>
+</div>
+''' %(perpage_num, perpage_num)
+
+
     pagination_html = \
 '''<!-- 分页导航条 -->
-<div class="col-xs-12">
-    <nav aria-label="pagination-1">
-    %s
-    %s
-    %s
-    </nav>
+<div class="col-md-12">
+    <div class="pagination btn pull-left">共%s条</div>
+    <div class="pull-left">
+        <nav aria-label="pagination-1">
+        %s
+        %s
+        %s
+        </nav>
+    </div>
+    <div class="pagination margin-L10">%s</div>
+    <div class="pagination">%s</div>
 </div>
 <!-- end 分页导航条 -->
-''' %(pagination_prev_element, pagination_middle_element, pagination_next_element)
+''' %(paginator.count, pagination_prev_element, pagination_middle_element, pagination_next_element, input_page, per_page )
     # end 拼接前端的分页导航条html ##
 
     return sub_obj_set, pagination_html
@@ -304,7 +391,7 @@ def record_list(req, domain_id):
     else:
         page = 1
     zone_tag_obj = models.ZoneTag.objects.get(id=domain_id)
-    record_obj_list = zone_tag_obj.ZoneTag_Record.all()
+    record_obj_list = zone_tag_obj.ZoneTag_Record.filter(basic=0)
 
     record_obj_perpage_list, pagination_html  = MyPaginator(record_obj_list, page)
     return render(req, 'bind/record_list.html',
@@ -323,14 +410,26 @@ def rlist_page(req):
     if req.method == 'POST':
         data = json.loads(req.POST.get('data'))
         zone_tag_obj = models.ZoneTag.objects.get(zone_name=data['zone'])
-        record_obj_list = zone_tag_obj.ZoneTag_Record.all()
-        record_obj_perpage_list, pagination_html  = MyPaginator(record_obj_list, data['page'])
-    return render(req, 'bind/tmp/domain_record_table_tmp.html',
+        record_obj_list = None
+        if data['action'] == 'pagination':
+            record_obj_list = zone_tag_obj.ZoneTag_Record.filter(basic=0)
+        elif data['action'] == 'search':
+            try:
+                search_key = data['other']['search_key']
+                record_obj_list = zone_tag_obj.ZoneTag_Record.filter(Q(basic=0) & (Q(host__icontains=search_key) | Q(data__icontains=search_key) | Q(comment__icontains=search_key) ) )
+
+            except Exception as e:
+                print(e)
+        record_obj_perpage_list, pagination_html  = MyPaginator(record_obj_list, data['page'], data['perpage_num'])
+
+    ret = render(req, 'bind/tmp/domain_record_table_tmp.html',
                   {'record_obj_list': record_obj_perpage_list,
                    'pagination_html': pagination_html,
                    'zone_tag_obj': zone_tag_obj,
                    'DNS_RESOLUTION_LINE': dns_conf.DNS_RESOLUTION_LINE
                    })
+    ret.set_cookie('perpage_num', 10)
+    return ret
 
 def record_add(req):
     """
@@ -344,7 +443,7 @@ def record_add(req):
         try:
             data = json.loads(data)
             # data = record_data_filter(data)
-            record_data_filter(data)        # 传递参数为字典时是以指针形式传递的
+            record_data_filter(data)        # 字典或列表 以指针形式传递参数
             zone_tag_obj = models.ZoneTag.objects.get(zone_name=data['zone'])
             data['zone_tag'] = zone_tag_obj
             models.Record.objects.update_or_create(**data)
@@ -367,19 +466,28 @@ record_request_field = {
     'AAAA':['zone', 'host', 'type', 'data', 'ttl', 'resolution_line', 'comment'],
     'SRV':['zone', 'host', 'type', 'data', 'ttl', 'resolution_line', 'comment'],
     'PTR':['zone', 'host', 'type', 'data', 'ttl', 'resolution_line', 'comment'],
-    'SOA':['zone', 'host', 'type', 'data', 'refresh', 'retry', 'expire', 'minimum', 'serial', 'resp_person', 'primary_ns'],
+    'SOA':['zone', 'host', 'type', 'data', 'refresh', 'retry', 'expire', 'minimum', 'serial', 'resp_person', 'primary_ns', 'comment'],
 }
+
+record_lower_field = ['zone', 'host', 'data', 'resp_person', 'primary_ns']
 
 def record_data_filter(data):
     """
-    更新或创建 record 根据type过滤 data key,把非必要字段都留空
+    更新或创建 record 根据type过滤 data key,把非必要字段都留空,把type字段转为大写，CharField字段要求小写的转为小写
     :param data: 要更新或创建 的 record数据，字典形式
     :return:
     """
     if type(data) == dict:
+        if data['type']:
+            data['type'] = data['type'].upper()     # type字段转为大写
         if data['type'] in record_request_field.keys():
-            diff_set = set(record_key) - set(record_request_field[data['type']])
-            for i in diff_set:
+            lower_set = set(data.keys()) & set(record_lower_field)
+            for f in lower_set:        # CharField要求小写的转换成小写
+                if data[f]:
+                    data[f] = data[f].lower()
+
+            request_set = set(record_key) - set(record_request_field[data['type']])
+            for i in request_set:
                 data[i] = None
             return data
         else:
@@ -398,6 +506,7 @@ def record_del(req):
     if req.method == 'POST':
         msg = {'status': 500}
         data = json.loads(req.POST.get('data'))
+        print(data);
         success_count = 0
         total_count = len(data)
         for i in data:
@@ -454,3 +563,4 @@ def record_mod(req):
         return HttpResponse(json.dumps(msg))
     else:
         return HttpResponse(COMMON_MSG['req_use_post'])
+

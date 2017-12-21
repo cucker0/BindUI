@@ -24,120 +24,11 @@
 })(jQuery);
 
 
-function GetProxyServer(site_id) {
-    //通过site_id 获取proxy server列表
-    var data_send = {'site_id':site_id};
-    $.post("/nginx/get_proxy_server/",{'data':JSON.stringify(data_send)},
-            function(callback){
-                var response_data = JSON.parse(callback);
-                //console.log(response_data['data']);
-                $('.dd-middle').html(RealServerList(response_data['data'], response_data['site_id']));
-                $('.dd-right').html(ShowDu(response_data['du']));
-            });
-}
-
-function RealServerList(obj, site_id){
-    //源站服务器展示列表
-    /*[{'proxy_server': '192.168.1.46', 'realserver': [{'url': 'http://192.168.1.46:17818/du?upstream=vip_tuandai_com_du&server=192.168.1.146:20026&up=', 'id': 2, 'host': '192.168.1.146:20026'}, {'url': 'http://192.168.1.46:17818/du?upstream=vip_tuandai_com_du&server=192.168.1.146:20026&up=', 'id': 2, 'host': '192.168.1.146:20026'}]},
-        {'proxy_server': '192.168.1.142', 'realserver': [{'url': 'http://192.168.1.142:17818/du?upstream=vip_tuandai_com_du&server=192.168.1.146:20026&up=', 'id': 2, 'host': '192.168.1.146:20026'}, {'url': 'http://192.168.1.142:17818/du?upstream=vip_tuandai_com_du&server=192.168.1.146:20026&up=', 'id': 2, 'host': '192.168.1.146:20026'}]}]
-    */
-    var lis = '<div class="dd-subdiv"><button type="button" action="0" class="btn btn-warning" onclick="UpDown(this);">下线</button> <button type="button" action="1" class="btn btn-success pull-right" onclick="UpDown(this)">上线</button></div>';
-
-    lis += '<table id="realserver-tab" site_id='+ site_id +' class="table table-hover"><thead><tr><th><input type="checkbox" name="ckSelectAll" status="0" onclick="SelectAll(this,\'#realserver-tab\');"></th><th>RealServer</th><th>Status</th></tr></thead><tbody>';
-
-    for (var i in obj){
-        var ele = '<tr><td><input type="checkbox" name="realserver" value="'+ obj[i].id +'" id="rs__'+  obj[i].id + '"></td><td><label for="rs__'+ obj[i].id +'">' + obj[i].ip_port + '</label></td><td>'+ UpDownStatus(obj[i].up_down) +'</td></tr>';
-        lis += ele;
-    }
-    lis += '</tbody></table>';
-    return lis;
-}
-
-function ShowDu(obj){
-    //展示upstream详情
-    //[{'get_du': {'192.168.1.59:20026': 1, '192.168.1.146:20026': 1}, 'proxy_server': 'nginx_11.213'}, {'get_du': {'192.168.1.59:20026': 1, '192.168.1.146:20026': 1}, 'proxy_server': 'nginx_11.211'}]
-    var ele1 = '<ul class="margin-t50">';
-    for (var i in obj){
-        var ele2 = '<h4>'+ obj[i].proxy_server +'</h4>';
-        for(var j in obj[i].get_du){
-            ele2 += '<li>'+ j + UpDownStatus(obj[i].get_du[j]) + '</li>';
-        }
-        ele1 += ele2;
-    }
-    ele1 += '</ul>';
-    return ele1;
-}
-function GetProxyServerByGroup(ths, action){
-    var data_send = '';
-    if (action == 0){     //刷新整个content-wrapper div
-        var ele = '<div class="dd-left"><div class="site_box"></div></div><div class="dd-middle"></div><div class="dd-right"></div>';
-        $('.content-wrapper').html(ele);
-        //获取 proxy server by group id
-        //$(".site_box").html('');
-        //$(".dd-middle").html('');
-        //$(".dd-right").html('');
-        $(ths).parent().addClass('active');
-        $(ths).parent().siblings().removeClass('active');
-        var proxy_server_group_id = $(ths).attr('proxy_group_id');
-        data_send = {'proxy_server_group_id':proxy_server_group_id};
-    }else if (action == 1){     //只刷新dd-right div内容，适用于上、下线站点、维护站点时用
-        var proxy_server_group_id = $(ths).attr('proxy_group_id');
-        data_send = {'proxy_server_group_id':proxy_server_group_id};
-    }else if (action == 2){     //点击分页
-        var proxy_server_group_id = $('#table_site').attr('proxy_group_id');
-        var page = $(ths).attr('page');
-        if (!page){
-            page = $('.pagination li.active a').attr('page');
-        }
-        data_send = {'proxy_server_group_id':proxy_server_group_id, 'page':page};
-    }
-    $.post("/nginx/get_proxy_server_byproxyservergroup/",{'data':JSON.stringify(data_send)},
-        function(callback){
-            var response_data = JSON.parse(callback);
-            $('.site_box').html(response_data['data']);
-        }
-    );
-}
-
-function UpDownStatus(status){
-    //判断upstream 服务器上、下线显示状态
-    var ele = ''
-    if (status == '0'){
-        ele = '<span class="glyphicon glyphicon-minus-sign orange"></span>';
-    }else if(status == '1'){
-        ele = '<span class="glyphicon glyphicon-play-circle green"></span>';
-    }else{
-        ele = '<span class="glyphicon glyphicon-question-sign"></span>';
-    }
-    return ele;
-}
-
-function UpDown(ths){
-    //上线、下线源站服务器
-    var action = $(ths).attr("action");
-    //获取选中的服务器checkbox值
-    var checkbox_val = GetCheckboxValue('#realserver-tab');
-    var site_id = $('#realserver-tab').attr('site_id');
-    if (checkbox_val.length > 0 && site_id.length > 0){
-        var data_send = {'action':action, 'realserver_list':checkbox_val, 'site_id':site_id};
-        $.post("/nginx/updown_realserver/",{'data':JSON.stringify(data_send)},
-                function(callback){
-                    var callback = JSON.parse(callback)['data'];
-                    //console.log(callback);
-                    //var site_id = $('.site_active').find('input').val();
-                    var site_id = $('#realserver-tab').attr('site_id');
-                    GetProxyServer(site_id);        //刷新realserver列表
-                    //GetProxyServerByGroup('.treeview-menu[name=dynamic_upstream] li.active [proxy_group_id]', 1);  //刷新站点列表
-                    //GetProxyServerByGroup('#table_site', 1);  //刷新站点列表
-                    GetProxyServerByGroup(null, 2);  //刷新站点列表
-                });
-    }
-}
-
 function GetCheckboxValue(selector){
     //获取目标选择器 input checkbox 选中的值，返回为列表
     var _checkbox_val = [];
-    var _target = selector + ' input:checked[name!="ckSelectAll"]';
+    //var _target = selector + ' input:checked[name!="ckSelectAll"]';
+    var _target = selector + ' input:checked:not([data-check-all])';
     $(_target).each(function(){
         _checkbox_val.push($(this).val());
     });
@@ -157,33 +48,6 @@ function SelectAll(){
     }
 }
 
-function SiteClick(ths){
-    //点击site
-    $(ths).parent().addClass('site_active').siblings().removeClass('site_active');
-    var site_id = $(ths).prev().children().first().val();
-    GetProxyServer(site_id);
-}
-
-function Maintain(ths){
-    //站点维护，挂载维护页或去恢复正常去维护页
-    var action = $(ths).attr('action');     //按钮动作，0：维护， 1：恢复
-    var maintain_group_id = $('.maintain_group_select ').val();
-    var checkbox_val = GetCheckboxValue('#table_site');
-    if (action.length != '-1' &&  checkbox_val.length > 0){   //维护页、站点必须选择
-        var data_send = {'action':action, 'maintain_group_id':maintain_group_id, 'site_id_list':checkbox_val};
-        data_send = JSON.stringify(data_send);
-        $.post('/nginx/maintain/', {'data':data_send},
-            function(callback){
-                callback = JSON.parse(callback)['data'];
-                if(callback){
-                    //GetProxyServerByGroup('.treeview-menu[name=dynamic_upstream] li.active [proxy_group_id]', 1);   //刷新站点列表
-                    GetProxyServerByGroup('#realserver-tab', 1);   //刷新站点列表
-                }
-                $('.dd-middle').html('');
-                $('.dd-right').html('');
-            });
-    }
-}
 
 function Login(){
     var user = $('.login-box-body input[type="text"]').val();
@@ -236,7 +100,7 @@ function ChangePassword(){
     $.post('/auth/userprofile/1/', {'data':JSON.stringify({'current_password':current_password,'new_password':new_password})},
         function(callback){
             callback = JSON.parse(callback)['data'];
-            console.log(callback);
+            //console.log(callback);
             if (callback['auth_status'] == '1'){  //登录成功
                 location.href = callback['url'];
             }else if(callback['auth_status'] == '0'){   //登录失败
@@ -518,20 +382,45 @@ function RecordAdd(){
 
 }
 
-function RecordDelteACK(){
-    //记录删除确认，显示删除记录模态对话框
-    var tag_selector = $(this).parent().siblings().filter("input, :first");     //<td>...</td>
-    tag_selector.children().prop("checked", true);      //当前行打勾
-    tag_selector.parent().siblings().find('input').removeAttr("checked");       //取消其他行的勾
-    $(this).parent().parent().parent().prev().find("input").removeAttr("checked");    //取消 selectAll 勾
+function  GetCheckboxAttrSet(selector, attr){
+    //获取checkbox 属性集合值, 返回为列表
+    var _set = [];
+    var _tag_selector =  selector + " input:checked:not([data-check-all])";
+    $(_tag_selector).each(function () {
+        _set.push($(this).prop(attr));
+    });
+    return _set;
+}
+
+function RecordDelteACK(event){
+    //记录删除确认，显示删除记录模态对话框(删除确认)
+    if(event.data.optype == 1){ // 单条记录操作
+        var tag_selector = $(this).parent().siblings().filter("input, :first");     //<td>...</td>
+        tag_selector.children().prop("checked", true);      //当前行打勾
+        tag_selector.parent().siblings().find('input').removeAttr("checked");       //取消其他行的勾
+        $(this).parent().parent().parent().prev().find("input").removeAttr("checked");    //取消 selectAll 勾
+        $("DNSRecordDeleteModalLabel").prop("multiple", 0);     // 标识为非多条操作
+    }else if (event.data.optype == 2){
+        $("DNSRecordDeleteModalLabel").prop("multiple", 1);     // 标识为多条操作
+    }
+
     $('#DNSRecordDeleteModalLabel').modal('show');
 }
 
 function RecordDel(){
-    //删除DNS记录
-    var select_id = $("#table_record_list tbody input:checked").attr('id');
+    //删除DNS记录（执行删除）
     var _checkbox_val = [];
-    _checkbox_val.push(select_id);
+    var multiple = $("DNSRecordDeleteModalLabel").prop("multiple");
+    if(multiple == 0){     // 单条操作
+        var select_id = $("#table_record_list tbody input:checked").prop('id');
+        _checkbox_val.push(select_id);
+    } else {  // 多条操作
+        //$("#table_record_list input:checked:not([data-check-all])").each(function () {
+        //    _checkbox_val.push($(this).attr("id"));
+        //});
+        _checkbox_val = GetCheckboxAttrSet("#table_record_list", "id")
+    }
+
     $.ajax({
         url: "/dns/del.html",
         type: "POST",        //请求类型
@@ -549,13 +438,19 @@ function RecordDel(){
     });
 }
 
-function RecordStatusACK(){
+function RecordStatusACK(event){
     //DNS记录状态修改确认操作页面
-    var tag_selector = $(this).parent().siblings().filter("input, :first");     //<td>...</td>
-    tag_selector.children().prop("checked", true);      //当前行打勾
-    tag_selector.parent().siblings().find('input').removeAttr("checked");       //取消其他行的勾
-    $(this).parent().parent().parent().prev().find("input").removeAttr("checked");    //取消 selectAll 勾
-    var _status = $(this).attr('name');
+    if(event.data.optype == 1){     //单条操作
+        var tag_selector = $(this).parent().siblings().filter("input, :first");     //<td>...</td>
+        tag_selector.children().prop("checked", true);      //当前行打勾
+        tag_selector.parent().siblings().find('input').removeAttr("checked");       //取消其他行的勾
+        $(this).parent().parent().parent().prev().find("input").removeAttr("checked");    //取消 selectAll 勾
+        $("#DNSRecordStatusModalLabel").prop("multiple", 0);
+    } else if(event.data.optype == 2){      //多条操作
+        $("#DNSRecordStatusModalLabel").prop("multiple", 1);
+    }
+    var _status = $(this).prop('name');
+    $("#DNSRecordStatusModalLabel").prop('name', _status);      // 在DNS记录状态操作模态框中标识 DNS记录状态操作动态类型
     if (_status == '_turnOff'){
         $("#DNSRecordStatusModalLabel td .info").text('暂停记录吗？');
     } else if(_status == '_turnOn'){
@@ -566,19 +461,37 @@ function RecordStatusACK(){
 
 function RedcordStatusModify(){
     // 修改记录状态
-    var select_id = $("#table_record_list tbody input:checked").attr('id');
     var _checkbox_val = [];
-    _checkbox_val.push(select_id);
-    var _action = $("#table_record_list tbody tr").has(":checked").find('a[action_type=status]').attr('name');
+    var _action = '';
+    var multiple = $("#DNSRecordStatusModalLabel").prop("multiple");
+    //if(multiple == 0){
+    //    var select_id = $("#table_record_list tbody input:checked").prop('id');
+    //    _checkbox_val.push(select_id);
+    //    //_action = $("#table_record_list tbody tr").has(":checked").find('a[action_type=status]').attr('name');
+    //    _action = $(this).prop('name');
+    //}else if(multiple == 1){
+    //    _checkbox_val = GetCheckboxAttrSet("#table_record_list", 'id');
+    //    //console.log(_checkbox_val);
+    //    _action = $("#DNSRecordStatusModalLabel").prop('name');
+    //}
+    _checkbox_val = GetCheckboxAttrSet("#table_record_list", 'id');
+    //console.log(_checkbox_val);
+    _action = $("#DNSRecordStatusModalLabel").prop('name');
+
+
     var data = {'action':_action, 'id_list':_checkbox_val};
+
     $.ajax({
         url:"/dns/mod.html?type=status",
         type:"POST",
         data:{'data':JSON.stringify(data)},
         dataType:"json",
         success:function(callback){
-            if (callback['status']  == 200){
-                location.reload(true);
+            if (callback['status']  == 200){        // 状态修改成功
+                //location.reload(true);
+                $("#DNSRecordStatusModalLabel").modal('hide');
+                ClickPage({'data':{'optype':3}});
+
             }
         },
         error:function(){
@@ -610,31 +523,60 @@ function RecordModifyACK(){
     $(".form-horizontal input[name=mx_priority]").val(_mx_priority);
     $(".form-horizontal select[name=ttl]").val(_ttl);
     $(".form-horizontal input[name=comment]").val(_comment);
-    $("#DNSRecordAddOrModifyModalLabel .modal-title").attr("id", _id);
+    $("#DNSRecordAddOrModifyModalLabel .modal-title").prop("id", _id);
 }
 
-function ClickPage(){
+function ClickPage(event){
     //点击分页
+    // event.data 为含操作类型字典 ==> {'optype': 1}
     var page_num = 1;
+    var active_page_num = parseInt( $(".pagination li.active a").text().trim() );
+    if (event.data.optype == 1){        // 点击分页导航器上的分页码
 
-    if ( typeof($(this).attr("aria-label")) != "undefined" ){
-        if ($(this).parent().hasClass("disabled")){     // 上一页、下一页若为 disabled 直接退出
-            return 400
+        if ( typeof($(this).attr("aria-label")) != "undefined" ){
+            if ($(this).parent().hasClass("disabled")){     // 上一页、下一页若为 disabled 直接退出
+                return 400;
+            }
+
+            var PN = $(this).attr("aria-label");
+            if (PN == "Previous"){
+                page_num = active_page_num - 1;
+            } else if (PN == "Next"){
+                page_num = active_page_num + 1;
+            }
+        } else{
+            page_num = $(this).text().trim();
+            if (!parseInt(page_num)){
+                console.log("page number is error!");
+                return 400;
+            }
         }
-        var active_page_num = parseInt( $(".pagination li.active a").text().trim() );
-        var PN = $(this).attr("aria-label");
-        if (PN == "Previous"){
-            page_num = active_page_num - 1;
-        } else if (PN == "Next"){
-            page_num = active_page_num + 1;
+
+
+    }else if (event.data.optype == 2){      // 点击分页导航器上输入页码直接跳转
+        page_num = $("#input_page").val().trim();
+        $(this).prev().val('');
+        if (!parseInt(page_num)){
+            console.log("page number is error!");
+            return 400;
         }
-    } else{
-        page_num = $(this).text().trim();
+    }else if(event.data.optype == 3){       // 刷新当前分页（如修改了记录状态后刷新回本分页）
+        page_num = active_page_num;
     }
+
+    var perpage_num = $("#perpage-dropdownMenu").attr('value').trim();
     var active_page = $(".pagination .active").text().trim();
-    if (page_num != active_page){
+    if (page_num != active_page || (event.data.optype != 1) || (event.data.optype != 2)){
         var _zone_tag_name = $("[zone_tag_name]").text();
-        data = {'page':page_num, 'zone':_zone_tag_name}
+        var _action = 'pagination';     // 搜索还是点击分页
+        var _other = '';        // 其他参数
+        if(event.data.optype == 4){     // DNS记录搜索分页
+            _action = 'search';
+            _other = {'search_key':event.data.search_key};
+
+        }
+        var data = {'action':_action, 'page':page_num, 'zone':_zone_tag_name, 'perpage_num':perpage_num, 'other':_other}
+        //console.log(data);
         var html = $.ajax({
             url: "/dns/rlist_page.html",
             type:"POST",
@@ -647,6 +589,79 @@ function ClickPage(){
     }
 
 }
+
+function SelectPerPageNum(){
+    //选择x条记录/页
+    var perpage_num = $(this).parent().attr("value");
+    var perpage_text = $(this).parent().text().trim();
+    $("#perpage-dropdownMenu").attr("value", perpage_num);
+    $("#perpage-dropdownMenu span:first").text(perpage_text)
+
+    ClickPage({'data':{'optype': 0}});
+}
+
+function DnsRecordSearch(){
+    // DNS记录搜索
+    var _search_key = $("input[name=dns_record_search]").val().trim();
+    $("input[name=dns_record_search]").val('');
+
+    ClickPage({'data':{'optype':4, 'search_key':_search_key} });
+
+}
+
+
+function DoaminAddACK(){
+    // 添加域名确认操作页面
+    $("#DomainAddOrModifyModalLabel").modal("show");
+}
+
+function DoaminAdd(){
+    //添加域名 点击 保存按键
+
+    var _zone = $("#DomainAddOrModifyModalLabel input[name=zone]").val().trim();
+    var _data = $("#DomainAddOrModifyModalLabel input[name=data]").val().trim();
+    var _responsible_mail = $("#DomainAddOrModifyModalLabel input[name=responsible_mail]").val().trim();
+    //var _serial = $("#DomainAddOrModifyModalLabel input[name=serial]").val().trim();
+    var _refresh = $("#DomainAddOrModifyModalLabel input[name=refresh]").val().trim();
+    var _retry = $("#DomainAddOrModifyModalLabel input[name=retry]").val().trim();
+    var _expire = $("#DomainAddOrModifyModalLabel input[name=expire]").val().trim();
+    var _minimum = $("#DomainAddOrModifyModalLabel input[name=minimum]").val().trim();
+    var _primary_ns = $("#DomainAddOrModifyModalLabel input[name=primary_ns]").val().trim();
+    var _comment = $("#DomainAddOrModifyModalLabel input[name=comment]").val().trim();
+
+    var _data = {
+        'zone': _zone,
+        'data': _data,
+        'resp_person': _responsible_mail,
+        //'serial': _serial,
+        'refresh': _refresh,
+        'retry': _retry,
+        'expire': _expire,
+        'minimum': _minimum,
+        'primary_ns': _primary_ns,
+        'comment':_comment
+    };
+
+    $.ajax({
+        url:"/domains/domain_curd.html?type=c",
+        type:"GET",
+        data:{'data':JSON.stringify(_data)},
+        dataType:"json",
+        success:function(callback){
+            console.log('====.>',callback);
+            if (callback['status']  == 200){        // 状态修改成功
+                //location.reload(true);
+                $("#DomainAddOrModifyModalLabel").modal('hide');
+
+            }
+        },
+        error:function(){
+
+        }
+    });
+
+}
+
 
 $(document).ready(function(){
     //文件加载后执行
@@ -665,19 +680,21 @@ $(document).ready(function(){
     // 选择/取消 所有项
     $("table tr input[data-check-all]").bind('click', SelectAll);
 
-    // DNS记录展示页的操作绑定事件--删除操作按钮
+    // DNS记录展示页的操作绑定事件--删除操作按钮 （删除确认）
     //$("table a[action_type=delete]").bind('click', RecordDelteACK);
-    $(document).on("click", "table a[action_type=delete]", RecordDelteACK);
+    $(document).on("click", "table a[action_type=delete]", {'optype': 1}, RecordDelteACK);
+    $(document).on("click", ".box-title button[action_type=delete]", {'optype': 2}, RecordDelteACK)
 
-    // 记录删除 确认按钮绑定事件
+    // 记录删除 确认按钮绑定事件（执行删除）
     //$(".modal-footer button[name=_delete_ok]").bind('click', RecordDel);
-    $(document).on("click", ".modal-footer button[name=_delete_ok]", RecordDel);
+    $(document).on("click", ".modal-footer button[name=_delete_ok]", {'optype': 1}, RecordDel);
 
-    // DNS记录展示页的操作绑定事件--状态操作按钮
+    // DNS记录展示页的操作绑定事件--状态操作按钮(记录状态操作确认)
     //$("table a[action_type=status]").bind('click', RecordStatusACK);
-    $(document).on("click", "table a[action_type=status]", RecordStatusACK);
+    $(document).on("click", "table a[action_type=status]", {'optype': 1},  RecordStatusACK);
+    $(document).on("click", ".box-title button[action_type=status]", {'optype': 2},  RecordStatusACK);
 
-    // 记录暂停 确认按钮绑定事件
+    // 记录状态操作 确认按钮绑定事件（执行记录状态操作）
     //$("#DNSRecordStatusModalLabel button[name=_modify_status_ok]").bind('click', RedcordStatusModify);
     $(document).on("click", "#DNSRecordStatusModalLabel button[name=_modify_status_ok]", RedcordStatusModify);
 
@@ -687,6 +704,16 @@ $(document).ready(function(){
 
     // 分页导航绑定点击事件
     //$(".pagination a").bind('click', ClickPage);
-    $(document).on("click",'.pagination a',ClickPage)       //动态新增元素也生效
+    $(document).on("click","nav .pagination a", {'optype': 1}, ClickPage)       // 点击分页导航器上的分页码, 动态新增元素也生效
+    $(document).on("click","button[name=jump-page]", {'optype': 2}, ClickPage)       // 点击分页导航器上输入页码直接跳转
 
+    // 分页导航器选择x条记录/页
+    $(document).on("click", ".dropdown-menu[aria-labelledby='perpage-dropdownMenu'] li a", SelectPerPageNum);
+
+    // DNS记录搜按钮绑搜索事件
+    $(document).on("click", "div button[name=dns_record_search_submit]", DnsRecordSearch);
+
+    // 点击 添加域名 弹出添加域名页（添加域名确认操作页面）
+    $(document).on("click", "button[name=add_domain]", DoaminAddACK)
+    $(document).on("click", "#DomainAddOrModifyModalLabel button[name=_save]", DoaminAdd);
 });

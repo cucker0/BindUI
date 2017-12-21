@@ -19,6 +19,7 @@ from . import views
 urlpatterns = [
     url(r'^domains/list', views.domain_list, name='domain_list'),
     url(r'^domains/rlist', views.domain_resolution_list, name='domain_resolution_list'),
+    url(r'^domains/domain_curd.html', views.domain_curd, name='domain_add'),
     url(r'^dns/(?P<domain_id>\d+)', views.record_list, name='record_list'),
     url(r'^dns/add.html', views.record_add, name='record_add'),
     url(r'^dns/del.html', views.record_del, name='record_del'),

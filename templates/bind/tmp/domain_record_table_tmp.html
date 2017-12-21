@@ -10,6 +10,7 @@
                             <th>记录值</th>
                             <th>MX优先级</th>
                             <th>TTL</th>
+                            <th>状态</th>
                             <th>最后操作时间</th>
                             <th>操作</th>
                             <th>备注</th>
@@ -25,12 +26,19 @@
                                 <td>{{ record_obj.data }}</td>
                                 <td>{% val_none_to_blank record_obj.mx_priority '-' %}</td>
                                 <td ttl="{{ record_obj.ttl }}">{% ttl_convert record_obj.ttl %}</td>
+                                <td>
+                                    {% if record_obj.status == 'on' %}
+                                        <span class="glyphicon glyphicon-play-circle green"></span>
+                                    {% elif record_obj.status == 'off' %}
+                                        <span class="glyphicon glyphicon-pause orange"></span>
+                                    {% endif %}
+                                </td>
                                 <td>{{ record_obj.update_time }}</td>
                                 <td><a action_type="modify" href="javascript:;">修改</a>
                                     {% if record_obj.status == 'on' %}
                                         <a action_type="status" name="_turnOff" href="javascript:;">暂停</a>
                                     {% elif record_obj.status == 'off' %}
-                                        <a action_type="status" name="_turnOn" href="javascript:;">开启<span class="glyphicon glyphicon-pause orange"></span></a>
+                                        <a action_type="status" name="_turnOn" href="javascript:;">开启</a>
                                     {% endif %}
                                     <a action_type="delete" href="javascript:;">删除</a>
                                 </td>
