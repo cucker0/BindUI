@@ -238,7 +238,11 @@ function MXShowOrHide(){
     switch(type_val){
         case 'MX':
             $(".form-horizontal input[name=mx]").parent().parent().show();
-            $(".form-horizontal input[name=mx]").val('5');
+            var _mx = $(".form-horizontal input[name=mx]").val();
+            if (_mx != '' || _mx != undefined){
+                $(".form-horizontal input[name=mx]").val('10');
+            }
+            $(".form-horizontal input[name=data]").prop("placeholder", "填写邮件服务器地址，如：mx2.dns.com.");
             break;
         default:
             $(".form-horizontal input[name=mx]").val('');
@@ -267,7 +271,7 @@ function ChangePlaceholder(){
             break;
         case 'MX':
             $(".form-horizontal input[name=host]").prop("placeholder", "通常填写@、mail，不填写默认保存为@");
-            $(".form-horizontal input[name=data]").prop("placeholder", "填写邮件服务器地址");
+            $(".form-horizontal input[name=data]").prop("placeholder", "填写邮件服务器地址，如：mx2.dns.com.");
             break;
         case 'TXT':
             $(".form-horizontal input[name=host]").prop("placeholder", "填写子域名，不填写默认保存为@");
@@ -310,13 +314,29 @@ function ChangePlaceholder(){
 
 }
 
+function ClearRecordAddModModal(){
+    // 清空 DNS记录 添加/修改 模态框一些历史值
+    $(".modal-body select[name=type]").val('A');
+    $(".modal-body input[name=host]").val('');
+    $(".modal-body select[name=resolution_line]").val(0);
+    $(".modal-body input[name=data]").val('');
+    $(".modal-body input[name=mx]").val('');
+    $(".modal-body select[name=ttl]").val(600);
+    $(".modal-body input[name=comment]").val('');
+}
 
-function DnsRecordDefaultSelect(){
+function RecordAddACK(){
+    // 添加DNS记录确认操作页面
     $("#DNSRecordAddOrModifyModalLabel .modal-title").html("添加记录");         //修改modal标题内容
     $("#DNSRecordAddOrModifyModalLabel").attr("action_type", "add");        //修改 action_type值
 
     //每次点击 添加记录 重置记录类型,并改变Placeholder值
     $(".form-horizontal input[name=mx]").parent().parent().hide();
+    $(".form-horizontal input[name=host]").val('');
+    $(".form-horizontal select[name=resolution_line]").val('0');
+    $(".form-horizontal input[name=data]").val('');
+    $(".form-horizontal select[name=ttl]").val('600');
+    $(".form-horizontal input[name=comment]").val('');
     var _domain_name = $("div .nav h2").text();
     if (_domain_name.endsWith('in-addr.arpa')) {
         $(".form-horizontal select[name=type]").val('PTR');
@@ -330,8 +350,8 @@ function DnsRecordDefaultSelect(){
     ChangePlaceholder();
 }
 
-function RecordAdd(){
-    //添加记录 点击 保存按键
+function RecordAddModify(){
+    // 添加记录/修改记录 点击 保存按键
     var _type = $(".modal-body select[name=type]").val();
     var _host = $(".modal-body input[name=host]").val();
     var _resolution_line = $(".modal-body select[name=resolution_line]").val();
@@ -340,19 +360,21 @@ function RecordAdd(){
     var _ttl = $(".modal-body select[name=ttl]").val();
     var _zone_tag_name = $("[zone_tag_name]").text();
     var _comment = $(".modal-body input[name=comment]").val();
-    var senddata = {"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data, "mx_priority":_mx, "ttl":_ttl, "comment":_comment, "zone":_zone_tag_name }
+    var _data = {"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data, "mx_priority":_mx, "ttl":_ttl, "comment":_comment, "zone":_zone_tag_name }
 
     var action_type = $("#DNSRecordAddOrModifyModalLabel").attr("action_type");
     if (action_type == "add"){  //添加记录
         $.ajax({
             url: "/dns/add.html",
             type: "POST",        //请求类型
-            data: {'data': JSON.stringify(senddata)},
+            data: {'data': JSON.stringify(_data)},
             dataType: "json",
             success: function (callback) {
                 //当向服务端发起的请求执行成功完成后，自动调用
-                if (callback['status'] == 200){
-                    location.reload(true);      //刷新当前页面,status=500 添加记录失败。
+                if (callback['status'] == 200){     //刷新当前页面,status=500 添加记录失败。
+                    $("#DNSRecordAddOrModifyModalLabel").modal('hide');
+                    ClickPage( { 'data':{'optype':5} } );       // 分页器中查看最后一页
+                    //location.reload(true);
                 }
             },
             error: function () {
@@ -360,18 +382,22 @@ function RecordAdd(){
             }
         });
     } else if (action_type == "modify"){        //修改记录
-        var _id = $("#DNSRecordAddOrModifyModalLabel .modal-title").attr("id");
-        $("#DNSRecordAddOrModifyModalLabel .modal-title").removeAttr("id");
-        senddata['id'] = _id;
+        var _id = $("#DNSRecordAddOrModifyModalLabel .modal-title").prop("id");
+        $("#DNSRecordAddOrModifyModalLabel .modal-title").removeProp("id");
+        _data['id'] = _id;
+
         $.ajax({
             url: "/dns/mod.html?type=main",
             type: "POST",        //请求类型
-            data: {'data': JSON.stringify(senddata)},
+            data: {'data': JSON.stringify(_data)},
             dataType: "json",
             success: function (callback) {
                 //当向服务端发起的请求执行成功完成后，自动调用
-                if (callback['status'] == 200){
-                    location.reload(true);      //刷新当前页面,status=500 添加记录失败。
+                if (callback['status'] == 200){ //刷新当前页面,status=500 添加记录失败。
+                    //location.reload(true);
+                    $("#DNSRecordAddOrModifyModalLabel").modal('hide');
+                    ClickPage( { 'data':{'optype':3} } );
+                    ClearRecordAddModModal();
                 }
             },
             error: function () {
@@ -430,7 +456,9 @@ function RecordDel(){
         success: function (callback) {
             //当向服务端发起的请求执行成功完成后，自动调用
             if (callback['status'] == 200) {
-                location.reload(true);      //刷新当前页面,status=500 添加记录失败。
+                //location.reload(true);      //刷新当前页面,status=500 添加记录失败。
+                $("#DNSRecordDeleteModalLabel").modal('hide');
+                ClickPage({'data':{'optype':3}});
             }
         },
         error: function () {
@@ -465,18 +493,16 @@ function RedcordStatusModify(){
     var _checkbox_val = [];
     var _action = '';
     var multiple = $("#DNSRecordStatusModalLabel").prop("multiple");
-    //if(multiple == 0){
-    //    var select_id = $("#table_record_list tbody input:checked").prop('id');
-    //    _checkbox_val.push(select_id);
-    //    //_action = $("#table_record_list tbody tr").has(":checked").find('a[action_type=status]').attr('name');
-    //    _action = $(this).prop('name');
-    //}else if(multiple == 1){
-    //    _checkbox_val = GetCheckboxAttrSet("#table_record_list", 'id');
-    //    //console.log(_checkbox_val);
-    //    _action = $("#DNSRecordStatusModalLabel").prop('name');
-    //}
+    if(multiple == 0){
+        var select_id = $("#table_record_list tbody input:checked").prop('id');
+        _checkbox_val.push(select_id);
+        //_action = $("#table_record_list tbody tr").has(":checked").find('a[action_type=status]').attr('name');
+        _action = $(this).prop('name');
+    }else if(multiple == 1){
+        _checkbox_val = GetCheckboxAttrSet("#table_record_list", 'id');
+        _action = $("#DNSRecordStatusModalLabel").prop('name');
+    }
     _checkbox_val = GetCheckboxAttrSet("#table_record_list", 'id');
-    //console.log(_checkbox_val);
     _action = $("#DNSRecordStatusModalLabel").prop('name');
 
 
@@ -521,17 +547,22 @@ function RecordModifyACK(){
     $(".form-horizontal select[name=type]").val(_type);
     $(".form-horizontal select[name=resolution_line]").val(_resolution_line);
     $(".form-horizontal input[name=data]").val(_data);
-    $(".form-horizontal input[name=mx_priority]").val(_mx_priority);
+    $(".form-horizontal input[name=mx]").val(_mx_priority);
     $(".form-horizontal select[name=ttl]").val(_ttl);
     $(".form-horizontal input[name=comment]").val(_comment);
     $("#DNSRecordAddOrModifyModalLabel .modal-title").prop("id", _id);
+
+    MXShowOrHide();
 }
 
 function ClickPage(event){
     //点击分页
-    // event.data 为含操作类型字典 ==> {'optype': 1}
+    // event ==> { 'data': {'optype': 1} }
+    // event.data 为含操作类型字典 ==> { 'optype': 1 }
     var page_num = 1;
     var active_page_num = parseInt( $(".pagination li.active a").text().trim() );
+    var _action = 'pagination';     // 点击分页(搜索还是点击分页)
+    var _other = '';        // 其他参数
     if (event.data.optype == 1){        // 点击分页导航器上的分页码
 
         if ( typeof($(this).attr("aria-label")) != "undefined" ){
@@ -540,9 +571,9 @@ function ClickPage(event){
             }
 
             var PN = $(this).attr("aria-label");
-            if (PN == "Previous"){
+            if (PN == "Previous"){      // 查看上一页
                 page_num = active_page_num - 1;
-            } else if (PN == "Next"){
+            } else if (PN == "Next"){       // 查看下一页
                 page_num = active_page_num + 1;
             }
         } else{
@@ -563,19 +594,23 @@ function ClickPage(event){
         }
     }else if(event.data.optype == 3){       // 刷新当前分页（如修改了记录状态后刷新回本分页）
         page_num = active_page_num;
+    }else if(event.data.optype == 4){       // 搜索record记录
+        _action = 'search';     // 搜索分页(搜索还是点击分页)
+        _other = {'search_key':event.data.search_key};
+    }else if(event.data.optype == 5){       // 查看最后一页
+        page_num = 0;
     }
 
     var perpage_num = $("#perpage-dropdownMenu").attr('value').trim();
     var active_page = $(".pagination .active").text().trim();
     if (page_num != active_page || (event.data.optype != 1) || (event.data.optype != 2)){
         var _zone_tag_name = $("[zone_tag_name]").text();
-        var _action = 'pagination';     // 搜索还是点击分页
-        var _other = '';        // 其他参数
-        if(event.data.optype == 4){     // DNS记录搜索分页
-            _action = 'search';
-            _other = {'search_key':event.data.search_key};
-
-        }
+        //var _action = 'pagination';     // 点击分页(搜索还是点击分页)
+        //var _other = '';        // 其他参数
+        //if(event.data.optype == 4){     // DNS记录搜索分页
+        //    _action = 'search';     // 搜索分页(搜索还是点击分页)
+        //    _other = {'search_key':event.data.search_key};
+        //}
         var data = {'action':_action, 'page':page_num, 'zone':_zone_tag_name, 'perpage_num':perpage_num, 'other':_other}
         //console.log(data);
         var html = $.ajax({
@@ -649,7 +684,6 @@ function DoaminAdd(){
         data:{'data':JSON.stringify(_data)},
         dataType:"json",
         success:function(callback){
-            console.log('====.>',callback);
             if (callback['status']  == 200){        // 状态修改成功
                 //location.reload(true);
                 $("#DomainAddOrModifyModalLabel").modal('hide');
@@ -663,6 +697,66 @@ function DoaminAdd(){
 
 }
 
+function DnsResolutionClick(){
+    //域名列表页点击 DNS解析跳转到DNS解析页
+    var domain_id = $(this).parent().siblings().first().find("input").prop("id").trim();
+    var url = "/dns/" + domain_id;
+    location.href = url;
+}
+
+
+function DomainMan(){
+    //域名列表页点击 管理跳转到DNS管理页
+    var domain_id = $(this).parent().siblings().first().find("input").prop("id").trim();
+    var url = "/domains/" + domain_id + "/info";
+    location.href = url;
+}
+
+function AddDomainNSHtmlElement(){
+    //点击 新增 域名NS 按钮添加输入框
+    var element = '\
+        <ul class="row"> \
+            <li class="col-md-2"> </li> \
+            <li class="col-md-5"><input name="ns" type="text" class="col-md-12" placeholder="NS主机，如：ns1.bindui.com."></li> \
+            <a href="javascript:;" name="_domain_ns_edit_del">删除</a> \
+        </ul>';
+    $(this).parent().parent().parent().append(element);
+}
+
+function AddDomainNS(){
+    //新建domain ns记录，输入NS主机名后，提交到后台
+    var _ns_list = [];
+    var ele_ul = $(this).parent().parent().siblings();
+    var _zone = $(ele_ul).find("li[name=zone]").text().trim();
+    $(ele_ul).find("input[name=ns]").each(function (i) {
+        var _ns = $(this).val().trim();
+        if ( !(_ns == '' || _ns == undefined) ){
+            _ns_list.push(_ns);
+        }
+    });
+    var _data = {'zone':_zone, 'ns_list': _ns_list};
+    $.ajax({
+        url:"/domains/domain_curd.html?type=ns",
+        type:"GET",
+        data:{'data':JSON.stringify(_data)},
+        dataType:"json",
+        success:function(callback){
+            if (callback['status']  == 200){        // 状态修改成功
+                location.reload(true);
+            }
+        },
+        error:function(){
+
+        }
+    });
+}
+
+function DomainNsEditDel(){
+    // 点击 domain ns编辑框后的 删除按钮 删除该编辑框
+    $(this).parent().remove();
+
+}
+
 
 $(document).ready(function(){
     //文件加载后执行
@@ -672,11 +766,11 @@ $(document).ready(function(){
     $(".form-horizontal select[name=type]").bind('change', ChangePlaceholder);
 
     //点击 添加记录 按钮绑定事件
-    //$("button[data-toggle=modal]").bind('click', DnsRecordDefaultSelect, ChangePlaceholder);
-    $("button[data-toggle=modal]").bind('click', DnsRecordDefaultSelect);
+    //$("button[data-toggle=modal]").bind('click', RecordAddACK, ChangePlaceholder);
+    $("button[data-toggle=modal]").bind('click', RecordAddACK);
 
     //添加记录时点击 保存 按键绑定事件
-    $(".modal-footer  button[name=_save]").bind('click', RecordAdd);
+    $(".modal-footer  button[name=_save]").bind('click', RecordAddModify);
 
     // 选择/取消 所有项
     $("table tr input[data-check-all]").bind('click', SelectAll);
@@ -717,4 +811,21 @@ $(document).ready(function(){
     // 点击 添加域名 弹出添加域名页（添加域名确认操作页面）
     $(document).on("click", "button[name=add_domain]", DoaminAddACK)
     $(document).on("click", "#DomainAddOrModifyModalLabel button[name=_save]", DoaminAdd);
+
+    //域名列表页点击 DNS解析跳转到DNS解析页
+    $(document).on("click", "#table_domains tbody a[name=dns_resolution]", DnsResolutionClick);
+
+    //域名列表页点击 DNS解析跳转到DNS解析页
+    $(document).on("click", "#table_domains tbody a[name=domain_manager]", DomainMan);
+
+    //点击 新增 域名NS 按钮事件
+    $(document).on("click", "#domain_manager button[name=_add_domain_ns]", AddDomainNSHtmlElement);
+
+    // 输入NS主机后，提交到后台
+    $(document).on("click", "#domain_manager button[name=_add_domain_submit]", AddDomainNS);
+
+    // 点击 domain ns编辑框后的 删除按钮
+    $(document).on("click", "a[name=_domain_ns_edit_del]", DomainNsEditDel)
 });
+
+

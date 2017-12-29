@@ -1,3 +1,7 @@
+ul li{
+    list-style: none;
+}
+
 .dd-left{
     float: left;
     width: 40%;

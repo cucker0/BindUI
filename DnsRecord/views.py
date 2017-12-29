@@ -53,6 +53,8 @@ def domain_curd(req):
     type = req.GET.get('type').strip()
     if type == 'c':
         resp = domain_add(req)
+    elif type == 'ns':
+        resp = domain_ns(req)
     return HttpResponse(resp)
 
 
@@ -103,6 +105,46 @@ def domain_add(req):
     return json.dumps(msg)
 
 
+def domain_ns(req):
+    """
+    domain NS记录创建、修改
+    :param req:
+    :return:
+    """
+    msg = {'status': 500, 'msg':''}
+    try:
+        data = json.loads(req.GET.get('data'))
+        print("submit data===>",data)
+        zone = data['zone'].strip()
+        ns_submit_set = set(data['ns_list'])        # 提交更新的domain NS集合
+        zone_tag_obj = models.ZoneTag.objects.get(zone_name=zone)
+        if zone_tag_obj:        # zone必须存在
+            ns_obj_set = models.Record.objects.filter(Q(host='@') & Q(type='NS') & Q(zone=zone))
+            print("1 ns_obj_set===>", ns_obj_set)
+            ns_data_set = set()
+            for i in ns_obj_set:
+                ns_data_set.add(i.data)        # 数据库中已经存在domain NS集合
+            ns_toadd_set = ns_submit_set - ns_data_set      # 需要创建的domain NS data字段集合
+            ns_todelete_set = ns_data_set - ns_submit_set   # 需要删除的domian NS data字段集合
+            print("2 ns_toadd_set=====>", ns_toadd_set)
+            print("3 ns_todelete_set=====>", ns_todelete_set)
+            for i in ns_toadd_set:
+                ns_instance = {'zone':zone, 'host':'@', 'type':'NS', 'data':i.strip(), 'basic':2, 'zone_tag':zone_tag_obj }
+                record_data_filter(ns_instance)
+                models.Record.objects.update_or_create(**ns_instance)
+                msg['msg'] += "domain ns:%s create success; " %(i.strip())
+
+            ns_todele_obj_set = models.Record.objects.filter(data__in=ns_todelete_set)
+            ns_todele_obj_set.delete()
+            for i in ns_toadd_set:
+                msg['msg'] += "domain ns:%s delete success; " %(i.strip())
+
+        msg['status'] = 200
+    except Exception as e:
+        print(e)
+
+    return json.dumps(msg)
+
 def domain_resolution_list(req):
     """
     dashboard, domain list
@@ -111,6 +153,18 @@ def domain_resolution_list(req):
     """
     zone_obj_list = models.ZoneTag.objects.all()
     return render(req, 'bind/domain_resolution_list.html', {'zone_obj_list': zone_obj_list})
+
+
+def domain_man(req, domain_id, optype):
+    """
+    域名管理
+    :param req:
+    :return:
+    """
+    domain_id = int(domain_id)
+    zone_tag_obj = models.ZoneTag.objects.get(id=domain_id)
+    ns_set = models.Record.objects.filter(Q(type='NS') & Q(basic=2) & Q(zone_tag=zone_tag_obj))
+    return render(req, 'bind/domain_manager.html', {'zone_tag_obj':zone_tag_obj, 'ns_set': ns_set})
 
 
 
@@ -126,18 +180,26 @@ def  MyPaginator(obj_set, page=1, perpage_num=10, pagiformart=[1, 3, 1]):
     注意把 前端分页导航条html(pagination_html) 传到模板
     """
 
+    if not obj_set:     # obj_set 为空
+        sub_obj_set = None
+        pagination_html = ' '
+        return sub_obj_set, pagination_html
+
     # 上一页 1 2 ... 4 5 6 ... 9 10 下一页         #导航条示例
     L_NUM = pagiformart[0]       # 导航条左边显示个数
     M_NUM = pagiformart[1]//2 * 2 + 1     # 导航条中间显示个数，只能为大于1的奇数,如3、5、7 ...
     R_NUM = pagiformart[2]       # 导航条左边显示个数
+    paginator = Paginator(obj_set, perpage_num)
     if type(page) == str:
         try:
             page = int(page)
         except ValueError:
             page = 1
 
-
-    paginator = Paginator(obj_set, perpage_num)
+    if page == 0:       # 查看最后一页
+        page = paginator.num_pages
+    elif page < 0:      # 查看页码为负数（正常情况不允许查看页码为负数）
+        page = 1
 
     try:
         sub_obj_set = paginator.page(page)
@@ -444,7 +506,7 @@ def record_add(req):
             data = json.loads(data)
             # data = record_data_filter(data)
             record_data_filter(data)        # 字典或列表 以指针形式传递参数
-            zone_tag_obj = models.ZoneTag.objects.get(zone_name=data['zone'])
+            zone_tag_obj = models.ZoneTag.objects.get(zone_name=data['zone'].strip())
             data['zone_tag'] = zone_tag_obj
             models.Record.objects.update_or_create(**data)
             msg['status'] = 200
@@ -471,23 +533,35 @@ record_request_field = {
 
 record_lower_field = ['zone', 'host', 'data', 'resp_person', 'primary_ns']
 
+record_type = ('A', 'CNAME', 'MX', 'TXT', 'NS', 'AAAA', 'SRV', 'PTR', 'SOA')
+
 def record_data_filter(data):
     """
     更新或创建 record 根据type过滤 data key,把非必要字段都留空,把type字段转为大写，CharField字段要求小写的转为小写
     :param data: 要更新或创建 的 record数据，字典形式
     :return:
     """
+
     if type(data) == dict:
+        if not data['type'] in record_type: # type不在范围内的返回None
+            data = None
+            return data
+
         if data['type']:
             data['type'] = data['type'].upper()     # type字段转为大写
+
+        for k in data.keys():       # 去除用户提交data各值的左右空格
+            if type(data[k]) == str:
+                data[k] = data[k].strip()
+
         if data['type'] in record_request_field.keys():
             lower_set = set(data.keys()) & set(record_lower_field)
             for f in lower_set:        # CharField要求小写的转换成小写
                 if data[f]:
                     data[f] = data[f].lower()
 
-            request_set = set(record_key) - set(record_request_field[data['type']])
-            for i in request_set:
+            not_request_set = set(record_key) - set(record_request_field[data['type']])
+            for i in not_request_set:       # # 不要求填写字段置为None
                 data[i] = None
             if data['type'] != 'MX':
                 data['mx_priority'] = None
@@ -552,11 +626,12 @@ def record_mod(req):
         elif type == 'main':      # 修改DNS记录除staus外的项
             try:
                 record_obj_set = models.Record.objects.filter(id=data['id'])
-
                 del(data['id'])     # data.pop('id') print key
-                record_data_filter(data)
-                zone_tag_obj = models.ZoneTag.objects.get(zone_name=data['zone'])
+                # zone_tag_obj = models.ZoneTag.objects.get(zone_name=data['zone'])
+                zone_tag_obj = record_obj_set.first().zone_tag
+                data['zone'] = zone_tag_obj.zone_name
                 data['zone_tag'] = zone_tag_obj
+                data = record_data_filter(data)
                 record_obj_set.update(**data)
                 msg['status'] = 200
             except Exception as e:

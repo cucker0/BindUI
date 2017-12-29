@@ -1,0 +1,52 @@
+{% extends "bind/tmp/index_tmp.html" %}
+
+{% block head %}
+    <link rel="stylesheet" href="/static/AdminLTE/css/common.css">
+    <script src="/static/AdminLTE/js/myjs.js"></script>
+{% endblock %}
+
+
+{% block content %}
+    <div class="col-xs-12">
+        <h4>
+            <a href="/domains/list">&lt;返回</a>
+            <span>{{ zone_tag_obj.zone_name }}</span>
+        </h4>
+    </div>
+    <div class="col-xs-12">基本信息</div>
+    <div class="col-xs-10" id="domain_manager">
+        <ul class="row">
+            <li class="col-md-2">域名：</li>
+            <li class="col-md-6" name="zone">{{ zone_tag_obj.zone_name }}</li>
+        </ul>
+        <ul class="row">
+            <li class="col-md-2">DNS服务器：</li>
+            <li class="col-md-3">
+                <button name="_add_domain_ns" type="button" class="btn btn-default">+新增</button>
+            </li>
+            <li class="col-md-1">
+                <button name="_add_domain_cancel" type="button" class="btn btn-default"
+                        onclick="javascript:location.reload(true);">取消
+                </button>
+            </li>
+            <li class="col-md-2">
+                <button name="_add_domain_submit" type="button" class="btn btn-primary">确定</button>
+            </li>
+        </ul>
+        {% if ns_set %}
+            {% for i in ns_set %}
+                <ul class="row">
+                    <li class="col-md-2"></li>
+                    <li class="col-md-5">
+                        <input name="ns" type="text" value="{{ i.data }}" class="col-md-12" placeholder="NS主机，如：ns1.bindui.com.">
+                    </li>
+                    <a href="javascript:;" name="_domain_ns_edit_del">删除</a>
+                </ul>
+            {% endfor %}
+        {% endif %}
+
+    </div>
+
+
+
+{% endblock %}
