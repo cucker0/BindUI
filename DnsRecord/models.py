@@ -20,7 +20,7 @@ record_type_choices = (
     ('SOA','SOA'),
 )
 
-record_status_choices = (
+status_choices = (
     ('on', '开启'),
     ('off', '暂停'),
 )
@@ -43,7 +43,7 @@ class Record(models.Model):
     serial = models.BigIntegerField('serial', null=True, blank=True, default=None, help_text='serial # for SOA record,Zone序列号,不超过10位数字')
     resp_person = models.CharField('resp_person', max_length=255, null=True, blank=True, default=None, help_text='Responsible person mail for SOA record')
     primary_ns =  models.CharField('primary_ns', max_length=255, null=True, blank=True, default=None, help_text='Primary name server for SOA record,slav DNS指定Master DNS')
-    status = models.CharField('status', max_length=3, choices=record_status_choices, default='on',help_text='record on/off status')
+    status = models.CharField('status', max_length=3, choices=status_choices, default='on',help_text='record on/off status')
     create_time = models.DateTimeField('create_time', auto_now_add=True)
     update_time = models.DateTimeField('update_time', auto_now=True)
     comment = models.CharField('comment', max_length=255, null=True, blank=True, default=None, help_text='备注')
@@ -60,6 +60,7 @@ class ZoneTag(models.Model):
     """
     zone_name = models.CharField('zone name', max_length=255, unique=True)
     comment = models.CharField('注释', max_length=255, null=True, blank=True)
+    status = models.CharField('status', max_length=3, choices=status_choices, default='on',help_text='record on/off status')
 
     def __str__(self):
         return self.zone_name

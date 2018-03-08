@@ -1,0 +1,57 @@
+
+                <div class="box-body table-responsive no-padding">
+                    <table id="table_domains" class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th><input type="checkbox" data-check-all onclick="SelectAll('#table_domains' )"></th>
+                            <th>域名</th>
+                            <th>状态</th>
+                            <th>备注</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for zone_obj in zone_obj_list %}
+                            <tr>
+                                <td><input type="checkbox" id="{{ zone_obj.id }}"></td>
+                                <td>{{ zone_obj.zone_name }}</td>
+                                <td>
+                                    {% if zone_obj.status == 'on' %}
+                                        <span class="glyphicon glyphicon-play-circle green"></span>
+                                    {% elif zone_obj.status == 'off' %}
+                                        <span class="glyphicon glyphicon-pause orange"></span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ zone_obj.comment }}</td>
+                                <td><a name="dns_resolution">解析</a>
+                                    <a name="domain_manager">管理</a>
+                                    <span role="presentation" class="dropdown">
+                                        <a id="drop4" href="#" class="dropdown-toggle" data-toggle="dropdown"
+                                           role="button" aria-haspopup="true" aria-expanded="false">
+                                            更多
+                                            <span class="caret"></span>
+                                        </a>
+                                        <ul id="menu1" class="dropdown-menu" aria-labelledby="drop4">
+                                        {% if zone_obj.status == 'on' %}
+                                            <li><a action_type=status name="_turnOff" href="javascript:;">暂停解析</a></li>
+                                        {% elif zone_obj.status == 'off' %}
+                                            <li><a action_type=status name="_turnOn" href="javascript:;">开启解析</a></li>
+                                        {% endif %}
+                                            <li><a action_type="delete" href="javascript:;">删除域名</a></li>
+                                            <li><a action_type="_export_records" href="javascript:;">导出解析记录</a></li>
+                                        </ul>
+                                    </span>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+
+                    </table>
+                    <div style="height: 120px"> </div>
+                </div>
+                <!-- /.box-body -->
+                {% autoescape off %}    {# 关闭特殊字符转换 #}
+                    {# 分页导航条 #}
+                    {{ pagination_html }}
+                {% endautoescape %}
+

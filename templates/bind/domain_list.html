@@ -23,7 +23,7 @@
                         <div class="form-group">
                             <label class="col-sm-2 control-label">域名</label>
                             <div class="col-sm-10">
-                                <input type="text" name="zone" class="form-control" placeholder="填写域名，例如：bindui.com">
+                                <input type="text" name="zone" class="form-control" placeholder="填写域名，例如：bindui.com或反向域：1.168.192.in-addr.arpa">
                             </div>
                         </div>
 
@@ -109,6 +109,65 @@
     </div>
     <!-- Modal 1 end -->
 
+    <!-- Modal 2  删除domain -->
+{#    <div class="modal fade" id="DomiandDeleteModalLabel" multiple="" tabindex="-10" role="dialog"#}
+    <div class="modal fade" id="DomiandDeleteModalLabel" multiple="" tabindex="-10" role="dialog"
+         aria-labelledby="DomiandDeleteModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="DomiandDeleteModalLabel">删除域名</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="ui-popmsg">
+                        <tbody>
+                        <tr>
+                            <td height="72" class="i"><i class="b-error-icon"></i></td>
+                            <td height="72" class="t"><span class="info"><span class="tit"><span class="glyphicon glyphicon-warning-sign red"></span>确定删除所选择的域名吗？</span><p>
+                                删除后，所选记录将不再有效并被删除。</p></span></td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" name="_delete_ok">确定</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal 2-->
+
+    <!-- Modal 3 修改domain状态值 -->
+    <div class="modal fade" id="DomainStatusModalLabel" multiple="" name="" tabindex="-30" role="dialog"
+         aria-labelledby="DomainStatusModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="DomainStatusModalLabel">域名状态操作</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="ui-popmsg">
+                        <tbody>
+                        <tr>
+                            <td height="72" class="i"><i class="b-error-icon"></i></td>
+                            <td height="72" class="t"><span class="info"></span><span class="tit"></span></td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" name="_modify_status_ok">确定</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal 3-->
 
     <div class="col-xs-12"><h2>域名列表</h2></div>
 
@@ -133,45 +192,9 @@
                     </div>
                 </div>
                 <!-- /.box-header -->
-                <div class="box-body table-responsive no-padding">
-                    <table id="table_domains" class="table table-hover">
-                        <thead>
-                        <tr>
-                            <th><input type="checkbox" data-check-all onclick="SelectAll('#table_domains' )"></th>
-                            <th>域名</th>
-                            <th>状态</th>
-                            <th>备注</th>
-                            <th>操作</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for zone_obj in zone_obj_list %}
-                            <tr>
-                                <td><input type="checkbox" id="{{ zone_obj.id }}"></td>
-                                <td>{{ zone_obj.zone_name }}</td>
-                                <td>OK</td>
-                                <td>{{ zone_obj.comment }}</td>
-                                <td><a name="dns_resolution">解析</a>
-                                    <a name="domain_manager">管理</a>
-                                    <span role="presentation" class="dropdown">
-                                        <a id="drop4" href="#" class="dropdown-toggle" data-toggle="dropdown"
-                                           role="button" aria-haspopup="true" aria-expanded="false">
-                                            更多
-                                            <span class="caret"></span>
-                                        </a>
-                                        <ul id="menu1" class="dropdown-menu" aria-labelledby="drop4">
-                                            <li><a name="_stop_resolution" href="#">暂停解析</a></li>
-                                            <li><a name="_del_resolution" href="#">删除解析</a></li>
-                                            <li><a name="_export_records" href="#">导出解析记录</a></li>
-                                        </ul>
-                                    </span>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
 
-                    </table>
-                    <div style="height: 120px"> </div>
+                <div id="domain_box">
+                    {% include "bind/tmp/domain_table_tmp.html" %}
                 </div>
                 <!-- /.box-body -->
             </div>

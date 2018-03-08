@@ -46,9 +46,15 @@
                             <tr>
                                 <td><input type="checkbox" id="{{ zone_obj.id }}"></td>
                                 <td><a href="/dns/{{ zone_obj.id }}">{{ zone_obj.zone_name }}</a></td>
-                                <td>OK</td>
+                                <td>
+                                    {% if zone_obj.status == 'on' %}
+                                        <span class="glyphicon glyphicon-play-circle green"></span>
+                                    {% elif zone_obj.status == 'off' %}
+                                        <span class="glyphicon glyphicon-pause orange"></span>
+                                    {% endif %}
+                                </td>
                                 <td>{{ zone_obj.comment }}</td>
-                                <td><a>解析</a> <a>暂停</a> <a>更多</a></td>
+                                <td><a href="/dns/{{ zone_obj.id }}">解析</a>  <a>更多</a></td>
                             </tr>
                         {% endfor %}
                         </tbody>

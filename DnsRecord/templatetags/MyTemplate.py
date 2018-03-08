@@ -10,6 +10,7 @@ import sys, os
 BASIC_DIR = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(BASIC_DIR)
 from bindUI import dns_conf
+import datetime
 
 register = template.Library()
 
@@ -110,9 +111,9 @@ def dns_resolution_line_fileter(data):
     return line_name
 
 @register.simple_tag
-def record_status_convert(status):
+def status_convert(status):
     """
-    根据DNS记录status值显示相应的操作按钮，
+    根据status值显示相应的操作按钮，
     如status为on时,记录状态操作按钮为暂停，反之为开启
     :param status:记录status值
     :return: status值对应的状态操作按钮
@@ -122,3 +123,12 @@ def record_status_convert(status):
         action = '暂停'
     return action
 
+@register.simple_tag
+def get_year():
+    """
+    获取当年年份
+    :return: 当年年份
+    """
+    now = datetime.datetime.now()
+    YYYY = now.year
+    return YYYY
