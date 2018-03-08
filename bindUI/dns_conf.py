@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-# DNS解析线路
+# DNS解析线路，定义好的线路最好不要修改或删除
 DNS_RESOLUTION_LINE = (
     ('0', '默认'),
     ('cn', '国内'),

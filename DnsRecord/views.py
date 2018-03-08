@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, HttpResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.contrib.auth.decorators import login_required
 from . import models
 from django.db.models import Q
 
@@ -19,10 +20,11 @@ code 值含义
     500：失败
 """
 
-
+@login_required
 def root(req):
     return redirect('/')
 
+@login_required
 def index(req):
     """
     首页
@@ -31,6 +33,7 @@ def index(req):
     """
     return render(req, 'bind/index.html')
 
+@login_required
 def domain_list(req):
     """
     dashboard, domain list
@@ -52,7 +55,7 @@ def domain_list(req):
         'pagination_html':pagination_html,
     })
 
-
+@login_required
 def domain_status_mod(req):
     """
     修改doamin状态值，即开启或停用
@@ -75,6 +78,7 @@ def domain_status_mod(req):
             print(e)
     return msg
 
+@login_required
 def domain_curd(req):
     """
     域名增改查删
@@ -115,6 +119,7 @@ def domain_delete(req):
                 print(e)
 
     return msg
+
 
 def domain_add(req):
     """
@@ -199,6 +204,7 @@ def domain_ns(req):
 
     return msg
 
+@login_required
 def domain_resolution_list(req):
     """
     dashboard, domain list
@@ -208,7 +214,7 @@ def domain_resolution_list(req):
     zone_obj_list = models.ZoneTag.objects.all()
     return render(req, 'bind/domain_resolution_list.html', {'zone_obj_list': zone_obj_list})
 
-
+@login_required
 def domain_man(req, domain_id, optype):
     """
     域名管理
@@ -220,6 +226,7 @@ def domain_man(req, domain_id, optype):
     ns_set = models.Record.objects.filter(Q(type='NS') & Q(basic=2) & Q(zone_tag=zone_tag_obj))
     return render(req, 'bind/domain_manager.html', {'zone_tag_obj':zone_tag_obj, 'ns_set': ns_set})
 
+@login_required
 def dlist_page(req):
     """
     domain page翻页
@@ -245,6 +252,7 @@ def dlist_page(req):
                   })
     ret.set_cookie('perpage_num', data['perpage_num'] or 10)
     return ret
+
 
 def  MyPaginator(obj_set, page=1, perpage_num=10, pagiformart=[1, 3, 1]):
     """
@@ -515,6 +523,7 @@ def  MyPaginator(obj_set, page=1, perpage_num=10, pagiformart=[1, 3, 1]):
 
     return sub_obj_set, pagination_html
 
+@login_required
 def record_list(req, domain_id):
     """
     域名解析展示列表
@@ -541,6 +550,7 @@ def record_list(req, domain_id):
                    'DNS_RESOLUTION_LINE': dns_conf.DNS_RESOLUTION_LINE
                    })
 
+@login_required
 def rlist_page(req):
     """
     DNS记录 page翻页
@@ -571,6 +581,7 @@ def rlist_page(req):
     ret.set_cookie('perpage_num', data['perpage_num'] or 10)
     return ret
 
+@login_required
 def record_add(req):
     """
     添加解析记录
@@ -594,7 +605,7 @@ def record_add(req):
     else:
         return HttpResponse(COMMON_MSG['req_use_post'])
 
-
+@login_required
 def record_del(req):
     """
 
@@ -622,7 +633,7 @@ def record_del(req):
     else:
         return HttpResponse(COMMON_MSG['req_use_post'])
 
-
+@login_required
 def record_mod(req):
     """
     修改DNS记录

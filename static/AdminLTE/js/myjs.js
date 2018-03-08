@@ -59,7 +59,8 @@ function Login(){
         return 0;
     }
     send_data = JSON.stringify(send_data)
-    $.post('/auth/login/', {'data':send_data},
+    //$.post('/auth/login/', {'data':send_data},
+    $.post(window.location.pathname + window.location.search, {'data':send_data},
         function(callback){
             callback = JSON.parse(callback)['data'];
             if (callback['auth_status'] == '1'){  //登录成功

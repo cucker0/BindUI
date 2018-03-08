@@ -23,6 +23,7 @@ def MyLogin(req):
             userprofile_set = models.UserProfile.objects.filter(user=models.User.objects.filter(username=req.POST.get('username')).first())
             userprofile_set.update(login_status=1)
             login(req, user_auth)
+            print("req.GET.get('next')",req.GET.get('next'))
             next_url = req.GET.get('next') or '/'
             # return redirect(next_url)
             data_send['url'] = next_url
