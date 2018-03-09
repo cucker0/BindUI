@@ -615,7 +615,7 @@ def record_del(req):
     if req.method == 'POST':
         msg = {'status': 500}
         data = json.loads(req.POST.get('data'))
-        print(data)
+        # print(data)
         success_count = 0
         total_count = len(data)
         for i in data:
