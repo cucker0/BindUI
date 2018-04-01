@@ -6,7 +6,7 @@ class UserProfile(models.Model):
     """
     用户表
     """
-    user = models.OneToOneField(User)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     name = models.CharField('昵称', max_length=32, default='bind')
     head_portrait_width = models.PositiveIntegerField(default=90)
     head_portrait_height = models.PositiveIntegerField(default=90)

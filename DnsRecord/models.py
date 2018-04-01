@@ -48,7 +48,7 @@ class Record(models.Model):
     update_time = models.DateTimeField('update_time', auto_now=True)
     comment = models.CharField('comment', max_length=255, null=True, blank=True, default=None, help_text='备注')
     resolution_line = models.CharField('resolution_line', max_length=32,choices=dns_conf.DNS_RESOLUTION_LINE, default='0', help_text='解析线路')
-    zone_tag = models.ForeignKey('ZoneTag', related_name='ZoneTag_Record')
+    zone_tag = models.ForeignKey('ZoneTag', related_name='ZoneTag_Record', on_delete=models.CASCADE)
     basic = models.IntegerField('basic', default=0, help_text='是否为基础记录，记录是否允许重复,0:可重复非基础记录, 1:可重复基础记录， 2:不可重复基础记录')
 
     def __str__(self):
