@@ -96,6 +96,12 @@ def record_data_filter(data):
                     pass
                 else:
                     data =None
+
+                if data['type'] == 'SOA':
+                    if not data['resp_person'].endwith('.'):
+                        data['resp_person'] = "%s." %(data['resp_person'])
+                    if not data['primary_ns'].endwith('.'):
+                        data['primary_ns'] = "%s." %(data['primary_ns'])
             else:
                 pass
 
