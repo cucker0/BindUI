@@ -31,7 +31,7 @@ class Record(models.Model):
 
     """
     zone = models.CharField('zone', max_length=255)
-    host = models.CharField('host', max_length=255, default='@', help_text='Host name or IP address')
+    host = models.CharField('host', max_length=255, default='@', db_index=True, help_text='Host name or IP address')
     type = models.CharField('type', max_length=64, choices=record_type_choices, default= 'A', help_text='DNS data type')
     data = models.CharField('data', max_length=255, help_text='IP address / Host name / Full domain name')
     ttl = models.IntegerField('ttl', null=True, blank=True, default=None, help_text='Time to live')
@@ -58,7 +58,7 @@ class ZoneTag(models.Model):
     """
     zone tag
     """
-    zone_name = models.CharField('zone name', max_length=255, unique=True)
+    zone_name = models.CharField('zone name', max_length=255, unique=True, db_index=True)
     comment = models.CharField('注释', max_length=255, null=True, blank=True)
     status = models.CharField('status', max_length=3, choices=status_choices, default='on',help_text='record on/off status')
 
