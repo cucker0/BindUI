@@ -530,7 +530,7 @@ def record_list(req, domain_id):
     :param req:
     :return:
     """
-
+    is_search = 0
     if req.method == "POST":
         data = json.loads(req.POST.get('data'))
         if 'page' in data.keys():
@@ -547,7 +547,8 @@ def record_list(req, domain_id):
                   {'record_obj_list': record_obj_perpage_list,
                    'pagination_html': pagination_html,
                    'zone_tag_obj': zone_tag_obj,
-                   'DNS_RESOLUTION_LINE': dns_conf.DNS_RESOLUTION_LINE
+                   'DNS_RESOLUTION_LINE': dns_conf.DNS_RESOLUTION_LINE,
+                   'is_search': is_search
                    })
 
 @login_required
@@ -561,11 +562,13 @@ def rlist_page(req):
         data = json.loads(req.POST.get('data'))
         zone_tag_obj = models.ZoneTag.objects.get(zone_name=data['zone'])
         record_obj_list = None
+        history_search_key = ''
         if data['action'] == 'pagination':
             record_obj_list = zone_tag_obj.ZoneTag_Record.filter(basic=0)
         elif data['action'] == 'search':
             try:
                 search_key = data['other']['search_key']
+                history_search_key = search_key
                 record_obj_list = zone_tag_obj.ZoneTag_Record.filter(Q(basic=0) & (Q(host__icontains=search_key) | Q(data__icontains=search_key) | Q(comment__icontains=search_key) ) )
 
             except Exception as e:
@@ -576,7 +579,8 @@ def rlist_page(req):
                   {'record_obj_list': record_obj_perpage_list,
                    'pagination_html': pagination_html,
                    'zone_tag_obj': zone_tag_obj,
-                   'DNS_RESOLUTION_LINE': dns_conf.DNS_RESOLUTION_LINE
+                   'DNS_RESOLUTION_LINE': dns_conf.DNS_RESOLUTION_LINE,
+                   'history_search_key':history_search_key
                    })
     ret.set_cookie('perpage_num', data['perpage_num'] or 10)
     return ret

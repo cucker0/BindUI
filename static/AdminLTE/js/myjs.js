@@ -386,7 +386,8 @@ function RecordAddModify(){
         var _id = $("#DNSRecordAddOrModifyModalLabel .modal-title").prop("id");
         $("#DNSRecordAddOrModifyModalLabel .modal-title").removeProp("id");
         __data['id'] = _id;
-
+        var history_search_key = $("#table_record_list").attr("history_search_key");
+        var _history_search_key = $("#table_record_list").attr("history_search_key").trim();
         $.ajax({
             url: "/dns/mod.html?type=main",
             type: "POST",        //请求类型
@@ -397,7 +398,12 @@ function RecordAddModify(){
                 if (callback['status'] == 200){ //刷新当前页面,status=500 添加记录失败。
                     //location.reload(true);
                     $("#DNSRecordAddOrModifyModalLabel").modal('hide');
-                    ClickPage( { 'data':{'optype':5} } );
+                    if(_history_search_key == ""){
+                        ClickPage( { 'data':{'optype':3} } );
+                    }else{
+                        ClickPage( { 'data':{'optype':6} } );
+                    }
+
                     ClearRecordAddModModal();
                 }
             },
@@ -494,6 +500,7 @@ function RedcordStatusModify(){
     var _checkbox_val = [];
     var _action = '';
     var multiple = $("#DNSRecordStatusModalLabel").prop("multiple");
+    var _history_search_key = $("#table_record_list").attr("history_search_key").trim();
     if(multiple == 0){
         var select_id = $("#table_record_list tbody input:checked").prop('id');
         _checkbox_val.push(select_id);
@@ -518,7 +525,11 @@ function RedcordStatusModify(){
             if (callback['status']  == 200){        // 状态修改成功
                 //location.reload(true);
                 $("#DNSRecordStatusModalLabel").modal('hide');
-                ClickPage({'data':{'optype':3}});
+                if(_history_search_key == ""){
+                    ClickPage({'data':{'optype':3}});
+                }else {
+                    ClickPage({'data':{'optype':6}});
+                }
 
             }
         },
@@ -564,6 +575,8 @@ function ClickPage(event){
     var active_page_num = parseInt( $(".pagination li.active a").text().trim() ) || 1;
     var _action = 'pagination';     // 点击分页(搜索还是点击分页)
     var _other = {};        // 其他参数
+    var _history_search_key = $("#table_record_list").attr("history_search_key").trim();
+    //_other['history_search_key'] = _history_search_key;
     if (event.data.optype == 1){        // 点击分页导航器上的分页码
 
         if ( typeof($(this).attr("aria-label")) != "undefined" ){
@@ -600,18 +613,17 @@ function ClickPage(event){
         _other = {'search_key':event.data.search_key};
     }else if(event.data.optype == 5){       // 查看最后一页
         page_num = 0;
+    }else if(event.data.optype == 6){       // 修改搜索的record记录及其状态
+        _action = 'search';
+        _other = {'search_key':_history_search_key};
     }
 
     var perpage_num = $("#perpage-dropdownMenu").attr('value') || 10;
     var active_page = $(".pagination .active").text() || 1;
+
     if (page_num != active_page || (event.data.optype != 1) || (event.data.optype != 2)){
         var _zone_tag_name = $("#table_record_list").attr("domain").trim();
-        //var _action = 'pagination';     // 点击分页(搜索还是点击分页)
-        //var _other = '';        // 其他参数
-        //if(event.data.optype == 4){     // DNS记录搜索分页
-        //    _action = 'search';     // 搜索分页(搜索还是点击分页)
-        //    _other = {'search_key':event.data.search_key};
-        //}
+
         var __data = {'action':_action, 'page':page_num, 'zone':_zone_tag_name, 'perpage_num':perpage_num, 'other':_other}
         //console.log(data);
         var html = $.ajax({
@@ -637,15 +649,26 @@ function SelectPerPageNum(){
     ClickPage({'data':{'optype': 0}});
 }
 
+
 function DnsRecordSearch(){
     // DNS记录搜索
     var _search_key = $("input[name=dns_record_search]").val().trim();
     $("input[name=dns_record_search]").val('');
 
     ClickPage({'data':{'optype':4, 'search_key':_search_key} });
-
 }
 
+function EnterDnsRecordSearch(){
+    // 回车搜索DNS记录
+    document.onkeydown = function (e) {
+        var _event = e || window.event;
+        if (_event.keyCode == 13) {
+            if (document.activeElement.name == 'dns_record_search'){
+                DnsRecordSearch();
+            }
+        }
+    }
+}
 
 function DoaminAddACK(){
     // 添加域名确认操作页面
@@ -991,6 +1014,8 @@ $(document).ready(function(){
     // 删除domain
     $(document).on("click", "#DomiandDeleteModalLabel button[name=_delete_ok]", DomainDelete);
 
+    // 回车搜索DNS记录
+    EnterDnsRecordSearch();
 });
 
 
