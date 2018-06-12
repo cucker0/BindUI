@@ -212,7 +212,11 @@ def domain_resolution_list(req):
     :return:
     """
     zone_obj_list = models.ZoneTag.objects.all()
-    return render(req, 'bind/domain_resolution_list.html', {'zone_obj_list': zone_obj_list})
+    zone_obj_perpage_list, pagination_html  = MyPaginator(zone_obj_list, 1, 10)
+    return render(req, 'bind/domain_resolution_list.html',
+                  {'zone_obj_list': zone_obj_perpage_list,
+                    'pagination_html':pagination_html,
+                   })
 
 @login_required
 def domain_man(req, domain_id, optype):
@@ -229,7 +233,7 @@ def domain_man(req, domain_id, optype):
 @login_required
 def dlist_page(req):
     """
-    domain page翻页
+    我的域名 page翻页
     :param req: 用户请求
     :return: render模板
     """
@@ -247,12 +251,43 @@ def dlist_page(req):
         zone_obj_perpage_list, pagination_html  = MyPaginator(zone_obj_list, data['page'], data['perpage_num'])
 
     ret = render(req, 'bind/tmp/domain_table_tmp.html',
-                 {'zone_obj_list': zone_obj_list,
+                 {'zone_obj_list': zone_obj_perpage_list,
                   'pagination_html': pagination_html,
                   })
     ret.set_cookie('perpage_num', data['perpage_num'] or 10)
     return ret
 
+@login_required
+def domain_resolution_page(req):
+    """
+    domain resolution翻页
+    :param req:
+    :return:
+    """
+
+    if req.method == 'POST':
+
+        data = json.loads(req.POST.get('data'))
+        zone_obj_list = None
+        if data['action'] == 'pagination':
+            zone_obj_list = models.ZoneTag.objects.all()
+        elif data['action'] == 'search':
+            try:
+                search_key = data['other']['search_key']
+                zone_obj_list = models.ZoneTag.objects.filter(Q(zone_name__icontains=search_key) | Q(comment__icontains=search_key))
+            except Exception as e:
+                print(e)
+        zone_obj_perpage_list, pagination_html  = MyPaginator(zone_obj_list, data['page'], data['perpage_num'])
+
+    else:
+        zone_obj_list = models.ZoneTag.objects.all()
+        zone_obj_perpage_list, pagination_html  = MyPaginator(zone_obj_list, 1)
+
+    ret = render(req, 'bind/tmp/domain_resolution_table_tmp.html',
+                  {'zone_obj_list': zone_obj_perpage_list,
+                    'pagination_html':pagination_html,
+                   })
+    return ret
 
 def  MyPaginator(obj_set, page=1, perpage_num=10, pagiformart=[1, 3, 1]):
     """

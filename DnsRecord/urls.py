@@ -17,8 +17,9 @@ from django.conf.urls import url, include
 from . import views
 
 urlpatterns = [
-    url(r'^domains/list_page', views.dlist_page, name='dlist_page'),
+    url(r'^domains/dlist_page.html', views.dlist_page, name='dlist_page'),
     url(r'^domains/list', views.domain_list, name='domain_list'),
+    url(r'^domains/drlist_page.html', views.domain_resolution_page, name='domain_resolution_page'),
     url(r'^domains/rlist', views.domain_resolution_list, name='domain_resolution_list'),
     url(r'^domains/domain_curd.html', views.domain_curd, name='domain_add'),
     url(r'^domains/(?P<domain_id>\d+)/(?P<optype>\w+)', views.domain_man, name='domain_man'),

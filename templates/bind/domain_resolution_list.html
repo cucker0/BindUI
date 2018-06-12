@@ -21,47 +21,19 @@
 
                     <div class="box-tools">
                         <div class="input-group input-group-sm" style="width: 300px;">
-                            <input type="text" name="table_search" class="form-control pull-right" placeholder="Search">
+                            <input type="text" name="domain_resolution_search" class="form-control pull-right" placeholder="Search">
 
                             <div class="input-group-btn">
-                                <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+                                <button type="submit" name="domain_resolution_search_submit" class="btn btn-default"><i class="fa fa-search"></i></button>
                             </div>
                         </div>
                     </div>
                 </div>
                 <!-- /.box-header -->
-                <div class="box-body table-responsive no-padding">
-                    <table id="table_domains" class="table table-hover">
-                        <thead>
-                        <tr>
-                            <th><input type="checkbox" data-check-all onclick="SelectAll('#table_domains' )"></th>
-                            <th>域名</th>
-                            <th>状态</th>
-                            <th>备注</th>
-                            <th>操作</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for zone_obj in zone_obj_list %}
-                            <tr>
-                                <td><input type="checkbox" id="{{ zone_obj.id }}"></td>
-                                <td><a href="/dns/{{ zone_obj.id }}">{{ zone_obj.zone_name }}</a></td>
-                                <td>
-                                    {% if zone_obj.status == 'on' %}
-                                        <span class="glyphicon glyphicon-play-circle green"></span>
-                                    {% elif zone_obj.status == 'off' %}
-                                        <span class="glyphicon glyphicon-pause orange"></span>
-                                    {% endif %}
-                                </td>
-                                <td>{{ zone_obj.comment }}</td>
-                                <td><a href="/dns/{{ zone_obj.id }}">解析</a>  <a>更多</a></td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
 
-                    </table>
+                <div id="domain_resolution_box">
+                    {% include "bind/tmp/domain_resolution_table_tmp.html" %}
                 </div>
-                <!-- /.box-body -->
             </div>
             <!-- /.box -->
         </div>
