@@ -811,7 +811,7 @@ function DnsRecordSearch(){
 function DomainResolutionSearch(){
     // 域名解析页搜索
     var _search_key = $("input[name=domain_resolution_search]").val().trim();
-    $("#domain_resolution_box input[name=domain_resolution_search]").val('');
+    $("input[name=domain_resolution_search]").val('');
 
     DomainResolutionPage({'data':{'optype':4, 'search_key':_search_key} });
 }
@@ -819,7 +819,7 @@ function DomainResolutionSearch(){
 function DomainSearch(){
     // 我的域名页搜索
     var _search_key = $("input[name=domain_search]").val().trim();
-    $("#domain_box input[name=domain_resolution_search]").val('');
+    $("input[name=domain_search]").val('');
 
     DomainPage({'data':{'optype':4, 'search_key':_search_key} });
 }
