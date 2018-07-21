@@ -1,0 +1,42 @@
+#!/bin/bash
+#
+# Add for chkconfig
+# chkconfig: 2345 70 30
+# description: RealServer's script
+# processname: realserver.sh
+
+# Source function library.
+. /etc/init.d/functions
+
+
+VIP0=172.16.12.28
+VIP1=172.16.12.29
+
+case "$1" in
+start)
+       ifconfig lo:0 ${VIP0} netmask 255.255.255.255 broadcast ${VIP0}
+       ifconfig lo:1 ${VIP1} netmask 255.255.255.255 broadcast ${VIP1}
+       /sbin/route add -host ${VIP0} dev lo:0
+       /sbin/route add -host ${VIP1} dev lo:1
+       echo "1" >/proc/sys/net/ipv4/conf/lo/arp_ignore
+       echo "2" >/proc/sys/net/ipv4/conf/lo/arp_announce
+       echo "1" >/proc/sys/net/ipv4/conf/all/arp_ignore
+       echo "2" >/proc/sys/net/ipv4/conf/all/arp_announce
+       echo "RealServer Start OK"
+       ;;
+stop)
+       ifconfig lo:0 down
+       ifconfig lo:1 down
+       route del ${VIP0} >/dev/null 2>&1
+       #route del ${VIP1} >/dev/null 2>&1
+       echo "0" >/proc/sys/net/ipv4/conf/lo/arp_ignore
+       echo "0" >/proc/sys/net/ipv4/conf/lo/arp_announce
+       echo "0" >/proc/sys/net/ipv4/conf/all/arp_ignore
+       echo "0" >/proc/sys/net/ipv4/conf/all/arp_announce
+       echo "RealServer Stoped"
+       ;;
+       *)
+       echo "Usage: $0 {start|stop}"
+       exit 1
+esac
+exit 0
