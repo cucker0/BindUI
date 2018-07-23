@@ -3,6 +3,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.decorators import login_required
 from . import models
 from django.db.models import Q
+from django.utils import timezone
 
 import sys, os
 BASIC_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -703,8 +704,10 @@ def record_mod(req):
                 zone_tag_obj = record_obj_set.first().zone_tag
                 data['zone'] = zone_tag_obj.zone_name
                 data['zone_tag'] = zone_tag_obj
+                data['update_time'] = timezone.now()
                 record_data_filter(data)
                 record_obj_set.update(**data)
+
                 msg['status'] = 200
             except Exception as e:
                 print(e)

@@ -94,7 +94,7 @@ DATABASES = {
         'NAME': 'bind_ui',
         'USER': 'bind_ui',
         'PASSWORD': 'py123456',
-        'HOST': '10.100.11.131',
+        'HOST': '127.0.0.1',
         'PORT': '3306',
     }
 }
