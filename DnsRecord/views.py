@@ -241,6 +241,7 @@ def dlist_page(req):
     if req.method == 'POST':
         data = json.loads(req.POST.get('data'))
         zone_obj_list = None
+        search_key = ''
         if data['action'] == 'pagination':
             zone_obj_list = models.ZoneTag.objects.all()
         elif data['action'] == 'search':
@@ -254,6 +255,7 @@ def dlist_page(req):
     ret = render(req, 'bind/tmp/domain_table_tmp.html',
                  {'zone_obj_list': zone_obj_perpage_list,
                   'pagination_html': pagination_html,
+                  'search_key':search_key
                   })
     ret.set_cookie('perpage_num', data['perpage_num'] or 10)
     return ret
@@ -598,13 +600,15 @@ def rlist_page(req):
         data = json.loads(req.POST.get('data'))
         zone_tag_obj = models.ZoneTag.objects.get(zone_name=data['zone'])
         record_obj_list = None
-        history_search_key = ''
+        search_key = data['other']['search_key'] or ''
+
         if data['action'] == 'pagination':
-            record_obj_list = zone_tag_obj.ZoneTag_Record.filter(basic=0)
+            if search_key == '':
+                record_obj_list = zone_tag_obj.ZoneTag_Record.filter(basic=0)
+            else:
+                record_obj_list = zone_tag_obj.ZoneTag_Record.filter(Q(basic=0) & (Q(host__icontains=search_key) | Q(data__icontains=search_key) | Q(comment__icontains=search_key) ) )
         elif data['action'] == 'search':
             try:
-                search_key = data['other']['search_key']
-                history_search_key = search_key
                 record_obj_list = zone_tag_obj.ZoneTag_Record.filter(Q(basic=0) & (Q(host__icontains=search_key) | Q(data__icontains=search_key) | Q(comment__icontains=search_key) ) )
 
             except Exception as e:
@@ -616,7 +620,7 @@ def rlist_page(req):
                    'pagination_html': pagination_html,
                    'zone_tag_obj': zone_tag_obj,
                    'DNS_RESOLUTION_LINE': dns_conf.DNS_RESOLUTION_LINE,
-                   'history_search_key':history_search_key
+                   # 'history_search_key':search_key
                    })
     ret.set_cookie('perpage_num', data['perpage_num'] or 10)
     return ret
