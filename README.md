@@ -8,6 +8,8 @@ django
 Pillow
 pymysql
 IPy
+xlrd
+xlwt
 
 # 操作页面
 ![image](https://github.com/cucker0/file_store/blob/master/BindUI/01.png)
