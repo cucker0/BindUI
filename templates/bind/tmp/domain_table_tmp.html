@@ -1,5 +1,5 @@
 
-                <div class="box-body table-responsive no-padding">
+                <div class="box-body table-responsive no-padding" style="overflow-x:visible">
                     <table id="table_domains" class="table table-hover">
                         <thead>
                         <tr>
@@ -38,6 +38,7 @@
                                             <li><a action_type=status name="_turnOn" href="javascript:;">开启解析</a></li>
                                         {% endif %}
                                             <li><a action_type="delete" href="javascript:;">删除域名</a></li>
+                                            <li><a action_type="_import_records" href="{% url 'import_dns' %}?domain={{ zone_obj.zone_name }}">导入解析记录</a></li>
                                             <li><a action_type="_export_records" href="javascript:;">导出解析记录</a></li>
                                         </ul>
                                     </span>
@@ -49,6 +50,44 @@
                     </table>
 {#                    <div style="height: 120px"> </div>#}
                 </div>
+
+                <!-- Modal 1 导出DNS解析记录 -->
+                <div class="modal fade" id="ExportDnsRecordModalLabel"  tabindex="-30" role="dialog"
+                     aria-labelledby="DomainStatusModalLabel">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                        aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title" id="ExportDnsRecordModalLabel" domain="">导出DNS解析记录</h4>
+                            </div>
+                            <div class="modal-body">
+                                <table class="ui-popmsg">
+                                    <tbody>
+                                    <tr>
+                                        <td height="72" class="i"><span class="info">选择导出格式</span></td>
+                                        <td height="72" class="t">
+                                            <span class="info margin-L30">
+                                                <select name="export_dns_record_type" style="width: 100px">
+                                                    <option value="0">Excel表格</option>
+                                                    <option value="1">zone文本</option>
+                                                </select>
+                                            </span>
+                                            <span class="tit"></span></td>
+                                        <td></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                                <button type="button" class="btn btn-primary" name="_export_dns_record_ok">确定</button>
+                            </div>
+                        </div><!-- /.modal-content -->
+                    </div><!-- /.modal-dialog -->
+                </div><!-- /.modal 1-->
+
                 <!-- /.box-body -->
                 {% autoescape off %}    {# 关闭特殊字符转换 #}
                     {# 分页导航条 #}

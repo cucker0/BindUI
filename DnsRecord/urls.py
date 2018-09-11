@@ -22,7 +22,10 @@ urlpatterns = [
     url(r'^domains/drlist_page.html', views.domain_resolution_page, name='domain_resolution_page'),
     url(r'^domains/rlist', views.domain_resolution_list, name='domain_resolution_list'),
     url(r'^domains/domain_curd.html', views.domain_curd, name='domain_add'),
+    url(r'^domains/_import_dns.html', views.import_dns, name='import_dns'),
+    url(r'^domains/_export_dns.html', views.export_dns, name='export_dns'),
     url(r'^domains/(?P<domain_id>\d+)/(?P<optype>\w+)', views.domain_man, name='domain_man'),
+
 
     url(r'^dns/(?P<domain_id>\d+)', views.record_list, name='record_list'),
     url(r'^dns/add.html', views.record_add, name='record_add'),

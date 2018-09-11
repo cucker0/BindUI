@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from . import models
 from django.db.models import Q
 from django.utils import timezone
+import xlrd, xlwt
 
 import sys, os
 BASIC_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -50,7 +51,7 @@ def domain_list(req):
     else:
         page = 1
     zone_obj_list = models.ZoneTag.objects.all()
-    zone_obj_perpage_list, pagination_html  = MyPaginator(zone_obj_list, page)
+    zone_obj_perpage_list, pagination_html = MyPaginator(zone_obj_list, page)
     return render(req, 'bind/domain_list.html', {
         'zone_obj_list': zone_obj_list,
         'pagination_html':pagination_html,
@@ -230,6 +231,168 @@ def domain_man(req, domain_id, optype):
     zone_tag_obj = models.ZoneTag.objects.get(id=domain_id)
     ns_set = models.Record.objects.filter(Q(type='NS') & Q(basic=2) & Q(zone_tag=zone_tag_obj))
     return render(req, 'bind/domain_manager.html', {'zone_tag_obj':zone_tag_obj, 'ns_set': ns_set})
+
+@login_required
+def import_dns(req):
+    """
+    批量导入DNS记录显示页
+    :param req:
+    :return:
+    """
+    if req.method == 'GET':
+        domain = req.GET.get('domain')
+        return render(req, 'bind/import_dns.html', {'domain':domain })
+    elif req.method == 'POST':
+        data = {'status':0}
+        file_obj = req.FILES.get('file',)
+
+        fp = xlrd.open_workbook(file_contents=file_obj.read())
+        sheet = fp.sheet_by_index(0)
+        content_list = []
+        for i in range(1, sheet.nrows):
+            content_list.append(sheet.row_values(i))
+        # print(content_list)
+        return render(req, 'bind/tmp/import_dns_table_tmp.html', {'content_list': content_list, 'DNS_RESOLUTION_LINE':dns_conf.DNS_RESOLUTION_LINE})
+
+def set_style(name, height, bold=False):
+    """
+    excel样式
+    :param name: 字体名
+    :param height: 调度
+    :param bold: 边框
+    :return:
+    """
+    style = xlwt.XFStyle()  # 初始化样式
+    font = xlwt.Font()  # 为样式创建字体
+    font.name = name  # 'Times New Roman'
+    font.bold = bold
+    font.color_index = 000
+    font.height = height
+    style.font = font
+
+    # 设置单元格边框
+    # borders= xlwt.Borders()
+    # borders.left= 6
+    # borders.right= 6
+    # borders.top= 6
+    # borders.bottom= 6
+    # style.borders = borders
+
+    # 设置单元格背景颜色
+    # pattern = xlwt.Pattern()
+    # 设置其模式为实型
+    # pattern.pattern = pattern.SOLID_PATTERN
+    # 设置单元格背景颜色
+    # pattern.pattern_fore_colour = 0x00
+    # style.pattern = pattern
+
+    return style
+
+@login_required
+def export_dns(req):
+    """
+    导出DNS解析记录
+    :param req:
+    :return:
+    """
+    from django.template import loader, Context
+    if req.method == 'GET':
+        data = req.GET.get('data')
+        data = json.loads(data)
+        resolution_line = '解析线路 '
+        for i in dns_conf.DNS_RESOLUTION_LINE:
+                l = '%s:%s ' %(i[0], i[1])
+                resolution_line += l
+        if data['export_dns_record_type'] == '0':       # 导出excel表格类型数据
+            zone_tag_obj = models.ZoneTag.objects.get(zone_name=data['zone'])
+            record_obj_list = zone_tag_obj.ZoneTag_Record.filter( ~Q(type='SOA') )
+
+            response = HttpResponse(content_type='application/ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="%s.xls"' %(data['zone'])
+
+            # 生成excel文件
+            book = xlwt.Workbook(encoding='utf-8')
+            sheet = book.add_sheet('Sheet1', cell_overwrite_ok=True)
+            row0 = ['主机记录', '记录类型', resolution_line, '记录值', 'MX优先级', 'TTL', '状态', '备注']
+            # 设置列宽、高
+            sheet.col(0).width = 6000
+            sheet.col(1).width = 3000
+            sheet.col(2).width = 18000
+            sheet.col(3).width = 6000
+            sheet.col(4).width = 3000
+            sheet.col(5).width = 3000
+            sheet.col(6).width = 3000
+            sheet.col(7).width = 12000
+
+            for i in range(0, len(row0)):
+                sheet.write_merge(0, 0, i, i, row0[i], set_style('Times New Roman', 220, True))
+
+            for k, v in enumerate(record_obj_list, start=1):
+                sheet.write(k, 0, v.host)
+                sheet.write(k, 1, v.type )
+                sheet.write(k, 2, v.resolution_line )
+                sheet.write(k, 3, v.data )
+                sheet.write(k, 4, v.mx_priority )
+                sheet.write(k, 5, v.ttl)
+                sheet.write(k, 6, v.status)
+                sheet.write(k, 7, v.comment )
+            # 生成excel文件完成
+
+            book.save(response)    # excel文件保存到 http请求 stream中
+
+            return response
+        elif data['export_dns_record_type'] == '1':     # 导出zone文本类型数据
+            domain_obj = {}
+            zone_tag_obj = models.ZoneTag.objects.get(zone_name=data['zone'])
+            record_obj_list = zone_tag_obj.ZoneTag_Record.filter( ~Q(type='SOA') )
+            record_obj_soa = zone_tag_obj.ZoneTag_Record.get(type='SOA')
+            record_obj_ns = zone_tag_obj.ZoneTag_Record.filter( Q(type='NS') )
+            record_obj_other = zone_tag_obj.ZoneTag_Record.filter( ~Q(type__in=['SOA', 'NS', 'PTR']) )
+
+            domain_obj['SOA'] = record_obj_soa
+            domain_obj['NS'] = record_obj_ns
+            domain_obj['OTHER'] = record_obj_other
+            domain_obj['resolution_line_info'] = resolution_line
+
+            response = HttpResponse(content_type='text/plain; charset=utf-8')
+            response['Content-Disposition'] = 'attachment; filename="%s.txt"' %(data['zone'])
+            t = loader.get_template('bind/tmp/export_dns_record.txt')
+            c = Context({
+                'configs': domain_obj,
+              })
+            response.write(t.render(c))
+            return response
+
+
+    elif req.method == 'POST':
+        msg = {'status': 200}
+        return HttpResponse(json.dumps(msg))
+
+# def write_excel(filepath):
+#     """
+#     生成excel文件并保存到本地
+#     :param filepath:
+#     :return:
+#     """
+#     book = xlwt.Workbook(encoding='utf-8')
+#     sheet = book.add_sheet('Sheet1', cell_overwrite_ok=True)
+#     row = ['主机记录', '记录类型', '解析线路', '记录值', 'MX优先级', 'TTL', '状态', '备注']
+#     zone_tag_obj = models.ZoneTag.objects.get(zone_name='paiconf.com')
+#     record_obj_list = zone_tag_obj.ZoneTag_Record.filter( ~Q(type='SOA') )
+#
+#     for i in range(0, len(row)):
+#         sheet.write_merge(0, 0, i, i, row[i], set_style('Times New Roman', 220, True))
+#     for k, v in enumerate(record_obj_list, start=1):
+#         sheet.write(k, 0, v.host)
+#         sheet.write(k, 1, v.type )
+#         sheet.write(k, 2, v.resolution_line )
+#         sheet.write(k, 3, v.data )
+#         sheet.write(k, 4, v.mx_priority )
+#         sheet.write(k, 5, v.ttl)
+#         sheet.write(k, 6, v.status)
+#         sheet.write(k, 7, v.comment )
+#     book.save(filepath)
+
 
 @login_required
 def dlist_page(req):
@@ -628,20 +791,24 @@ def rlist_page(req):
 @login_required
 def record_add(req):
     """
-    添加解析记录
+    添加解析记录，批量导入DNS记录
+    接收到的data： [{"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data, "mx_priority":_mx, "ttl":_ttl, "comment":_comment, "zone":_zone_tag_name }]
     :param req:
     :return:
     """
     if req.method == 'POST':
         data = req.POST.get('data')
-        msg = {'status': 500}
+        msg = {'status': 500, 'total':0, 'success_total':0}
         try:
             data = json.loads(data)
-            # data = record_data_filter(data)
-            record_data_filter(data)        # 字典或列表 以指针形式传递参数
-            zone_tag_obj = models.ZoneTag.objects.get(zone_name=data['zone'].strip())
-            data['zone_tag'] = zone_tag_obj
-            models.Record.objects.update_or_create(**data)
+            msg['total'] = len(data)
+            for i in data:
+                record_data_filter(i)        # 字典或列表 以指针形式传递参数
+                zone_tag_obj = models.ZoneTag.objects.get(zone_name=i['zone'].strip())
+                i['zone_tag'] = zone_tag_obj
+                models.Record.objects.update_or_create(**i)
+                msg['success_total'] += 1
+
             msg['status'] = 200
         except Exception as e:
             print(e)

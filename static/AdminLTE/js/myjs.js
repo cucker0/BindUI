@@ -198,6 +198,38 @@ function UploadFile(selector, action){
     }
 }
 
+function UploadImportDNSFile(){
+    //上传导入DNS文件
+     var form_data = new FormData();
+    var selector = $('input[name=import_dns_file]')
+    //var name = $(selector).val();
+    form_data.append('file', $(selector)[0].files[0]);
+    //form_data.append('name', name);
+    var _url = document.URL;
+    if ($(selector)[0].files[0]){
+        $.ajax({
+            url: _url,
+            type: 'POST',
+            data: form_data,
+            //告诉jQuery不要去处理发送的数据
+            processData : false,
+            //告诉jQuery不要去设置Content-Type请求头
+            contentType : false,
+            //beforeSend: function(){
+            //    console.log('正上传中，请稍候');
+            //},
+            //async: false,
+            success: function(callback){
+                $("#table_import_dns").html(callback);
+            },
+            error: function(err){
+                console.log(err);
+            }
+        });
+    }
+
+}
+
 function UploadFileCancel(selector) {
     //取消上传文件
     $('div[func="msg_error1"]').addClass('hide');
@@ -365,10 +397,12 @@ function RecordAddModify(){
 
     var action_type = $("#DNSRecordAddOrModifyModalLabel").attr("action_type");
     if (action_type == "add"){  //添加记录
+        var record_set = [];
+        record_set.push(__data);
         $.ajax({
             url: "/dns/add.html",
             type: "POST",        //请求类型
-            data: {'data': JSON.stringify(__data)},
+            data: {'data': JSON.stringify(record_set)},
             dataType: "json",
             success: function (callback) {
                 //当向服务端发起的请求执行成功完成后，自动调用
@@ -415,6 +449,87 @@ function RecordAddModify(){
     }
 
 
+}
+
+function ImportDnsRecordACK(){
+    // 批量导入DNS记录
+    var record_set = [];
+    var _zone_tag_name = $("p[name=import_dns_domain]").attr("domain").trim();
+    $("#table_import_dns tbody tr").each(function(){
+        var _record = {};
+        _record['host'] = $($(this).find('td')).children()[0].value.trim();
+        _record['type'] = $($(this).find('td')).children()[1].value.trim();
+        _record['data'] = $($(this).find('td')).children()[2].value.trim();
+        _record['ttl'] = $($(this).find('td')).children()[3].value.trim();
+        _record['resolution_line'] = $($(this).find('td')).children()[4].value.trim();
+        _record['comment'] = $($(this).find('td')).children()[5].value.trim();
+        _record['zone'] = _zone_tag_name;
+        record_set.push(_record);
+    });
+    //console.log(record_set);
+    if(record_set.length > 0){
+       $.ajax({
+            url: "/dns/add.html",
+            type: "POST",        //请求类型
+            data: {'data': JSON.stringify(record_set)},
+            dataType: "json",
+            success: function (callback) {
+                //当向服务端发起的请求执行成功完成后，自动调用
+                if (callback['status'] == 200){     //刷新当前页面,status=500 添加记录失败。
+                    $("#table_import_dns").html('');
+                }
+            },
+            error: function () {
+                //当请求错误之后，自动调用
+                $("#table_import_dns").html('');
+            }
+        });
+    }
+}
+
+function ExportDnsRecord(){
+    // 点击导出DNS解析记录
+    $('#ExportDnsRecordModalLabel').modal('show');
+    var _domain = $($(this).parent().parent().parent().parent().siblings()[1]).html();
+    var _modal_title = $("#ExportDnsRecordModalLabel h4").html();
+    _modal_title = _domain + ' ' +  _modal_title;
+
+    $("#ExportDnsRecordModalLabel h4").html(_modal_title);
+    $("#ExportDnsRecordModalLabel h4").attr('domain', _domain);
+
+
+
+}
+
+function ExportDnsRecordACK(){
+    // 确认导出DNS解析记录
+    var _export_dns_record_type = $("select[name=export_dns_record_type]")[0].value.trim();
+    var _zone = $("#ExportDnsRecordModalLabel h4").attr('domain')
+    var __data = {'export_dns_record_type': _export_dns_record_type, 'zone':_zone}
+
+    var url = "/domains/_export_dns.html?data=" + JSON.stringify(__data);
+
+    $.ajax({
+        url: "/domains/_export_dns.html",
+        type: "POST",        //请求类型
+        data: {},
+        //async : false,
+        dataType: "json",
+        //beforeSend:function(XMLHttpRequest){
+        //    // 请求前执行
+        //},
+        success: function (response, status, request) {
+            //当向服务端发起的请求执行成功完成后，自动调用
+            if(request['status'] == 200){
+                $('#ExportDnsRecordModalLabel').modal('hide');
+                $("select[name=export_dns_record_type]").val('0')
+                window.location.href = url;     //下载文件
+            }
+        },
+        error: function () {
+            //当请求错误之后，自动调用
+        }
+    });
 }
 
 function  GetCheckboxAttrSet(selector, attr){
@@ -1067,7 +1182,8 @@ $(document).ready(function(){
     $(".modal-footer  button[name=_save]").bind('click', RecordAddModify);
 
     // 选择/取消 所有项
-    $("table tr input[data-check-all]").bind('click', SelectAll);
+    //$("table tr input[data-check-all]").bind('click', SelectAll);
+    $(document).on("click", "table tr input[data-check-all]", SelectAll);
 
     // DNS记录展示页的操作绑定事件--删除操作按钮 （删除确认）
     //$("table a[action_type=delete]").bind('click', RecordDelteACK);
@@ -1155,6 +1271,18 @@ $(document).ready(function(){
 
     // 回车搜索DNS记录
     EnterdSearch();
+
+    // 上传 导入DNS文件
+    $(document).on("click", "button[name=upload_import_dns_file]", UploadImportDNSFile);
+
+    // 确认导入批量导入DNS记录
+    $(document).on("click", 'button[name=import_dns_confirm]', ImportDnsRecordACK);
+
+    // 点击 导出DNS解析记录 按钮
+    $(document).on("click", 'ul li a[action_type=_export_records]', ExportDnsRecord);
+
+    // 确认 导出DNS解析记录
+    $(document).on("click", 'button[name=_export_dns_record_ok]', ExportDnsRecordACK);
 });
 
 

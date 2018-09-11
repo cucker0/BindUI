@@ -51,7 +51,6 @@ def record_data_filter(data):
         for k in data.keys():       # 去除用户提交data各值的左右空格
             if type(data[k]) == str:
                 data[k] = data[k].strip()
-
         if data['type'] in record_request_field.keys():
             lower_set = set(data.keys()) & set(record_lower_field)
             for f in lower_set:        # CharField要求小写的转换成小写
