@@ -5,7 +5,7 @@ $ORIGIN {{configs.SOA.zone}}.
                                         {{configs.SOA.refresh}}      ; refresh
                                         {{configs.SOA.retry}}      ; retry
                                         {{configs.SOA.expire}}      ; expire
-                                        {{configs.SOA.minimum}}      ; minimum
+                                        {{configs.SOA.minimum}} )      ; minimum
 {% for i in configs.NS %}
 {{i.host}} {{i.ttl}}        IN NS            {{i.data}}
 {% endfor %}
