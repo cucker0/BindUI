@@ -307,8 +307,8 @@ def export_dns(req):
             zone_tag_obj = models.ZoneTag.objects.get(zone_name=data['zone'])
             record_obj_list = zone_tag_obj.ZoneTag_Record.filter( ~Q(type='SOA') )
 
-            response = HttpResponse(content_type='application/ms-excel')
-            response['Content-Disposition'] = 'attachment; filename="%s.xls"' %(data['zone'])
+            response = HttpResponse(content_type='application/ms-excel')        # 设置response响应头，指定文件类型
+            response['Content-Disposition'] = 'attachment; filename="%s.xls"' %(data['zone'])   # 设置Content-Disposition 和文件名
 
             # 生成excel文件
             book = xlwt.Workbook(encoding='utf-8')
@@ -344,7 +344,6 @@ def export_dns(req):
         elif data['export_dns_record_type'] == '1':     # 导出zone文本类型数据
             domain_obj = {}
             zone_tag_obj = models.ZoneTag.objects.get(zone_name=data['zone'])
-            record_obj_list = zone_tag_obj.ZoneTag_Record.filter( ~Q(type='SOA') )
             record_obj_soa = zone_tag_obj.ZoneTag_Record.get(type='SOA')
             record_obj_ns = zone_tag_obj.ZoneTag_Record.filter( Q(type='NS') )
             record_obj_other = zone_tag_obj.ZoneTag_Record.filter( ~Q(type__in=['SOA', 'NS', 'PTR']) )
@@ -354,9 +353,9 @@ def export_dns(req):
             domain_obj['OTHER'] = record_obj_other
             domain_obj['resolution_line_info'] = resolution_line
 
-            response = HttpResponse(content_type='text/plain; charset=utf-8')
-            response['Content-Disposition'] = 'attachment; filename="%s.txt"' %(data['zone'])
-            t = loader.get_template('bind/tmp/export_dns_record.txt')
+            response = HttpResponse(content_type='text/plain; charset=utf-8')       # 设置response响应头，指定文件类型
+            response['Content-Disposition'] = 'attachment; filename="%s.txt"' %(data['zone'])       # 设置Content-Disposition 和文件名
+            t = loader.get_template('bind/tmp/export_dns_record.txt')       # 通过template模板渲染成文件流
             c = Context({
                 'configs': domain_obj,
               })
