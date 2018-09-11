@@ -356,10 +356,8 @@ def export_dns(req):
             response = HttpResponse(content_type='text/plain; charset=utf-8')       # 设置response响应头，指定文件类型
             response['Content-Disposition'] = 'attachment; filename="%s.txt"' %(data['zone'])       # 设置Content-Disposition 和文件名
             t = loader.get_template('bind/tmp/export_dns_record.txt')       # 通过template模板渲染成文件流
-            c = Context({
-                'configs': domain_obj,
-              })
-            response.write(t.render(c))
+            # c = Context({'configs': domain_obj})
+            response.write(t.render({'configs': domain_obj}))
             return response
 
 
