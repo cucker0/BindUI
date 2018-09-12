@@ -6,13 +6,10 @@ $ORIGIN {{configs.SOA.zone}}.
                                         {{configs.SOA.retry}}      ; retry
                                         {{configs.SOA.expire}}      ; expire
                                         {{configs.SOA.minimum}} )      ; minimum
-{% for i in configs.NS %}
-{{i.host}} {{i.ttl}}        IN NS            {{i.data}}
+{% for i in configs.NS %}{{i.host}} {{i.ttl}}        IN NS            {{i.data}}
 {% endfor %}
 
 ;{{configs.resolution_line_info}}
 ;主机名 TTL     IN 类型 data     ;备注    ;解析线路
-{% for i in configs.OTHER %}
-{{i.host}} {{i.ttl}}        IN A {{i.data}}    ;{{i.comment}}      ;{{i.resolution_line}}
+{% for i in configs.OTHER %}{{i.host}} {{i.ttl}}        IN A {{i.data}}    ;{{i.comment}}      ;{{i.resolution_line}}
 {% endfor %}
-

@@ -346,7 +346,7 @@ def export_dns(req):
             zone_tag_obj = models.ZoneTag.objects.get(zone_name=data['zone'])
             record_obj_soa = zone_tag_obj.ZoneTag_Record.get(type='SOA')
             record_obj_ns = zone_tag_obj.ZoneTag_Record.filter( Q(type='NS') )
-            record_obj_other = zone_tag_obj.ZoneTag_Record.filter( ~Q(type__in=['SOA', 'NS', 'PTR']) )
+            record_obj_other = zone_tag_obj.ZoneTag_Record.filter( ~Q(type__in=['SOA', 'NS']) )
 
             domain_obj['SOA'] = record_obj_soa
             domain_obj['NS'] = record_obj_ns
