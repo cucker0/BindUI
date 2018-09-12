@@ -321,7 +321,7 @@ function ChangePlaceholder(){
             break;
         case 'SRV':
             $(".form-horizontal input[name=host]").prop("placeholder", "填写格式为：服务.协议（如_ldap._tcp）");
-            $(".form-horizontal input[name=data]").prop("placeholder", "例如：5 0 5269 example.dns.com");
+            $(".form-horizontal input[name=data]").prop("placeholder", "格式为：优先级 权重 端口 主机名，例如：5 0 5269 example.dns.com.");
             break;
         case 'PTR':
             $(".form-horizontal input[name=host]").prop("placeholder", "填写IP主机位数字（如反向解析IP 192.168.1.11，则填写11）");
