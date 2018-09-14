@@ -21,7 +21,7 @@
                         {% for record_obj in record_obj_list %}
                             <tr>
                                 <td><input type="checkbox" id="{{ record_obj.id }}"></td>
-                                <td>{{ record_obj.host }}</td>
+                                <td class="get_full_host">{{ record_obj.host }}</td>
                                 <td>{{ record_obj.type }}</td>
                                 <td line="{{ record_obj.resolution_line }}">{% dns_resolution_line_fileter record_obj.resolution_line %}</td>
                                 <td>{{ record_obj.data }}</td>
