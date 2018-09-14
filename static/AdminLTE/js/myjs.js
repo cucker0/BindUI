@@ -664,7 +664,7 @@ function RecordModifyACK(){
     $('#DNSRecordAddOrModifyModalLabel').modal('show');
     var _tag_selector = $(this).parent().siblings();
     var _id = $(_tag_selector[0]).children().attr("id");
-    var _host = $(_tag_selector[1]).text();
+    var _host = $(_tag_selector[1]).children('span').text();
     var _type = $(_tag_selector[2]).text();
     var _resolution_line = $(_tag_selector[3]).attr("line");
     var _data = $(_tag_selector[4]).text();

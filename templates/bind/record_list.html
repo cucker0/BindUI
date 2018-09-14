@@ -6,40 +6,24 @@
     <script src="/static/AdminLTE/js/myjs.js"></script>
     <script src="/static/AdminLTE/js/clipboard.min.js"></script>
     <script>
-        //  弹框
+
         $(function () {
-
+            //  弹框
             $('[data-toggle="popover"]').popover()
-        })
-        // 弹框 --end
+            // 弹框 --end
 
-        //复制到剪切板
-        $(document).ready(function(){
-{#            var clipboard = new ClipboardJS('.btn');#}
-{##}
-{#            clipboard.on('success', function(e) {#}
-{#                console.info('Action:', e.action);#}
-{#                console.info('Text:', e.text);#}
-{#                console.info('Trigger:', e.trigger);#}
-{##}
-{#                e.clearSelection();#}
-{#            });#}
-{##}
-{#            clipboard.on('error', function(e) {#}
-{#                console.error('Action:', e.action);#}
-{#                console.error('Trigger:', e.trigger);#}
-{#            });#}
-
+            // 复制到剪切板
+            // https://clipboardjs.com/
             new ClipboardJS('.get_full_host', {
             text: function(trigger) {
                 var _zone_tag_name = $("#table_record_list").attr("domain").trim();
-                var _get_host = $(trigger).text().trim() + '.' + _zone_tag_name;
+                var _get_host = $(trigger).prev().text().trim() + '.' + _zone_tag_name;
 {#                console.log(_get_host);#}
                     return _get_host;
                 }
             });
+            // 复制到剪切板  --end
         })
-        //复制到剪切板  --end
 
     </script>
 {% endblock %}
@@ -255,7 +239,6 @@ mail： 将域名解析为mail.qcloud.com，通常用于解析邮箱服务器。
                     <div class="box-tools">
                         <div class="input-group input-group-sm" style="width: 300px;">
                             <input type="text" name="dns_record_search" class="form-control pull-right" placeholder="Search">
-
                             <div class="input-group-btn">
                                 <button type="submit" name="dns_record_search_submit" class="btn btn-default"><i class="fa fa-search"></i></button>
                             </div>
