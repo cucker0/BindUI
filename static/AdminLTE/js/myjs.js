@@ -963,6 +963,9 @@ function EnterdSearch(){
                 case 'domain_search':
                     DomainSearch();
                     break;
+                case 'input_page_number':
+                    ClickPage({ 'data': {'optype': 2}});
+                    break;
             }
         }
     }

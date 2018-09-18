@@ -680,7 +680,7 @@ def  MyPaginator(obj_set, page=1, perpage_num=10, pagiformart=[1, 3, 1]):
 
     input_page = '''
 <div class="form-inline">
-    <input type="text" size="4" class="form-control" id="input_page" placeholder="输入页码">
+    <input type="text" size="4" class="form-control" name="input_page_number" id="input_page" placeholder="输入页码">
     <button type="submit" name="jump-page" class="btn btn-primary">跳转</button>
 </div>
 '''
