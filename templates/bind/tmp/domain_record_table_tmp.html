@@ -24,7 +24,7 @@
                                 <td><span>{{ record_obj.host }}</span><a class="get_full_host pull-right" href="javascript:;">复制</a></td>
                                 <td>{{ record_obj.type }}</td>
                                 <td line="{{ record_obj.resolution_line }}">{% dns_resolution_line_fileter record_obj.resolution_line %}</td>
-                                <td>{{ record_obj.data }}</td>
+                                <td class="record_data"><span>{{ record_obj.data }}</span><a class="get_record_data pull-right hidden" href="javascript:;">复制</a></td>
                                 <td>{% val_none_to_blank record_obj.mx_priority '-' %}</td>
                                 <td ttl="{{ record_obj.ttl }}">{% ttl_convert record_obj.ttl %}</td>
                                 <td>

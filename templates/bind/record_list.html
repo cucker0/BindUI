@@ -15,8 +15,9 @@
             })
             // 弹框 --end
 
-            // 复制到剪切板
+            // 复制到剪贴板
             // https://clipboardjs.com/
+            //点击复制host全值到剪贴板
             new ClipboardJS('.get_full_host', {
             text: function(trigger) {
                 var _zone_tag_name = $("#table_record_list").attr("domain").trim();
@@ -25,7 +26,15 @@
                     return _get_host;
                 }
             });
-            // 复制到剪切板  --end
+
+            // 点击复制record data到剪贴板
+            new ClipboardJS('.get_record_data', {
+            text: function(trigger) {
+                var _get_data = $(trigger).prev().text().trim();
+                    return _get_data;
+                }
+            });
+            // 复制到剪贴板  --end
         })
 
     </script>

@@ -667,7 +667,7 @@ function RecordModifyACK(){
     var _host = $(_tag_selector[1]).children('span').text();
     var _type = $(_tag_selector[2]).text();
     var _resolution_line = $(_tag_selector[3]).attr("line");
-    var _data = $(_tag_selector[4]).text();
+    var _data = $(_tag_selector[4]).children('span').text();
     var _mx_priority = $(_tag_selector[5]).text();
     var _ttl = $(_tag_selector[6]).attr("ttl");
     var _comment = $(_tag_selector[9]).text();
@@ -1170,6 +1170,15 @@ function DomainDelete(){
     });
 }
 
+function ShowRecordDataCopyButton(event){
+    // 鼠标移动到 record 记录值栏时显示复制按钮,离开时隐藏
+    if (event.data.val) {
+        $(this).children('a').removeClass('hidden');
+    } else {
+        $(this).children('a').addClass('hidden');
+    }
+}
+
 $(document).ready(function(){
     //文件加载后执行
 
@@ -1286,6 +1295,10 @@ $(document).ready(function(){
 
     // 确认 导出DNS解析记录
     $(document).on("click", 'button[name=_export_dns_record_ok]', ExportDnsRecordACK);
+
+    // 鼠标移动到 record 记录值时显示复制按钮,离开时隐藏
+    $(document).on('mouseenter', '#table_record_list .record_data', {'val': true}, ShowRecordDataCopyButton)
+    $(document).on('mouseleave', '#table_record_list .record_data', {'val': false}, ShowRecordDataCopyButton)
 });
 
 
