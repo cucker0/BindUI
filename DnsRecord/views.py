@@ -33,7 +33,8 @@ def index(req):
     :param req:
     :return:
     """
-    return render(req, 'bind/index.html')
+    zone_count = models.ZoneTag.objects.all().count()
+    return render(req, 'bind/index.html', {'zone_count': zone_count})
 
 @login_required
 def domain_list(req):

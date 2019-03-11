@@ -172,3 +172,46 @@ input.upload{
 .th-w2-11{
     width: 25%;
 }
+
+.content .title {
+    font: 30px/1 bold;
+    margin: 0 0 10px;
+}
+
+.content .products-box {
+    height: 600px;
+    border-top: #c0c0c0 1px solid;
+    padding: 35px 15px;
+}
+
+.content .products-box .product-box {
+    display: block;
+    width: 180px;
+    height: 80px;
+    /*border: #99a4ac 1px solid;*/
+    background: #99a4ac;
+    color: white;
+}
+
+.content .products-box .product-box div {
+    float: left;
+    width: 60px;
+    height: 80px;
+    /*background: #aca;*/
+    text-align: center;
+    font: 40px/80px normal;
+}
+
+.content .products-box .product-box p{
+    width: 110px;
+    float: right;
+}
+
+.product-box .product-name {
+    margin: 12px 0 0;
+    font: 24px bold;
+}
+
+.products-box .product-box:hover {
+    background: #B4C1CA;
+}
