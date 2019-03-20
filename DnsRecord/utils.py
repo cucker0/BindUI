@@ -45,6 +45,10 @@ def record_data_filter(data):
             data = None
             return data
 
+        # host为空时，设置默认值 @
+        if not data['host']:
+            data['host'] = '@'
+
         if data['type']:
             data['type'] = data['type'].upper()     # type字段转为大写
 

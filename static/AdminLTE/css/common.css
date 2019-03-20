@@ -215,3 +215,10 @@ input.upload{
 .products-box .product-box:hover {
     background: #B4C1CA;
 }
+
+.title_2 {
+    font: 26px/26px "Microsoft YaHei UI";
+    margin: 10px 0px;
+    height: 26px;
+    vertical-align: middle;
+}

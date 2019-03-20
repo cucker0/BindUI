@@ -395,6 +395,13 @@ function RecordAddModify(){
     var _comment = $(".modal-body input[name=comment]").val().trim();
     var __data = {"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data, "mx_priority":_mx, "ttl":_ttl, "comment":_comment, "zone":_zone_tag_name }
 
+    // 参数检测
+    if (__data.data == "") {
+        console.log("记录值不能为空!")
+        return
+    } else if (__data.host == "") {
+        __data.host =  '@'
+    }
     var action_type = $("#DNSRecordAddOrModifyModalLabel").attr("action_type");
     if (action_type == "add"){  //添加记录
         var record_set = [];
