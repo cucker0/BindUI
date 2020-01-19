@@ -1,28 +1,6 @@
 /**
- * Created by 0 on 02-27.
+ * Created by 0 on 02-27 2016.
  */
-
-(function($){
-    //自执行函数
-    function getCookie(name){
-        //从cookie中获取名为 csrftoken 的值并返回，默认django会response一个csrftoken值为csrf_token的cookie
-        var cookieValue = null;
-        if (document.cookie && document.cookie != '') {
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-                var cookie = jQuery.trim(cookies[i]);
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-
-})(jQuery);
-
 
 function GetCheckboxValue(selector){
     //获取目标选择器 input checkbox 选中的值，返回为列表
