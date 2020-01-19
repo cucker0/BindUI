@@ -89,46 +89,6 @@ function ChangePassword(){
         });
 }
 
-$(function(){
-    //DOM加载后执行
-
-    //搜索按键
-    //通过proxy_server_id与site_name搜索site
-    $('#search-btn').bind('click', function(){
-        var search_key = $(this).parent().siblings().first().val();
-        $(this).parent().siblings().first().val('');
-        var proxy_server_group_id = $('.treeview-menu .active a').attr('proxy_group_id');
-        var send_data = JSON.stringify({'search_key':search_key, 'proxy_server_group_id':proxy_server_group_id});
-        //console.log(send_data);
-        if(search_key.trim().length <= 0){     //搜索关键字不允许为空
-            return false;
-        }
-        $.post('/nginx/search_site/',{'data': send_data},
-            function(callback){
-                callback = JSON.parse(callback)['data'];
-                var ele = '<div class="dd-left"><div class="site_box"></div></div><div class="dd-middle"></div><div class="dd-right"></div>';
-                $('.content-wrapper').html(ele);
-                $('.site_box').html(callback);
-        });
-    });
-
-    //点击 上传 按钮，代替点击 上传头像的input
-    $('span[func="select_upload_file"]').bind('click', function(){
-        $(this).next().filter('input').click();
-    });
-
-    //上传头像文件，前面框提示PATH
-    $('#startUploadBtn').change(function(){
-            var file_path = $(this).val();
-            $(this).parent().prev().attr('placeholder', file_path);
-        }
-    );
-
-});
-
-
-
-
 function UploadFile(selector, action){
     //上传文件
     if(action == 1){
@@ -1165,7 +1125,39 @@ function ShowRecordDataCopyButton(event){
 }
 
 $(document).ready(function(){
-    //文件加载后执行
+    //DOM就绪后执行
+
+    //搜索按键
+    //通过proxy_server_id与site_name搜索site
+    $('#search-btn').bind('click', function(){
+        var search_key = $(this).parent().siblings().first().val();
+        $(this).parent().siblings().first().val('');
+        var proxy_server_group_id = $('.treeview-menu .active a').attr('proxy_group_id');
+        var send_data = JSON.stringify({'search_key':search_key, 'proxy_server_group_id':proxy_server_group_id});
+        //console.log(send_data);
+        if(search_key.trim().length <= 0){     //搜索关键字不允许为空
+            return false;
+        }
+        $.post('/nginx/search_site/',{'data': send_data},
+            function(callback){
+                callback = JSON.parse(callback)['data'];
+                var ele = '<div class="dd-left"><div class="site_box"></div></div><div class="dd-middle"></div><div class="dd-right"></div>';
+                $('.content-wrapper').html(ele);
+                $('.site_box').html(callback);
+        });
+    });
+
+    //点击 上传 按钮，代替点击 上传头像的input
+    $('span[func="select_upload_file"]').bind('click', function(){
+        $(this).next().filter('input').click();
+    });
+
+    //上传头像文件，前面框提示PATH
+    $('#startUploadBtn').change(function(){
+            var file_path = $(this).val();
+            $(this).parent().prev().attr('placeholder', file_path);
+        }
+    );
 
     //添加DNS记录 Placeholder 根据type值变动而改变提示
     //$(".form-horizontal select[name=type]").change(ChangePlaceholder);
