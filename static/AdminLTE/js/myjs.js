@@ -889,7 +889,7 @@ function DomainSearch(){
 }
 
 function EnterdSearch(){
-    // 回车搜索DNS记录
+    // 按下回车键的事件
     document.onkeydown = function (e) {
         var _event = e || window.event;
         if (_event.keyCode == 13) {
@@ -898,7 +898,7 @@ function EnterdSearch(){
             //} else if (document.activeElement.name == 'domain_resolution_search'){
             //    DomainResolutionSearch();
             //}
-            switch (document.activeElement.name){
+            switch (document.activeElement.name) {
                 case 'dns_record_search':
                     DnsRecordSearch();
                     break;
@@ -1238,7 +1238,7 @@ $(document).ready(function(){
     // 删除domain
     $(document).on("click", "#DomiandDeleteModalLabel button[name=_delete_ok]", DomainDelete);
 
-    // 回车搜索DNS记录
+    // 按下回车键的事件
     EnterdSearch();
 
     // 上传 导入DNS文件
