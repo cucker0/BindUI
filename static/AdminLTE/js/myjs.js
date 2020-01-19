@@ -1127,26 +1127,6 @@ function ShowRecordDataCopyButton(event){
 $(document).ready(function(){
     //DOM就绪后执行
 
-    //搜索按键
-    //通过proxy_server_id与site_name搜索site
-    $('#search-btn').bind('click', function(){
-        var search_key = $(this).parent().siblings().first().val();
-        $(this).parent().siblings().first().val('');
-        var proxy_server_group_id = $('.treeview-menu .active a').attr('proxy_group_id');
-        var send_data = JSON.stringify({'search_key':search_key, 'proxy_server_group_id':proxy_server_group_id});
-        //console.log(send_data);
-        if(search_key.trim().length <= 0){     //搜索关键字不允许为空
-            return false;
-        }
-        $.post('/nginx/search_site/',{'data': send_data},
-            function(callback){
-                callback = JSON.parse(callback)['data'];
-                var ele = '<div class="dd-left"><div class="site_box"></div></div><div class="dd-middle"></div><div class="dd-right"></div>';
-                $('.content-wrapper').html(ele);
-                $('.site_box').html(callback);
-        });
-    });
-
     //点击 上传 按钮，代替点击 上传头像的input
     $('span[func="select_upload_file"]').bind('click', function(){
         $(this).next().filter('input').click();
