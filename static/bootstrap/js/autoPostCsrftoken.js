@@ -1,5 +1,5 @@
 /**
-* 专门用于 AJAX post提交时自动处理csrftoken
+* 专门用于 AJAX post提交时自动处理csrftoken cookie
 *
 * 自动从cookies中获取 csrftoken并自动添把获取的 csrftoken添加到RequestHeader中
 */
