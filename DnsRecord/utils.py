@@ -14,30 +14,34 @@ code 值含义
 COMMON_MSG = {'req_use_post':'use POST request method please.',
               'data_type_error':'data type is error!',
               }
-
+# dns记录的字段列表
 record_key = ['zone', 'host', 'type', 'data', 'ttl', 'mx_priority', 'refresh', 'retry', 'expire', 'minimum', 'serial', 'resp_person', 'primary_ns', 'comment',]
+# 多个DNS记录类型通用的必填字段列表 
+COMMON_FIELD = ['zone', 'host', 'type', 'data', 'ttl', 'resolution_line', 'comment']
+# 每个DNS记录类型必填的字段
 record_request_field = {
-    'A':['zone', 'host', 'type', 'data', 'ttl', 'resolution_line', 'comment'],
-    'CNAME':['zone', 'host', 'type', 'data', 'ttl', 'resolution_line', 'comment'],
-    'MX':['zone', 'host', 'type', 'data', 'ttl', 'resolution_line', 'mx_priority', 'comment'],
-    'TXT':['zone', 'host', 'type', 'data', 'ttl', 'resolution_line', 'comment'],
-    'NS':['zone', 'host', 'type', 'data', 'ttl','resolution_line', 'comment'],
-    'AAAA':['zone', 'host', 'type', 'data', 'ttl', 'resolution_line', 'comment'],
-    'SRV':['zone', 'host', 'type', 'data', 'ttl', 'resolution_line', 'comment'],
-    'PTR':['zone', 'host', 'type', 'data', 'ttl', 'resolution_line', 'comment'],
-    'SOA':['zone', 'host', 'type', 'data', 'ttl', 'refresh', 'retry', 'expire', 'minimum', 'serial', 'resp_person', 'primary_ns', 'comment'],
+    'A': COMMON_FIELD,
+    'CNAME': COMMON_FIELD,
+    'MX': ['zone', 'host', 'type', 'data', 'ttl', 'resolution_line', 'mx_priority', 'comment'],
+    'TXT': COMMON_FIELD,
+    'NS': COMMON_FIELD,
+    'AAAA': COMMON_FIELD,
+    'SRV': COMMON_FIELD,
+    'PTR': COMMON_FIELD,
+    'SOA': ['zone', 'host', 'type', 'data', 'ttl', 'refresh', 'retry', 'expire', 'minimum', 'serial', 'resp_person', 'primary_ns', 'comment'],
 }
-
+# DNS记录的字段值中要求必须小写的字段列表
 record_lower_field = ['zone', 'host', 'data', 'resp_person', 'primary_ns']
-
+# DNS记录类型列表
 record_type = ('A', 'CNAME', 'MX', 'TXT', 'NS', 'AAAA', 'SRV', 'PTR', 'SOA')
 
 def record_data_filter(data):
-    """
-    数据过滤
+    """ 数据过滤
+    
     更新或创建 record 根据type过滤 data key,把非必要字段都留空,把type字段转为大写，CharField字段要求小写的转为小写
-    :param data: 要更新或创建 的 record数据，字典形式
-    :return:
+    :param data: dict
+        要更新或创建 的 record数据
+    :return: 返回过滤后的data或业务处理异常消息
     """
 
     if type(data) == dict:
@@ -116,17 +120,19 @@ def record_data_filter(data):
 
 
 def serial(num=0):
-    """
-    10位序列号生成与修改
+    """ 10位序列号的生成与修改
+    
+    用于SOA记录的serial字段
+    格式：YYYYxxxxxx
     :param num:
     :return:
     """
     now = datetime.datetime.now()
     YYYY = now.year
-    if num == 0:    # 生成10位序列号
+    if num == 0:  # 生成10位序列号，初始值为 YYYY000001
         num_str = "%s%s" %(str(YYYY), '1'.zfill(6))
         num = int(num_str)
-    else:       # 序列号递增
+    else:  # 序列号递增
         if len(str(num)) <= 10:
             num = int(num)
             num +=1
