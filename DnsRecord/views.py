@@ -17,7 +17,7 @@ from .utils import serial, record_data_filter, COMMON_MSG
 
 """
 msg = {'status': code}
-code 值含义
+status 响应状态
     200：成功
     500：失败
 """
@@ -61,7 +61,7 @@ def domain_list(req):
 @login_required
 def domain_status_mod(req):
     """
-    修改doamin状态值，即开启或停用
+    修改doamin状态值，即开启或停用doamin
     :param req:
     :return:
     """
@@ -84,7 +84,7 @@ def domain_status_mod(req):
 @login_required
 def domain_curd(req):
     """
-    域名增改查删
+    域名增改查删分类请求转发
     :param req:
     :return:
     """
@@ -137,7 +137,7 @@ def domain_add(req):
         print(e)
 
     data['type'] = 'SOA'
-    data['basic'] = 2       # 标识为不可重复基础记录
+    data['basic'] = 2       # 标识为不可重复的基础记录
     data['host'] = '@'
     data['ttl'] = 3600
     data['serial'] = serial()
@@ -395,7 +395,7 @@ def export_dns(req):
 @login_required
 def dlist_page(req):
     """
-    我的域名 page翻页
+    我的域名 page翻页操作
     :param req: 用户请求
     :return: render模板
     """
@@ -424,7 +424,7 @@ def dlist_page(req):
 @login_required
 def domain_resolution_page(req):
     """
-    domain resolution翻页
+    domain resolution翻页操作
     :param req:
     :return:
     """
@@ -457,12 +457,17 @@ def  MyPaginator(obj_set, page=1, perpage_num=10, pagiformart=[1, 3, 1]):
     """
     自定义分页器
 
-    :param obj_set: 对象集
-    :param page: 当前查看页页码（活动页）int
-    :param perpage_num: 每页展示对象数量,int型
-    :param pagiformart: 分页格式，左、中、右 显示个数， list
-    :return: 分页后的子对象集,前端分页导航条html
-    注意把 前端分页导航条html(pagination_html) 传到模板
+    :param obj_set: set
+        对象集
+    :param page: int
+        当前查看页页码（活动页）
+    :param perpage_num: int
+        每页展示对象数量
+    :param pagiformart: list
+        分页格式，左、中、右 显示个数
+    :return: str
+        分页后的子对象集,前端分页导航条html
+        注意把 前端分页导航条html(pagination_html) 传到模板
     """
 
     if not obj_set:     # obj_set 为空
@@ -753,7 +758,7 @@ def record_list(req, domain_id):
 @login_required
 def rlist_page(req):
     """
-    DNS记录 page翻页
+    DNS记录 page翻页操作
     :param req:
     :return: render模板
     """
@@ -853,7 +858,7 @@ def record_mod(req):
     _type = req.GET.get('type')      #  <==>  type = req.GET['type'] ,两种用法都可以
     if req.method == 'POST':
         data = json.loads(req.POST.get('data'))
-        if _type == 'status':        # 修改staus
+        if _type == 'status':        # 修改status，开启、停用DNS记录
             if data['id_list']:
                 record_obj_list = models.Record.objects.filter(id__in=data['id_list'])
             try:
@@ -865,7 +870,7 @@ def record_mod(req):
             except Exception as e:
                 print(e)
 
-        elif _type == 'main':      # 修改DNS记录除staus外的项
+        elif _type == 'main':      # 修改DNS记录除status外的项
             try:
                 record_obj_set = models.Record.objects.filter(id=data['id'])
                 del(data['id'])     # data.pop('id') print key
