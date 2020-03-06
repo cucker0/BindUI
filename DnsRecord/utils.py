@@ -6,7 +6,7 @@ import datetime, IPy, re
 
 """
 msg = {'status': code}
-code 值含义
+status 响应状态
     200：成功
     500：失败
 """
@@ -122,22 +122,35 @@ def record_data_filter(data):
 def serial(num=0):
     """ 10位序列号的生成与修改
     
-    用于SOA记录的serial字段
+    用于SOA记录的serial字段，要求长度为10位的数字
     格式：YYYYxxxxxx
     :param num:
     :return:
     """
     now = datetime.datetime.now()
     YYYY = now.year
-    if num == 0:  # 生成10位序列号，初始值为 YYYY000001
-        num_str = "%s%s" %(str(YYYY), '1'.zfill(6))
-        num = int(num_str)
-    else:  # 序列号递增
-        if len(str(num)) <= 10:
-            num = int(num)
-            num +=1
-        else:
+    # 生成10位序列号，初始值为 YYYY000001，也是该年最小的一个序号
+    num_str = "%s%s" % (str(YYYY), '1'.zfill(6))
+    num_gen = int(num_str)
+    if num == 0:
+        return num_gen
+    else:
+        if len(str(num)) < 10:  # 原来设置的serial值小于10位的，直接使用标准的10位serial值
+            return num_gen
+        elif len(str(num)) > 10:  # serial值大于10位的异常情况，取其最左边的10位
             num = str(num)[:10]
-            num = int(num)
-            num += 1
+
+        # 从serial字段中提取年份
+        year_of_serial = str(num)[:4]
+        year_of_serial = int(year_of_serial)
+        # 如果提供过来的serial值(即num)里的年份比当前的年份小，则把serial更新为当前年份的一个最小序号(新生成的序号)
+        if year_of_serial < YYYY:
+            return num_gen
+        else:  # year_of_serial >= YYYY情况
+            # 目前的serial值比该年最小的初始serial值还小的情况，直接更新serial值为num_gen
+            if int(num) < num_gen:
+                return num_gen
+            # 正常情况下，序列号递增
+            num = int(num) + 1
+
     return num
