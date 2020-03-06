@@ -72,7 +72,7 @@ def record_data_filter(data):
             if data['type'] != 'MX':
                 data['mx_priority'] = None
 
-            if data['type'] == 'A':     # data字段过滤，要求IP4
+            if data['type'] == 'A':     # data字段过滤，要求IPv4
                 try:
                     preip = IPy.IP(data['data'])
                     if preip.version() == 4:
@@ -92,7 +92,9 @@ def record_data_filter(data):
                 except Exception as e:
                     data = None
                     print(e)
-            elif data['type'] == 'CNAME' or (data['type'] == 'NS') or data['type'] == 'SOA' or data['type'] == 'PTR':    # 要求为域名，如www.abc.com.
+            # elif data['type'] == 'CNAME' or (data['type'] == 'NS') or data['type'] == 'SOA' or data['type'] == 'PTR':
+            elif data['type'] in ('CNAME', 'NS', 'SOA', 'PTR'):
+                # 要求为域名，如www.abc.com. 或 www.abc.com
                 reg1 = "^([a-zA-Z0-9]+(-[a-z0-9]+)*\.)+[a-z]{1,}$"
                 reg2 = "^([a-zA-Z0-9]+(-[a-z0-9]+)*\.)+[a-z]{1,}\.$"
                 compile_data1 = re.compile(reg1)
