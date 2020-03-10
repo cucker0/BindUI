@@ -462,7 +462,7 @@ def  MyPaginator(obj_set, page=1, perpage_num=10, pagiformart=[1, 3, 1]):
     :param page: int
         当前查看页页码（活动页）
     :param perpage_num: int
-        每页展示对象数量
+        每页展示对象数量，最大不超过100
     :param pagiformart: list
         分页格式，左、中、右 显示个数
     :return: str
@@ -479,6 +479,10 @@ def  MyPaginator(obj_set, page=1, perpage_num=10, pagiformart=[1, 3, 1]):
     L_NUM = pagiformart[0]       # 导航条左边显示个数
     M_NUM = pagiformart[1]//2 * 2 + 1     # 导航条中间显示个数，只能为大于1的奇数,如3、5、7 ...
     R_NUM = pagiformart[2]       # 导航条左边显示个数
+    perpage_num = int(perpage_num)
+    # perpage_num 最大不超过100，一次性展示太多数据影响性能
+    if perpage_num > 100: 
+        perpage_num = 100
     paginator = Paginator(obj_set, int(perpage_num))
     if type(page) == str:
         try:
