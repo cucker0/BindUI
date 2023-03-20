@@ -11,6 +11,9 @@ IPy
 xlrd
 xlwt
 
+* 安装依赖模块  
+  pip3 install -r ./requirements.txt
+
 # 注意
 * mysql连接驱动改为 pymysql
 ```
