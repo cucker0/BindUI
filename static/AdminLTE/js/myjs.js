@@ -279,7 +279,7 @@ function ChangePlaceholder(){
             break;
         case 'CAA':
             $(".form-horizontal input[name=host]").prop("placeholder", "填写子域名（如www），不填写默认保存为@");
-            $(".form-horizontal input[name=data]").prop("placeholder", "填写tag-value 标签-值 对,如：0 issue "ca.abc.com"，参考https://sslmate.com/caa/);
+            $(".form-horizontal input[name=data]").prop("placeholder", '填写tag-value 标签-值 对,如：0 issue "ca.abc.com"，参考https://sslmate.com/caa/');
             break;
         default:
             $(".form-horizontal input[name=host]").prop("placeholder", "填写子域名（如www），不填写默认保存为@");
