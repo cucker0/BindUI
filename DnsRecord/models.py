@@ -18,6 +18,9 @@ record_type_choices = (
     ('SRV','SRV'),
     ('PTR','PTR'),
     ('SOA','SOA'),
+    ('CAA','CAA'),
+    ('ExplicitURL','ExplicitURL'),
+    ('ImplicitURL','ImplicitURL'),
 )
 
 status_choices = (
