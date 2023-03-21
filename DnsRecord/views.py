@@ -797,7 +797,7 @@ def rlist_page(req):
     ret.set_cookie('perpage_num', data['perpage_num'] or 10)
     return ret
 
-def add_a_cname_record(record:dict):
+def add_a_cname_record(rr:dict):
     """新建一条特定的显性URL 或 隐性URL 关联的 CNAME 记录
 
     :param record: 类型为 dict
@@ -806,7 +806,7 @@ def add_a_cname_record(record:dict):
     # models.Record.objects.update_or_create() 返回结果为
     # Return a tuple (object, created), where created is a boolean
     # cname_rr 的 data 数据从数据库中读取
-    cname_rr = {'zone':record['zone'], 'host':record['host'], 'type':'CNAME', 'data':get_url_forwarder_domain(), 'ttl':record['ttl'], 'basic':3, 'zone_tag':record['zone_tag'] }
+    cname_rr = {'zone':rr['zone'], 'host':rr['host'], 'type':'CNAME', 'data':get_url_forwarder_domain(), 'ttl':rr['ttl'], 'basic':3, 'zone_tag':rr['zone_tag'] }
     obj, opt_type = models.Record.objects.update_or_create(**cname_rr)
     return obj
 
@@ -843,13 +843,13 @@ def record_add(req):
     else:
         return HttpResponse(COMMON_MSG['req_use_post'])
 
-def associate_rr_del(record:dict):
+def associate_rr_del(rr:models.Record):
     """ 删除关联的 record
 
-    :param record: 类型为dict
+    :param rr: 类型为dict
     :return:
     """
-    rr_obj = models.Record.objects.get(id=record['associate_rr_id'])
+    rr_obj = models.Record.objects.get(id=rr.associate_rr_id)
     if rr_obj:
         return rr_obj.delete()
 
@@ -862,6 +862,7 @@ def record_del(req):
     """
     if req.method == 'POST':
         msg = {'status': 500}
+        # 要删除的 rr id 的 list
         data = json.loads(req.POST.get('data'))
         # print(data)
         success_count = 0
