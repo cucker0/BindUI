@@ -806,7 +806,7 @@ def add_a_cname_record(record:dict):
     # models.Record.objects.update_or_create() 返回结果为
     # Return a tuple (object, created), where created is a boolean
     # cname_rr 的 data 数据从数据库中读取
-    cname_rr = {'zone':record['zone'], 'host':record['host'], 'type':'CNAME', 'data':'free.qq.com', 'ttl':record['ttl'], 'basic':3, 'zone_tag':record['zone_tag'] }
+    cname_rr = {'zone':record['zone'], 'host':record['host'], 'type':'CNAME', 'data':dns_conf.URL_FORWARDER_DOMAIN, 'ttl':record['ttl'], 'basic':3, 'zone_tag':record['zone_tag'] }
     obj, opt_type = models.Record.objects.update_or_create(**cname_rr)
     return obj
 

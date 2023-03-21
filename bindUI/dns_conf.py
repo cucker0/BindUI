@@ -11,3 +11,6 @@ DNS_RESOLUTION_LINE = (
     ('103', '移动'),
     ('104', '教育网'),
 )
+
+# 负责响应 显性URL、隐性URL转发的主机名(域名)
+URL_FORWARDER_DOMAIN = 'free.q.com'
