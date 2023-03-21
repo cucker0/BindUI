@@ -794,7 +794,7 @@ def rlist_page(req):
                    'DNS_RESOLUTION_LINE': dns_conf.DNS_RESOLUTION_LINE,
                    # 'history_search_key':search_key
                    })
-    ret.set_cookie('perpage_num', data['perpage_num'] or 10)
+    ret.set_cookie('perpage_num', data['perpage_num'] or 20)
     return ret
 
 def add_a_cname_record(rr:dict):
