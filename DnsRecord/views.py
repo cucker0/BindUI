@@ -800,7 +800,7 @@ def rlist_page(req):
 def add_a_cname_record(record:dict):
     """新建一条特定的显性URL 或 隐性URL 关联的 CNAME 记录
 
-    :param record:
+    :param record: 类型为 dict
     :return: 新建 或 更新的 对象
     """
     # models.Record.objects.update_or_create() 返回结果为
@@ -843,6 +843,16 @@ def record_add(req):
     else:
         return HttpResponse(COMMON_MSG['req_use_post'])
 
+def associate_rr_del(record:dict):
+    """ 删除关联的 record
+
+    :param record: 类型为dict
+    :return:
+    """
+    rr_obj = models.Record.objects.get(id=record['associate_rr_id'])
+    if rr_obj:
+        return rr_obj.delete()
+
 @login_required
 def record_del(req):
     """
@@ -859,6 +869,10 @@ def record_del(req):
         for i in data:
             try:
                 record_obj = models.Record.objects.get(id=i)
+                # 删除 显性URL、隐性URL 记录时，同时删除与其关联的 CNAME 记录 --start
+                if record_obj.type in ('EXPLICIT_URL', 'IMPLICIT_URL'):
+                    associate_rr_del(record_obj)
+                # 删除 显性URL、隐性URL 记录时，同时删除与其关联的 CNAME 记录 --end
                 record_obj.delete()
                 success_count += 1
             except Exception as e:
