@@ -228,10 +228,10 @@ function RedirectCodeShowOrHide() {
 
     switch (type_val) {
         case 'EXPLICIT_URL':
-            $(".form-horizontal select[name=redirect_code]").parent().parent().show();
+            $(".form-horizontal select[name=redirect_code]").show();
             break;
         default:
-            $(".form-horizontal select[name=redirect_code]").parent().parent().hide();
+            $(".form-horizontal select[name=redirect_code]").hide();
     }
 }
 
