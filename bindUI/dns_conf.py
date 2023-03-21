@@ -17,3 +17,12 @@ URL_FORWARDER_DOMAIN = 'free.q.com'
 
 # 需要在 WEB 端显示的 记录的 basic
 BASIC_SET2SHOW = (0, 200, 301, 302)
+
+# 显性URL basic code 集合
+EXPLICIT_URL_BASIC_SET = (301, 302)
+
+# 隐性URL basic code 集合
+IMPLICIT_URL_SET = (200)
+
+# 显性URL、隐性URL basic code 集合
+URL_FORWARDER_BASIC_SET = (200, 301, 302)

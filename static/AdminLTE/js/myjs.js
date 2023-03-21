@@ -359,9 +359,11 @@ function RecordAddModify(){
     // 显性URL，添加额外的 redirect_code
     switch (__data.type) {
         case "EXPLICIT_URL":
-            __data.basic = _redirect_code;
+            __data.type = 'TXT';
+            __data.basic = parseInt(_redirect_code);
             break;
         case "IMPLICIT_URL":
+            __data.type = 'TXT';
             __data.basic = 200;
     }
 
@@ -648,6 +650,14 @@ function RecordModifyACK(){
     var _mx_priority = $(_tag_selector[5]).text();
     var _ttl = $(_tag_selector[6]).attr("ttl");
     var _comment = $(_tag_selector[9]).text();
+    var _basic_code = $(_tag_selector[2]).attr("basic_code");
+
+    if (_type === '显性URL') {
+        _type = 'EXPLICIT_URL';
+        $(".form-horizontal select[name=redirect_code]").val(_basic_code);
+    } else if (_type === '隐性URL') {
+        _type = 'IMPLICIT_URL';
+    }
 
     $(".form-horizontal input[name=host]").val(_host);
     $(".form-horizontal select[name=type]").val(_type);
@@ -659,6 +669,7 @@ function RecordModifyACK(){
     $("#DNSRecordAddOrModifyModalLabel .modal-title").prop("id", _id);
 
     MXShowOrHide();
+    RedirectCodeShowOrHide();
 }
 
 function ClickPage(event){

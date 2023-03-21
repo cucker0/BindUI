@@ -418,7 +418,7 @@ def dlist_page(req):
                   'pagination_html': pagination_html,
                   'search_key':search_key
                   })
-    ret.set_cookie('perpage_num', data['perpage_num'] or 10)
+    ret.set_cookie('perpage_num', data['perpage_num'] or 20)
     return ret
 
 @login_required
@@ -453,7 +453,7 @@ def domain_resolution_page(req):
                    })
     return ret
 
-def  MyPaginator(obj_set, page=1, perpage_num=10, pagiformart=[1, 3, 1]):
+def  MyPaginator(obj_set, page=1, perpage_num=20, pagiformart=[1, 3, 1]):
     """
     自定义分页器
 
@@ -829,7 +829,7 @@ def record_add(req):
                 zone_tag_obj = models.ZoneTag.objects.get(zone_name=i['zone'].strip())
                 i['zone_tag'] = zone_tag_obj
                 # 新建 显性URL、隐性URL 记录时，需要创建一条关联的 CNAME 记录  --start
-                if i['type'] in ('EXPLICIT_URL', 'IMPLICIT_URL'):
+                if i['type'] == 'TXT' and i['basic'] in (dns_conf.URL_FORWARDER_BASIC_SET):
                     obj = add_a_cname_record(i)
                     i['associate_rr_id'] = obj.id
                 # 新建 显性URL、隐性URL 记录时，需要创建一条关联的 CNAME 记录  --end
@@ -871,7 +871,7 @@ def record_del(req):
             try:
                 record_obj = models.Record.objects.get(id=i)
                 # 删除 显性URL、隐性URL 记录时，同时删除与其关联的 CNAME 记录 --start
-                if record_obj.type in ('EXPLICIT_URL', 'IMPLICIT_URL'):
+                if record_obj.type == 'TXT' and record_obj.basic in dns_conf.URL_FORWARDER_BASIC_SET:
                     associate_rr_del(record_obj)
                 # 删除 显性URL、隐性URL 记录时，同时删除与其关联的 CNAME 记录 --end
                 record_obj.delete()

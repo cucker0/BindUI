@@ -132,3 +132,19 @@ def get_year():
     now = datetime.datetime.now()
     YYYY = now.year
     return YYYY
+
+@register.simple_tag
+def rr_type_convert(rr_type:str, basic:int) ->str:
+    """ 对 rr 的 type 进行转换
+
+    :param rr_type: rr 的类型
+    :param basic: rr 的 basic code
+    :return:
+    """
+    if rr_type == 'TXT':
+        if basic in dns_conf.EXPLICIT_URL_BASIC_SET:
+            return '显性URL'
+        elif basic in dns_conf.IMPLICIT_URL_SET:
+            return '隐性URL'
+
+    return rr_type
