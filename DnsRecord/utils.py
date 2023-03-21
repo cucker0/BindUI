@@ -40,7 +40,7 @@ def record_data_filter(data):
     """ 数据过滤
     
     更新或创建 record 根据type过滤 data key,把非必要字段都留空,把type字段转为大写，CharField字段要求小写的转为小写
-    :param data: dict
+    :param data: 接收到 web 端的数据，格式：[{"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data, "mx_priority":_mx, "ttl":_ttl, "comment":_comment, "zone":_zone_tag_name }]
         要更新或创建 的 record数据
     :return: 返回过滤后的data或业务处理异常消息
     """
@@ -112,8 +112,8 @@ def record_data_filter(data):
                         data['resp_person'] = "%s." %(data['resp_person'])
                     if not data['primary_ns'].endswith('.'):
                         data['primary_ns'] = "%s." %(data['primary_ns'])
-            elif data['type'] == 'IMPLICIT_URL':
-                data['basic'] = 200
+            # elif data['type'] == 'IMPLICIT_URL':
+            #     data['basic'] = 200
             else:
                 pass
 

@@ -353,8 +353,12 @@ function RecordAddModify(){
     var __data = {"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data, "mx_priority":_mx, "ttl":_ttl, "comment":_comment, "zone":_zone_tag_name }
 
     // 显性URL，添加额外的 redirect_code
-    if (__data.type == "EXPLICIT_URL") {
-        __data.basic = _redirect_code;
+    switch (__data.type) {
+        case "EXPLICIT_URL":
+            __data.basic = _redirect_code;
+            break;
+        case "IMPLICIT_URL":
+            __data.basic = 200;
     }
 
     // 参数检测
