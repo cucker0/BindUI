@@ -14,3 +14,6 @@ DNS_RESOLUTION_LINE = (
 
 # 负责响应 显性URL、隐性URL转发的主机名(域名)
 URL_FORWARDER_DOMAIN = 'free.q.com'
+
+# 需要在 WEB 端显示的 记录的 basic
+BASIC_SET2SHOW = (0, 200, 301, 302)

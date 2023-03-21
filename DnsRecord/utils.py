@@ -2,6 +2,7 @@
 # -*- coding:utf-8 -*-
 
 import datetime, IPy, re
+from bindUI import dns_conf
 
 
 """
@@ -112,7 +113,7 @@ def record_data_filter(data):
                     if not data['primary_ns'].endswith('.'):
                         data['primary_ns'] = "%s." %(data['primary_ns'])
             elif data['type'] == 'IMPLICIT_URL':
-                data['basic'] == 200
+                data['basic'] = 200
             else:
                 pass
 
@@ -158,3 +159,10 @@ def serial(num=0):
             num = int(num) + 1
 
     return num
+
+def get_url_forwarder_domain() -> str:
+    """ 获取 显性URL、隐性URL转发的主机名(域名)
+
+    :return:
+    """
+    return dns_conf.URL_FORWARDER_DOMAIN

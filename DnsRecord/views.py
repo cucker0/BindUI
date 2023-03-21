@@ -11,7 +11,7 @@ BASIC_DIR = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(BASIC_DIR)
 from bindUI import dns_conf
 import json
-from .utils import serial, record_data_filter, COMMON_MSG
+from .utils import serial, record_data_filter, COMMON_MSG, get_url_forwarder_domain
 
 # Create your views here.
 
@@ -748,7 +748,7 @@ def record_list(req, domain_id):
     else:
         page = 1
     zone_tag_obj = models.ZoneTag.objects.get(id=domain_id)
-    record_obj_list = zone_tag_obj.ZoneTag_Record.filter(basic=0)
+    record_obj_list = zone_tag_obj.ZoneTag_Record.filter(basic__in=dns_conf.BASIC_SET2SHOW)
 
     record_obj_perpage_list, pagination_html  = MyPaginator(record_obj_list, page)
     return render(req, 'bind/record_list.html',
@@ -776,12 +776,12 @@ def rlist_page(req):
         if data['action'] == 'pagination':
             if search_key == '':
                 # basic code 含义 0:可重复非基础记录, 1:可重复基础记录， 2:不可重复基础记录，3:被显性URL或隐性URL关联的记录 ，200:隐性URL转发，301:显性URL 301重定向，302:显性URL 302重定向
-                record_obj_list = zone_tag_obj.ZoneTag_Record.filter(basic__in=(0, 200, 301, 302))
+                record_obj_list = zone_tag_obj.ZoneTag_Record.filter(basic__in=dns_conf.BASIC_SET2SHOW)
             else:
-                record_obj_list = zone_tag_obj.ZoneTag_Record.filter(Q(basic__in=(0, 200, 301, 302)) & (Q(host__icontains=search_key) | Q(data__icontains=search_key) | Q(comment__icontains=search_key) ) )
+                record_obj_list = zone_tag_obj.ZoneTag_Record.filter(Q(basic__in=dns_conf.BASIC_SET2SHOW) & (Q(host__icontains=search_key) | Q(data__icontains=search_key) | Q(comment__icontains=search_key) ) )
         elif data['action'] == 'search':
             try:
-                record_obj_list = zone_tag_obj.ZoneTag_Record.filter(Q(basic__in=(0, 200, 301, 302)) & (Q(host__icontains=search_key) | Q(data__icontains=search_key) | Q(comment__icontains=search_key) ) )
+                record_obj_list = zone_tag_obj.ZoneTag_Record.filter(Q(basic__in=dns_conf.BASIC_SET2SHOW) & (Q(host__icontains=search_key) | Q(data__icontains=search_key) | Q(comment__icontains=search_key) ) )
 
             except Exception as e:
                 print(e)
@@ -806,7 +806,7 @@ def add_a_cname_record(record:dict):
     # models.Record.objects.update_or_create() 返回结果为
     # Return a tuple (object, created), where created is a boolean
     # cname_rr 的 data 数据从数据库中读取
-    cname_rr = {'zone':record['zone'], 'host':record['host'], 'type':'CNAME', 'data':dns_conf.URL_FORWARDER_DOMAIN, 'ttl':record['ttl'], 'basic':3, 'zone_tag':record['zone_tag'] }
+    cname_rr = {'zone':record['zone'], 'host':record['host'], 'type':'CNAME', 'data':get_url_forwarder_domain(), 'ttl':record['ttl'], 'basic':3, 'zone_tag':record['zone_tag'] }
     obj, opt_type = models.Record.objects.update_or_create(**cname_rr)
     return obj
 
