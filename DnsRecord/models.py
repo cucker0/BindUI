@@ -19,8 +19,8 @@ record_type_choices = (
     ('PTR','PTR'),
     ('SOA','SOA'),
     ('CAA','CAA'),
-    ('EXPLICIT_URL','EXPLICIT_URL'),
-    ('IMPLICIT_URL','IMPLICIT_URL'),
+    ('EXPLICIT_URL','EXPLICIT_URL'),  # 显性URL
+    ('IMPLICIT_URL','IMPLICIT_URL'),  # 隐性URL
 )
 
 status_choices = (
@@ -52,7 +52,8 @@ class Record(models.Model):
     comment = models.CharField('comment', max_length=255, null=True, blank=True, default=None, help_text='备注')
     resolution_line = models.CharField('resolution_line', max_length=32,choices=dns_conf.DNS_RESOLUTION_LINE, default='0', help_text='解析线路')
     zone_tag = models.ForeignKey('ZoneTag', related_name='ZoneTag_Record', on_delete=models.PROTECT)
-    basic = models.IntegerField('basic', default=0, help_text='是否为基础记录，记录是否允许重复。0:可重复非基础记录, 1:可重复基础记录， 2:不可重复基础记录，200:隐性URL转发，301:显性URL 301重定向，302:显性URL 302重定向')
+    basic = models.IntegerField('basic', default=0, help_text='是否为基础记录，记录是否允许重复。0:可重复非基础记录, 1:可重复基础记录， 2:不可重复基础记录，3:被显性URL或隐性URL关联的记录 ，200:隐性URL转发，301:显性URL 301重定向，302:显性URL 302重定向')
+    associate_rr_id = models.IntegerField('associate_rr_id', null=True, blank=True, default=None, help_text='关联的 Resource Record ID，用于显性URL、隐性URL')
 
     def __str__(self):
         return(self.host)

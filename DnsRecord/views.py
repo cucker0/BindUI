@@ -772,14 +772,16 @@ def rlist_page(req):
         record_obj_list = None
         search_key = data['other']['search_key'] or ''
 
+        # 查询出符合条件的 Record
         if data['action'] == 'pagination':
             if search_key == '':
-                record_obj_list = zone_tag_obj.ZoneTag_Record.filter(basic=0)
+                # basic code 含义 0:可重复非基础记录, 1:可重复基础记录， 2:不可重复基础记录，3:被显性URL或隐性URL关联的记录 ，200:隐性URL转发，301:显性URL 301重定向，302:显性URL 302重定向
+                record_obj_list = zone_tag_obj.ZoneTag_Record.filter(basic__in=(0, 200, 301, 302))
             else:
-                record_obj_list = zone_tag_obj.ZoneTag_Record.filter(Q(basic=0) & (Q(host__icontains=search_key) | Q(data__icontains=search_key) | Q(comment__icontains=search_key) ) )
+                record_obj_list = zone_tag_obj.ZoneTag_Record.filter(Q(basic__in=(0, 200, 301, 302)) & (Q(host__icontains=search_key) | Q(data__icontains=search_key) | Q(comment__icontains=search_key) ) )
         elif data['action'] == 'search':
             try:
-                record_obj_list = zone_tag_obj.ZoneTag_Record.filter(Q(basic=0) & (Q(host__icontains=search_key) | Q(data__icontains=search_key) | Q(comment__icontains=search_key) ) )
+                record_obj_list = zone_tag_obj.ZoneTag_Record.filter(Q(basic__in=(0, 200, 301, 302)) & (Q(host__icontains=search_key) | Q(data__icontains=search_key) | Q(comment__icontains=search_key) ) )
 
             except Exception as e:
                 print(e)
@@ -794,6 +796,19 @@ def rlist_page(req):
                    })
     ret.set_cookie('perpage_num', data['perpage_num'] or 10)
     return ret
+
+def add_a_cname_record(record:dict):
+    """新建一条特定的显性URL 或 隐性URL 关联的 CNAME 记录
+
+    :param record:
+    :return: 新建 或 更新的 对象
+    """
+    # models.Record.objects.update_or_create() 返回结果为
+    # Return a tuple (object, created), where created is a boolean
+    # cname_rr 的 data 数据从数据库中读取
+    cname_rr = {'zone':record['zone'], 'host':record['host'], 'type':'CNAME', 'data':'free.qq.com', 'ttl':record['ttl'], 'basic':3, 'zone_tag':record['zone_tag'] }
+    obj, opt_type = models.Record.objects.update_or_create(**cname_rr)
+    return obj
 
 @login_required
 def record_add(req):
@@ -813,6 +828,11 @@ def record_add(req):
                 record_data_filter(i)        # 字典或列表 以指针形式传递参数
                 zone_tag_obj = models.ZoneTag.objects.get(zone_name=i['zone'].strip())
                 i['zone_tag'] = zone_tag_obj
+                # 新建 显性URL、隐性URL 记录时，需要创建一条关联的 CNAME 记录  --start
+                if i['type'] in ('EXPLICIT_URL', 'IMPLICIT_URL'):
+                    obj = add_a_cname_record(i)
+                    i['associate_rr_id'] = obj.id
+                # 新建 显性URL、隐性URL 记录时，需要创建一条关联的 CNAME 记录  --end
                 models.Record.objects.update_or_create(**i)
                 msg['success_total'] += 1
 

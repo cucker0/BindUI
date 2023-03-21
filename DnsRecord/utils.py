@@ -111,6 +111,8 @@ def record_data_filter(data):
                         data['resp_person'] = "%s." %(data['resp_person'])
                     if not data['primary_ns'].endswith('.'):
                         data['primary_ns'] = "%s." %(data['primary_ns'])
+            elif data['type'] == 'IMPLICIT_URL':
+                data['basic'] == 200
             else:
                 pass
 

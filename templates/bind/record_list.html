@@ -161,6 +161,10 @@ mail： 将域名解析为mail.qcloud.com，通常用于解析邮箱服务器。
                         <div class="form-group">
                             <label class="col-sm-2 control-label">记录值</label>
                             <div class="col-sm-10">
+                                <select name="redirect_code" style="display:none">
+                                    <option value="302" selected="selected">302</option>
+                                    <option value="301">301</option>
+                                </select>
                                 <input type="text" name="data" class="form-control" placeholder="填写一个IPv4地址，例如：8.8.8.8">
                             </div>
                         </div>

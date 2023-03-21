@@ -222,6 +222,19 @@ function MXShowOrHide(){
     }
 }
 
+function RedirectCodeShowOrHide() {
+    // 天健 显性URL 时，重定向 code 选择框的展示/隐藏
+    var type_val = $(".form-horizontal select[name=type]").val();
+
+    switch (type_val) {
+        case 'EXPLICIT_URL':
+            $(".form-horizontal select[name=redirect_code]").parent().parent().show();
+            break;
+        default:
+            $(".form-horizontal select[name=redirect_code]").parent().parent().hide();
+    }
+}
+
 function ChangePlaceholder(){
     var action_type = $("#DNSRecordAddOrModifyModalLabel").prop("action_type");
     if(action_type == "add"){       // 添加记录，清空host，data值
@@ -230,9 +243,10 @@ function ChangePlaceholder(){
         $(".form-horizontal input[name=comment]").val("");
     }
 
-    //添加DNS记录选择记录类型时，自动调整相应的Placeholder提示内容
+    // 添加DNS记录选择记录类型时，自动调整相应的Placeholder提示内容
     var type_val = $(".form-horizontal select[name=type]").val();
     MXShowOrHide();
+    RedirectCodeShowOrHide();
 
     switch(type_val){
         case 'CNAME':
@@ -335,7 +349,13 @@ function RecordAddModify(){
     var _ttl = $(".modal-body select[name=ttl]").val().trim();
     var _zone_tag_name = $("#table_record_list").attr("domain").trim();
     var _comment = $(".modal-body input[name=comment]").val().trim();
+    var _redirect_code = $(".modal-body select[name=redirect_code]").val().trim();
     var __data = {"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data, "mx_priority":_mx, "ttl":_ttl, "comment":_comment, "zone":_zone_tag_name }
+
+    // 显性URL，添加额外的 redirect_code
+    if (__data.type == "EXPLICIT_URL") {
+        __data.basic = _redirect_code;
+    }
 
     // 参数检测
     if (__data.data == "") {
