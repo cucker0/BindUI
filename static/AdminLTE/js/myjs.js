@@ -269,17 +269,17 @@ function ChangePlaceholder(){
             $(".form-horizontal input[name=host]").prop("placeholder", "填写@");
             $(".form-horizontal input[name=data]").prop("placeholder", "填写一个域名，例如：ns1.dns.com.");
             break;
-        case 'ExplicitURL':
-            $(".form-horizontal input[name=host]").prop("placeholder", "填写子域名（如www），不填写默认保存为@");
-            $(".form-horizontal input[name=data]").prop("placeholder", "填写要跳转到的网址，如：http://www.qq.com");
-            break;
-        case 'ImplicitURL':
-            $(".form-horizontal input[name=host]").prop("placeholder", "填写子域名（如www），不填写默认保存为@");
-            $(".form-horizontal input[name=data]").prop("placeholder", "填写要跳转到的网址，如：https://www.qq.com");
-            break;
         case 'CAA':
             $(".form-horizontal input[name=host]").prop("placeholder", "填写子域名（如www），不填写默认保存为@");
             $(".form-horizontal input[name=data]").prop("placeholder", '填写tag-value 标签-值 对,如：0 issue "ca.abc.com"，参考https://sslmate.com/caa/');
+            break;
+        case 'EXPLICIT_URL':
+            $(".form-horizontal input[name=host]").prop("placeholder", "填写子域名（如www），不填写默认保存为@");
+            $(".form-horizontal input[name=data]").prop("placeholder", "填写要跳转到的网址，如：http://www.qq.com");
+            break;
+        case 'IMPLICIT_URL':
+            $(".form-horizontal input[name=host]").prop("placeholder", "填写子域名（如www），不填写默认保存为@");
+            $(".form-horizontal input[name=data]").prop("placeholder", "填写要跳转到的网址，如：https://www.qq.com");
             break;
         default:
             $(".form-horizontal input[name=host]").prop("placeholder", "填写子域名（如www），不填写默认保存为@");

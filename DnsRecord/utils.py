@@ -33,7 +33,7 @@ record_request_field = {
 # DNS记录的字段值中要求必须小写的字段列表
 record_lower_field = ['zone', 'host', 'data', 'resp_person', 'primary_ns']
 # DNS记录类型列表
-record_type = ('A', 'CNAME', 'MX', 'TXT', 'NS', 'AAAA', 'SRV', 'PTR', 'SOA')
+record_type = ('A', 'CNAME', 'MX', 'TXT', 'NS', 'AAAA', 'SRV', 'PTR', 'SOA', 'CAA', 'EXPLICIT_URL', 'IMPLICIT_URL')
 
 def record_data_filter(data):
     """ 数据过滤
