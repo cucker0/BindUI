@@ -287,6 +287,10 @@ function ChangePlaceholder(){
             $(".form-horizontal input[name=host]").prop("placeholder", "填写子域名（如www），不填写默认保存为@");
             $(".form-horizontal input[name=data]").prop("placeholder", '填写tag-value 标签-值 对,如：0 issue "ca.abc.com"，参考https://sslmate.com/caa/');
             break;
+        case 'URI':
+            $(".form-horizontal input[name=host]").prop("placeholder", "填写子域名（如www），格式：_service._proto，如：_ftp._tcp");
+            $(".form-horizontal input[name=data]").prop("placeholder", '格式：priority weight "target"，如：10 1 "ftp://ftp1.example.com/public"');
+            break;
         case 'EXPLICIT_URL':
             $(".form-horizontal input[name=host]").prop("placeholder", "填写子域名（如www），不填写默认保存为@");
             $(".form-horizontal input[name=data]").prop("placeholder", "填写要跳转到的网址，如：http://www.qq.com");

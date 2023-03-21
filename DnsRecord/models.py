@@ -19,8 +19,9 @@ record_type_choices = (
     ('PTR','PTR'),
     ('SOA','SOA'),
     ('CAA','CAA'),
-    ('EXPLICIT_URL','EXPLICIT_URL'),  # 显性URL
-    ('IMPLICIT_URL','IMPLICIT_URL'),  # 隐性URL
+    ('URI','URI'),
+    # ('EXPLICIT_URL','EXPLICIT_URL'),  # 显性URL
+    # ('IMPLICIT_URL','IMPLICIT_URL'),  # 隐性URL
 )
 
 status_choices = (
