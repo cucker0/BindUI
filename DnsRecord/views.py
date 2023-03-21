@@ -829,9 +829,10 @@ def record_add(req):
                 zone_tag_obj = models.ZoneTag.objects.get(zone_name=i['zone'].strip())
                 i['zone_tag'] = zone_tag_obj
                 # 新建 显性URL、隐性URL 记录时，需要创建一条关联的 CNAME 记录  --start
-                if i['type'] == 'TXT' and i['basic'] in (dns_conf.URL_FORWARDER_BASIC_SET):
-                    obj = add_a_cname_record(i)
-                    i['associate_rr_id'] = obj.id
+                if type(i) == dict and 'basic' in list(i.keys()):
+                    if i['type'] == 'TXT' and i['basic'] in (dns_conf.URL_FORWARDER_BASIC_SET):
+                        obj = add_a_cname_record(i)
+                        i['associate_rr_id'] = obj.id
                 # 新建 显性URL、隐性URL 记录时，需要创建一条关联的 CNAME 记录  --end
                 models.Record.objects.update_or_create(**i)
                 msg['success_total'] += 1
