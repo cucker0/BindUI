@@ -824,13 +824,7 @@ def record_add(req):
         try:
             data = json.loads(data)
             msg['total'] = len(data)
-            print("11==")
-            print(data)
-            print("id: %s", id(data))
             record_data_filter(data)
-            print("33==")
-            print(data)
-            print("id: %s", id(data))
             for i in data:
                 # record_data_filter(i)        # 字典或列表 以指针形式传递参数
                 zone_tag_obj = models.ZoneTag.objects.get(zone_name=i['zone'].strip())
