@@ -11,7 +11,7 @@ BASIC_DIR = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(BASIC_DIR)
 from bindUI import dns_conf
 import json
-from .utils import serial, record_data_filter, COMMON_MSG, get_url_forwarder_domain
+from .utils import serial, record_data_filter, COMMON_MSG, get_url_forwarder_domain, a_record_data_filter
 
 # Create your views here.
 
@@ -824,9 +824,11 @@ def record_add(req):
         try:
             data = json.loads(data)
             msg['total'] = len(data)
-            record_data_filter(data)
+            # record_data_filter(data)  # 字典或列表 以指针形式传递参数
             for i in data:
-                # record_data_filter(i)        # 字典或列表 以指针形式传递参数
+                if not a_record_data_filter(i):
+                    print("%s 检查过滤RR数据失败。" % i)
+                    continue
                 zone_tag_obj = models.ZoneTag.objects.get(zone_name=i['zone'].strip())
                 i['zone_tag'] = zone_tag_obj
                 # 新建 显性URL、隐性URL 记录时，需要创建一条关联的 CNAME 记录  --start
@@ -837,8 +839,10 @@ def record_add(req):
                 # 新建 显性URL、隐性URL 记录时，需要创建一条关联的 CNAME 记录  --end
                 models.Record.objects.update_or_create(**i)
                 msg['success_total'] += 1
-
-            msg['status'] = 200
+            if msg['success_total'] == 0:
+                msg['status'] = 500
+            else:
+                msg['status'] = 200
         except Exception as e:
             print(e)
         return HttpResponse(json.dumps(msg))

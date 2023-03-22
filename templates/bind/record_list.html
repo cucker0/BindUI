@@ -21,9 +21,13 @@
             new ClipboardJS('.get_full_host', {
             text: function(trigger) {
                 var _zone_tag_name = $("#table_record_list").attr("domain").trim();
-                var _get_host = $(trigger).prev().text().trim() + '.' + _zone_tag_name;
-{#                console.log(_get_host);#}
-                    return _get_host;
+                var _host = $(trigger).prev().text().trim();
+                var _full_host = _host + '.' + _zone_tag_name;
+                if (_host === '@') {
+                    _full_host = _zone_tag_name;
+                }
+{#                console.log(_full_host);#}
+                    return _full_host;
                 }
             });
 
