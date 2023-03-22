@@ -32,96 +32,113 @@ record_request_field = {
     'SOA': ['zone', 'host', 'type', 'data', 'ttl', 'refresh', 'retry', 'expire', 'minimum', 'serial', 'resp_person', 'primary_ns', 'comment'],
 }
 # DNS记录的字段值中要求必须小写的字段列表
-record_lower_field = ['zone', 'host', 'data', 'resp_person', 'primary_ns']
+record_lower_field = ['zone', 'host', 'resp_person', 'primary_ns']
 # DNS记录类型列表
-record_type = ('A', 'CNAME', 'MX', 'TXT', 'NS', 'AAAA', 'SRV', 'PTR', 'SOA', 'CAA', 'EXPLICIT_URL', 'IMPLICIT_URL')
+record_type = ('A', 'CNAME', 'MX', 'TXT', 'NS', 'AAAA', 'SRV', 'PTR', 'SOA', 'CAA', 'URI',)
+
+def check_ipv4(ip:str) -> bool:
+    """ 查检IP是否为合法的 IPv4
+
+    :param ip:
+    :return:
+    """
+    try:
+        if IPy.IP(ip).version() != 4:
+            return False
+    except Exception as e:
+        return False
+
+    addr = ip.strip().split('.')
+    if len(addr) != 4:
+        return False
+    score = 0
+    for i in range(len(addr)):
+        try:
+            if 0 <= int(addr[i]) <= 255:
+                score += 1
+        except Exception as e:
+            return False
+
+    if score == 4:
+        return True
+
+    return False
+
 
 def record_data_filter(data):
-    """ 数据过滤
-    
+    """ rr 数据过滤
+
     更新或创建 record 根据type过滤 data key,把非必要字段都留空,把type字段转为大写，CharField字段要求小写的转为小写
     :param data: 接收到 web 端的数据，格式：[{"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data, "mx_priority":_mx, "ttl":_ttl, "comment":_comment, "zone":_zone_tag_name }]
         要更新或创建 的 record数据
     :return: 返回过滤后的data或业务处理异常消息
     """
 
-    if type(data) == dict:
-        if not (data['type'] in record_type): # type不在范围内的返回None
-            data = None
-            return data
-
+    if type(data) != list:
+        return 'data structure like [{"type":_type, "host":_host}, {"type":_type, "host":_host}, ]'
+    for i in range(len(data)):
+        if type(data[i]) != dict:
+            continue
+        if data[i]['type']:
+            data[i]['type'] = data[i]['type'].upper()  # type字段转为大写
+        if not (data[i]['type'] in record_type):  # type不在范围内的返回None
+            continue
         # host为空时，设置默认值 @
-        if not data['host']:
-            data['host'] = '@'
+        if not data[i]['host']:
+            data[i]['host'] = '@'
 
-        if data['type']:
-            data['type'] = data['type'].upper()     # type字段转为大写
+        for k in data[i].keys():  # 去除用户提交data各值的左右空格
+            if type(data[i][k]) == str:
+                data[i][k] = data[i][k].strip()
+        if data[i]['type'] in list(record_request_field.keys()):
+            lower_set = set(data[i].keys()) & set(record_lower_field)
+            for f in lower_set:  # CharField要求小写的转换成小写
+                if data[i][f]:
+                    data[i][f] = data[i][f].lower()
+            not_request_set = set(record_key) - set(record_request_field[data[i]['type']])
+            for key in not_request_set:  # # 不要求填写字段置为None
+                data[i][key] = None
+            if data[i]['type'] != 'MX':
+                data[i]['mx_priority'] = None
 
-        for k in data.keys():       # 去除用户提交data各值的左右空格
-            if type(data[k]) == str:
-                data[k] = data[k].strip()
-        if data['type'] in record_request_field.keys():
-            lower_set = set(data.keys()) & set(record_lower_field)
-            for f in lower_set:        # CharField要求小写的转换成小写
-                if data[f]:
-                    data[f] = data[f].lower()
-
-            not_request_set = set(record_key) - set(record_request_field[data['type']])
-            for i in not_request_set:       # # 不要求填写字段置为None
-                data[i] = None
-
-            if data['type'] != 'MX':
-                data['mx_priority'] = None
-
-            if data['type'] == 'A':     # data字段过滤，要求IPv4
+            if data[i]['type'] == 'A':  # data字段过滤，要求IPv4
+                if not check_ipv4(data[i]['data']):
+                    print("%s 不是合法的IPv4地址。", data[i]['data'])
+                    data[i] = None
+            elif data[i]['type'] == 'AAAA':  # 要求IPv6
                 try:
-                    preip = IPy.IP(data['data'])
-                    if preip.version() == 4:
-                        data['data'] = preip.strNormal()
-                    else:
-                        data = None
-                except Exception as e:
-                    data = None
-                    print(e)
-            elif data['type'] == 'AAAA':        # 要求IPv6
-                try:
-                    preip = IPy.IP(data['data'])
+                    preip = IPy.IP(data[i]['data'])
                     if preip.version() == 6:
-                        data['data'] = preip.strNormal()
+                        data[i]['data'] = preip.strNormal()
                     else:
-                        data = None
+                        data[i] = None
                 except Exception as e:
-                    data = None
+                    data[i] = None
                     print(e)
             # elif data['type'] == 'CNAME' or (data['type'] == 'NS') or data['type'] == 'SOA' or data['type'] == 'PTR':
-            elif data['type'] in ('CNAME', 'NS', 'SOA', 'PTR'):
+            elif data[i]['type'] in ('CNAME', 'NS', 'SOA', 'PTR'):
                 # 要求为域名，如www.abc.com. 或 www.abc.com
                 reg1 = "^([a-zA-Z0-9]+(-[a-z0-9]+)*\.)+[a-z]{1,}$"
                 reg2 = "^([a-zA-Z0-9]+(-[a-z0-9]+)*\.)+[a-z]{1,}\.$"
                 compile_data1 = re.compile(reg1)
                 compile_data2 = re.compile(reg2)
-                if compile_data1.match(data['data']):
-                    data['data'] = "%s." %(data['data'])
-                elif compile_data2.match(data['data']):
+                if compile_data1.match(data[i]['data']):
+                    data[i]['data'] = "%s." % (data[i]['data'])
+                elif compile_data2.match(data[i]['data']):
                     pass
                 else:
-                    data =None
+                    data[i] = None
 
-                if data['type'] == 'SOA':
-                    if not data['resp_person'].endswith('.'):
-                        data['resp_person'] = "%s." %(data['resp_person'])
-                    if not data['primary_ns'].endswith('.'):
-                        data['primary_ns'] = "%s." %(data['primary_ns'])
-            # elif data['type'] == 'IMPLICIT_URL':
-            #     data['basic'] = 200
+                if data[i]['type'] == 'SOA':
+                    if not data[i]['resp_person'].endswith('.'):
+                        data[i]['resp_person'] = "%s." % (data[i]['resp_person'])
+                    if not data[i]['primary_ns'].endswith('.'):
+                        data[i]['primary_ns'] = "%s." % (data[i]['primary_ns'])
             else:
                 pass
-
             return data
         else:
             return COMMON_MSG['data_type_error']
-    else:
-        return "update or create record data type is not dict"
 
 
 def serial(num=0):

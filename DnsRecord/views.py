@@ -824,8 +824,15 @@ def record_add(req):
         try:
             data = json.loads(data)
             msg['total'] = len(data)
+            print("11==")
+            print(data)
+            print("id: %s", id(data))
+            record_data_filter(data)
+            print("33==")
+            print(data)
+            print("id: %s", id(data))
             for i in data:
-                record_data_filter(i)        # 字典或列表 以指针形式传递参数
+                # record_data_filter(i)        # 字典或列表 以指针形式传递参数
                 zone_tag_obj = models.ZoneTag.objects.get(zone_name=i['zone'].strip())
                 i['zone_tag'] = zone_tag_obj
                 # 新建 显性URL、隐性URL 记录时，需要创建一条关联的 CNAME 记录  --start
