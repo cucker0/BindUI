@@ -408,7 +408,7 @@ def dlist_page(req):
         elif data['action'] == 'search':
             try:
                 search_key = data['other']['search_key']
-                zone_obj_list = models.ZoneTag.objects.filter(Q(zone_name__icontains=search_key) | Q(comment__icontains=search_key))
+                zone_obj_list = models.ZoneTag.objects.filter(Q(zone_name__icontains=search_key) | Q(comment__icontains=search_key)).order_by('id')
             except Exception as e:
                 print(e)
         zone_obj_perpage_list, pagination_html  = MyPaginator(zone_obj_list, data['page'], data['perpage_num'])
@@ -438,7 +438,7 @@ def domain_resolution_page(req):
         elif data['action'] == 'search':
             try:
                 search_key = data['other']['search_key']
-                zone_obj_list = models.ZoneTag.objects.filter(Q(zone_name__icontains=search_key) | Q(comment__icontains=search_key))
+                zone_obj_list = models.ZoneTag.objects.filter(Q(zone_name__icontains=search_key) | Q(comment__icontains=search_key)).order_by('id')
             except Exception as e:
                 print(e)
         zone_obj_perpage_list, pagination_html  = MyPaginator(zone_obj_list, data['page'], data['perpage_num'])
@@ -748,7 +748,7 @@ def record_list(req, domain_id):
     else:
         page = 1
     zone_tag_obj = models.ZoneTag.objects.get(id=domain_id)
-    record_obj_list = zone_tag_obj.ZoneTag_Record.filter(basic__in=dns_conf.BASIC_SET2SHOW)
+    record_obj_list = zone_tag_obj.ZoneTag_Record.filter(basic__in=dns_conf.BASIC_SET2SHOW).order_by('id')
 
     record_obj_perpage_list, pagination_html  = MyPaginator(record_obj_list, page)
     return render(req, 'bind/record_list.html',
@@ -776,12 +776,12 @@ def rlist_page(req):
         if data['action'] == 'pagination':
             if search_key == '':
                 # basic code 含义 0:可重复非基础记录, 1:可重复基础记录， 2:不可重复基础记录，3:被显性URL或隐性URL关联的记录 ，200:隐性URL转发，301:显性URL 301重定向，302:显性URL 302重定向
-                record_obj_list = zone_tag_obj.ZoneTag_Record.filter(basic__in=dns_conf.BASIC_SET2SHOW)
+                record_obj_list = zone_tag_obj.ZoneTag_Record.filter(basic__in=dns_conf.BASIC_SET2SHOW).order_by('id')
             else:
-                record_obj_list = zone_tag_obj.ZoneTag_Record.filter(Q(basic__in=dns_conf.BASIC_SET2SHOW) & (Q(host__icontains=search_key) | Q(data__icontains=search_key) | Q(comment__icontains=search_key) ) )
+                record_obj_list = zone_tag_obj.ZoneTag_Record.filter(Q(basic__in=dns_conf.BASIC_SET2SHOW) & (Q(host__icontains=search_key) | Q(data__icontains=search_key) | Q(comment__icontains=search_key) ) ).order_by('id')
         elif data['action'] == 'search':
             try:
-                record_obj_list = zone_tag_obj.ZoneTag_Record.filter(Q(basic__in=dns_conf.BASIC_SET2SHOW) & (Q(host__icontains=search_key) | Q(data__icontains=search_key) | Q(comment__icontains=search_key) ) )
+                record_obj_list = zone_tag_obj.ZoneTag_Record.filter(Q(basic__in=dns_conf.BASIC_SET2SHOW) & (Q(host__icontains=search_key) | Q(data__icontains=search_key) | Q(comment__icontains=search_key) ) ).order_by('id')
 
             except Exception as e:
                 print(e)
