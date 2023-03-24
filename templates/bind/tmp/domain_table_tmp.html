@@ -7,9 +7,9 @@
                             <th class="th-w1-1"><input type="checkbox" data-check-all onclick="SelectAll('#table_domains' )"></th>
                             <th class="th-w1-2">域名</th>
                             <th class="th-w1-3">状态</th>
-                            <th class="th-w1-5">操作</th>
-                            <th class="th-w1-1">创建时间</th>
-                            <th class="th-w1-1">最后操作时间</th>
+                            <th class="th-w1-4">操作</th>
+                            <th class="th-w1-5">创建时间</th>
+                            <th class="th-w1-5">最后操作时间</th>
                             <th class="th-w1-4">备注</th>
                         </tr>
                         </thead>
@@ -45,9 +45,9 @@
                                         </ul>
                                     </span>
                                 </td>
-                                <td>{% val_none_to_blank zone_obj.create_time '' %}</td>
-                                <td>{% val_none_to_blank zone_obj.update_time '' %}</td>
-                                <td>{{ zone_obj.comment }}</td>
+                                <td>{{ zone_obj.create_time|date:"Y-m-d H:i:s" }}</td>
+                                <td>{{ zone_obj.update_time|date:"Y-m-d H:i:s" }}</td>
+                                <td>{% val_none_to_blank zone_obj.comment '' %}</td>
                             </tr>
                         {% endfor %}
                         </tbody>
