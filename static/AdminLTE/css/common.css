@@ -222,3 +222,8 @@ input.upload{
     height: 26px;
     vertical-align: middle;
 }
+
+/* 添加域名/修改域名 modal 框 */
+#DomainAddOrModifyModalLabel .modal-content {
+    width: 700px;
+}
