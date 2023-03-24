@@ -76,6 +76,8 @@ def domain_status_mod(req):
                 zone_tag_list.update(status='off')
             else:
                 zone_tag_list.update(status='on')
+            # 更新 update_time
+            zone_tag_list.update(update_time=timezone.now())
             msg['status'] = 200
         except Exception as e:
             print(e)
@@ -201,6 +203,8 @@ def domain_ns(req):
             for i in ns_toadd_set:
                 msg['msg'] += "domain ns:%s delete success; " %(i.strip())
 
+            # 更新 update_time
+            models.ZoneTag.objects.filter(zone_name=zone).update(update_time=timezone.now())
         msg['status'] = 200
     except Exception as e:
         print(e)
@@ -214,7 +218,7 @@ def domain_resolution_list(req):
     :param req:
     :return:
     """
-    zone_obj_list = models.ZoneTag.objects.all()
+    zone_obj_list = models.ZoneTag.objects.all().order_by('id')
     zone_obj_perpage_list, pagination_html  = MyPaginator(zone_obj_list, 1, 10)
     return render(req, 'bind/domain_resolution_list.html',
                   {'zone_obj_list': zone_obj_perpage_list,
@@ -911,6 +915,8 @@ def record_mod(req):
                     record_obj_list.update(status='off')
                 else:
                     record_obj_list.update(status='on')
+                # 更新 update_time
+                record_obj_list.update(update_time=timezone.now())
                 msg['status'] = 200
             except Exception as e:
                 print(e)

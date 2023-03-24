@@ -1,3 +1,4 @@
+{% load MyTemplate %}
                 <div class="box-body table-responsive no-padding">
                     <table id="table_domains" class="table table-hover">
                         <thead>
@@ -5,8 +6,8 @@
                             <th class="th-w1-1"><input type="checkbox" data-check-all onclick="SelectAll('#table_domains' )"></th>
                             <th class="th-w1-2">域名</th>
                             <th class="th-w1-3">状态</th>
-                            <th class="th-w1-4">备注</th>
-                            <th class="th-w1-5">操作</th>
+                            <th class="th-w1-6">操作</th>
+                            <th class="th-w1-6">备注</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -21,8 +22,8 @@
                                         <span class="glyphicon glyphicon-pause orange"></span>
                                     {% endif %}
                                 </td>
-                                <td>{{ zone_obj.comment }}</td>
                                 <td><a href="/dns/{{ zone_obj.id }}">解析</a>  <a>更多</a></td>
+                                <td>{% val_none_to_blank zone_obj.comment '' %}</td>
                             </tr>
                         {% endfor %}
                         </tbody>
