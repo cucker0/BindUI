@@ -1,3 +1,4 @@
+{% load MyTemplate %}
 
                 <div class="box-body table-responsive no-padding" style="overflow-x:visible">
                     <table id="table_domains" class="table table-hover">
@@ -6,8 +7,10 @@
                             <th class="th-w1-1"><input type="checkbox" data-check-all onclick="SelectAll('#table_domains' )"></th>
                             <th class="th-w1-2">域名</th>
                             <th class="th-w1-3">状态</th>
-                            <th class="th-w1-4">备注</th>
                             <th class="th-w1-5">操作</th>
+                            <th class="th-w1-1">创建时间</th>
+                            <th class="th-w1-1">最后操作时间</th>
+                            <th class="th-w1-4">备注</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -22,7 +25,6 @@
                                         <span class="glyphicon glyphicon-pause orange"></span>
                                     {% endif %}
                                 </td>
-                                <td>{{ zone_obj.comment }}</td>
                                 <td><a name="dns_resolution">解析</a>
                                     <a name="domain_manager">管理</a>
                                     <span role="presentation" class="dropdown">
@@ -43,6 +45,9 @@
                                         </ul>
                                     </span>
                                 </td>
+                                <td>{% val_none_to_blank zone_obj.create_time '' %}</td>
+                                <td>{% val_none_to_blank zone_obj.update_time '' %}</td>
+                                <td>{{ zone_obj.comment }}</td>
                             </tr>
                         {% endfor %}
                         </tbody>

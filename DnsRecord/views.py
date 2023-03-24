@@ -51,7 +51,7 @@ def domain_list(req):
             page = 1
     else:
         page = 1
-    zone_obj_list = models.ZoneTag.objects.all()
+    zone_obj_list = models.ZoneTag.objects.all().order_by('id')
     zone_obj_perpage_list, pagination_html = MyPaginator(zone_obj_list, page)
     return render(req, 'bind/domain_list.html', {
         'zone_obj_list': zone_obj_list,
