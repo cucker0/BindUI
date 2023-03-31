@@ -67,7 +67,7 @@ def check_ipv4(ip:str) -> bool:
     return False
 
 
-def record_data_filter(data):
+def records_data_filter(data):
     """ 多条 rr 数据过滤
 
     更新或创建 record 根据type过滤 data key,把非必要字段都留空,把type字段转为大写，CharField字段要求小写的转为小写
@@ -123,16 +123,7 @@ def record_data_filter(data):
             # elif data['type'] == 'CNAME' or (data['type'] == 'NS') or data['type'] == 'SOA' or data['type'] == 'PTR':
             elif data[i]['type'] in ('CNAME', 'NS', 'SOA', 'PTR'):
                 # 要求为域名，如www.abc.com. 或 www.abc.com
-                reg1 = "^([a-zA-Z0-9]+(-[a-z0-9]+)*\.)+[a-z]{1,}$"
-                reg2 = "^([a-zA-Z0-9]+(-[a-z0-9]+)*\.)+[a-z]{1,}\.$"
-                compile_data1 = re.compile(reg1)
-                compile_data2 = re.compile(reg2)
-                if compile_data1.match(data[i]['data']):
-                    data[i]['data'] = "%s." % (data[i]['data'])
-                elif compile_data2.match(data[i]['data']):
-                    pass
-                else:
-                    data[i] = None
+                data[i]['data'] = endwith_dot(data[i]['data'])
 
                 if data[i]['type'] == 'SOA':
                     if not data[i]['resp_person'].endswith('.'):
@@ -198,15 +189,8 @@ def a_record_data_filter(rr:dict) -> bool:
                 return False
         elif rr['type'] in ('CNAME', 'NS', 'SOA', 'PTR'):
             # 要求为域名，如www.abc.com. 或 www.abc.com
-            reg1 = "^([a-zA-Z0-9]+(-[a-z0-9]+)*\.)+[a-z]{1,}$"
-            reg2 = "^([a-zA-Z0-9]+(-[a-z0-9]+)*\.)+[a-z]{1,}\.$"
-            compile_data1 = re.compile(reg1)
-            compile_data2 = re.compile(reg2)
-            if compile_data1.match(rr['data']):
-                rr['data'] = "%s." % (rr['data'])
-            elif compile_data2.match(rr['data']):
-                pass
-            else:
+            rr['data'] = endwith_dot(rr['data'])
+            if rr['data'] == '':
                 return False
 
             if rr['type'] == 'SOA':
@@ -255,9 +239,29 @@ def serial(num=0):
 
     return num
 
-def get_url_forwarder_domain() -> str:
-    """ 获取 显性URL、隐性URL转发的主机名(域名)
+def get_url_forwarder_fqdn() -> str:
+    """ 获取 显性URL、隐性URL转发的主机名(完整域名/完全限定域名)
 
     :return:
     """
-    return dns_conf.URL_FORWARDER_DOMAIN
+    return endwith_dot(dns_conf.URL_FORWARDER_DOMAIN)
+
+def endwith_dot(fqdn:str) -> str:
+    """ 使给定的字符串 以"."结尾
+
+    :param fqdn:
+    :return:
+    """
+    if not fqdn:
+        return ''
+    if fqdn == '':
+        return ''
+    if type(fqdn) != str:
+        return ''
+
+    if fqdn.endswith('.'):
+        pass
+    else:
+        fqdn = f"%s." % (fqdn)
+
+    return fqdn

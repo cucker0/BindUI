@@ -223,7 +223,7 @@ function MXShowOrHide(){
 }
 
 function RedirectCodeShowOrHide() {
-    // 天健 显性URL 时，重定向 code 选择框的展示/隐藏
+    // 添加 显性URL 时，重定向 code 选择框的展示/隐藏
     var type_val = $(".form-horizontal select[name=type]").val();
 
     switch (type_val) {
@@ -300,7 +300,7 @@ function ChangePlaceholder(){
             $(".form-horizontal input[name=data]").prop("placeholder", "填写要跳转到的网址，如：https://www.qq.com");
             break;
         default:
-            $(".form-horizontal input[name=host]").prop("placeholder", "填写子域名（如www），不填写默认保存为@");
+            $(".form-horizontal input[name=host]").prop("placeholder", "填写子域名（如www），*表示泛域名，不填写默认保存为@");
             $(".form-horizontal input[name=data]").prop("placeholder", "填写一个IPv4地址，例如：8.8.8.8");
             //$(".form-horizontal input[name=mx]").parent().parent().hide();
     }
@@ -354,7 +354,7 @@ function RecordAddModify(){
     var _zone_tag_name = $("#table_record_list").attr("domain").trim();
     var _comment = $(".modal-body input[name=comment]").val().trim();
     var _redirect_code = $(".modal-body select[name=redirect_code]").val().trim();
-    var __data = {"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data, "mx_priority":_mx, "ttl":_ttl, "comment":_comment, "zone":_zone_tag_name }
+    var __data = {"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data, "mx_priority":_mx, "ttl":_ttl, "comment":_comment, "zone":_zone_tag_name };
 
     // 显性URL，添加额外的 redirect_code
     switch (__data.type) {

@@ -11,7 +11,7 @@ BASIC_DIR = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(BASIC_DIR)
 from bindUI import dns_conf
 import json
-from .utils import serial, record_data_filter, COMMON_MSG, get_url_forwarder_domain, a_record_data_filter
+from .utils import serial, records_data_filter, COMMON_MSG, get_url_forwarder_fqdn, a_record_data_filter
 
 # Create your views here.
 
@@ -38,8 +38,8 @@ def index(req):
 
 @login_required
 def domain_list(req):
-    """
-    dashboard, domain list
+    """ 我的域名 页面
+
     :param req:
     :return:
     """
@@ -143,7 +143,7 @@ def domain_add(req):
     data['host'] = '@'
     data['ttl'] = 3600
     data['serial'] = serial()
-    data = record_data_filter(data)
+    data = a_record_data_filter(data)
     record_set = models.Record.objects.filter(Q(type='SOA') & Q(zone=data['zone'].strip()) )
     zone_tag_set = models.ZoneTag.objects.filter(zone_name=data['zone'].strip())
 
@@ -194,7 +194,7 @@ def domain_ns(req):
             ns_todelete_set = ns_data_set - ns_submit_set   # 需要删除的domian NS data字段集合
             for i in ns_toadd_set:
                 ns_instance = {'zone':zone, 'host':'@', 'type':'NS', 'data':i.strip(), 'ttl':10800, 'basic':2, 'zone_tag':zone_tag_obj }
-                record_data_filter(ns_instance)
+                a_record_data_filter(ns_instance)
                 models.Record.objects.update_or_create(**ns_instance)
                 msg['msg'] += "domain ns:%s create success; " %(i.strip())
 
@@ -398,8 +398,7 @@ def export_dns(req):
 
 @login_required
 def dlist_page(req):
-    """
-    我的域名 page翻页操作
+    """ 我的域名 页面的 page翻页操作
     :param req: 用户请求
     :return: render模板
     """
@@ -801,18 +800,93 @@ def rlist_page(req):
     ret.set_cookie('perpage_num', data['perpage_num'] or 20)
     return ret
 
-def add_a_cname_record(rr:dict):
-    """新建一条特定的显性URL 或 隐性URL 关联的 CNAME 记录
+def associate_cname_rr_add(rr_data:dict) -> models.Record:
+    """新建一条给指定的显性URL 或 隐性URL 关联的 CNAME 记录
 
-    :param record: 类型为 dict
+    :param rr_data: 用于新建 RR 的数据，类型为 dict
     :return: 新建 或 更新的 对象
     """
     # models.Record.objects.update_or_create() 返回结果为
     # Return a tuple (object, created), where created is a boolean
     # cname_rr 的 data 数据从数据库中读取
-    cname_rr = {'zone':rr['zone'], 'host':rr['host'], 'type':'CNAME', 'data':get_url_forwarder_domain(), 'ttl':rr['ttl'], 'basic':3, 'zone_tag':rr['zone_tag'] }
+    cname_rr = {'zone':rr_data['zone'], 'host':rr_data['host'], 'type':'CNAME', 'data':get_url_forwarder_fqdn(), 'ttl':rr_data['ttl'], 'basic':3, 'zone_tag':rr_data['zone_tag'] }
     obj, opt_type = models.Record.objects.update_or_create(**cname_rr)
     return obj
+
+def associate_rr_del(rr:models.Record):
+    """ 删除 URL显性、URL隐性 记录关联的 record
+
+    :param rr: 类型为dict
+    :return:
+    """
+    rr_obj = models.Record.objects.get(id=rr.associate_rr_id)
+    if rr_obj:
+        return rr_obj.delete()
+
+def associate_rr_status_mod(rr:models.Record, action:str):
+    """ 修改URL显性、URL隐性 RR 关联的 record 的 status 属性(CNAME RR)
+
+    :param rr: 类型为dict
+    :param action: 操作。可选项 _turnOff: 停止此RR，其他: 启用此RR
+    :return:
+    """
+    rr_obj = models.Record.objects.get(id=rr.associate_rr_id)
+    if action == '_turnOff':
+        rr_obj.status = 'off'
+    else:
+        rr_obj.status = 'on'
+    rr_obj.update_time = timezone.now()
+    rr_obj.save()
+
+def associate_rr_main_mod(rr:models.Record, rr_update_data:dict):
+    """ 在一条 RR 更新数据后，处理后续的关联操作。
+
+    :param rr: URL显性 或 URL隐性 RR
+    :param rr_update_data: URL显性 或 URL隐性 RR 要更新的数据(dict)
+    :return:
+    """
+    # 非URL转发RR 更新为 URL转发RR --start
+    if (not is_forward_rr(rr)) and is_forward_rr_update_data(rr_update_data):
+        rr_obj = associate_cname_rr_add(rr_update_data)
+        if not rr_obj:
+            return
+        rr.associate_rr_id = rr_obj.id
+        rr.save()
+        # 与 rr 关联的 CNAME RR 状态与 rr 的状态保持相同。
+        rr_obj.status = rr.status
+        rr_obj.save()
+    # 非URL转发RR 更新为 URL转发RR --end
+
+    associate_rr = models.Record.objects.get(id=rr.associate_rr_id)
+    if not associate_rr:
+        return
+
+    # URL显性 或 URL隐性 RR 关联的 CNAME  RR 关心的属性：
+    #       type, host, resolution_line
+
+    # URL显性 或 URL隐性RR更新数据，不改变RR的type（还是URL转发类型） --start
+    if is_forward_rr(rr) and is_forward_rr_update_data(rr_update_data):
+        count = 0
+        # 更新 host
+        if rr.host != rr_update_data['host']:
+            associate_rr.host = rr_update_data['host']
+            count += 1
+        ## 更新 resolution_line
+        if rr.resolution_line != rr_update_data['resolution_line']:
+            associate_rr.resolution_line = rr_update_data['resolution_line']
+            count += 1
+
+        if count > 0:
+            associate_rr.update_time = timezone.now()
+            associate_rr.save()
+    # URL显性 或 URL隐性RR更新数据，不改变RR的type（还是URL转发类型） --end
+
+    # URL显性 或 URL隐性RR更新数据，并改变RR的type（改为非URL转发类型）  --start
+    if is_forward_rr(rr) and (not is_forward_rr_update_data(rr_update_data)):
+        rr.associate_rr_id = None
+        rr.save()
+        associate_rr.delete()
+    # URL显性 或 URL隐性RR更新数据，并改变RR的type（改为非URL转发类型）  --end
 
 @login_required
 def record_add(req):
@@ -828,7 +902,6 @@ def record_add(req):
         try:
             data = json.loads(data)
             msg['total'] = len(data)
-            # record_data_filter(data)  # 字典或列表 以指针形式传递参数
             for i in data:
                 if not a_record_data_filter(i):
                     print("%s 检查过滤RR数据失败。" % i)
@@ -838,7 +911,7 @@ def record_add(req):
                 # 新建 显性URL、隐性URL 记录时，需要创建一条关联的 CNAME 记录  --start
                 if type(i) == dict and 'basic' in list(i.keys()):
                     if i['type'] == 'TXT' and i['basic'] in (dns_conf.URL_FORWARDER_BASIC_SET):
-                        obj = add_a_cname_record(i)
+                        obj = associate_cname_rr_add(i)
                         i['associate_rr_id'] = obj.id
                 # 新建 显性URL、隐性URL 记录时，需要创建一条关联的 CNAME 记录  --end
                 models.Record.objects.update_or_create(**i)
@@ -852,16 +925,6 @@ def record_add(req):
         return HttpResponse(json.dumps(msg))
     else:
         return HttpResponse(COMMON_MSG['req_use_post'])
-
-def associate_rr_del(rr:models.Record):
-    """ 删除关联的 record
-
-    :param rr: 类型为dict
-    :return:
-    """
-    rr_obj = models.Record.objects.get(id=rr.associate_rr_id)
-    if rr_obj:
-        return rr_obj.delete()
 
 @login_required
 def record_del(req):
@@ -906,17 +969,18 @@ def record_mod(req):
     msg = {'status': 500}
     _type = req.GET.get('type')      #  <==>  type = req.GET['type'] ,两种用法都可以
     if req.method == 'POST':
-        data = json.loads(req.POST.get('data'))
+        data = json.loads(req.POST.get('data'))  # 一条 json 格式的更新RR 数据(dict类型)
         if _type == 'status':        # 修改status，开启、停用DNS记录
             if data['id_list']:
-                record_obj_list = models.Record.objects.filter(id__in=data['id_list'])
+                record_obj_set = models.Record.objects.filter(id__in=data['id_list'])
             try:
                 if data['action'] == '_turnOff':
-                    record_obj_list.update(status='off')
+                    record_obj_set.update(status='off')
                 else:
-                    record_obj_list.update(status='on')
+                    record_obj_set.update(status='on')
                 # 更新 update_time
-                record_obj_list.update(update_time=timezone.now())
+                record_obj_set.update(update_time=timezone.now())
+
                 msg['status'] = 200
             except Exception as e:
                 print(e)
@@ -924,13 +988,13 @@ def record_mod(req):
         elif _type == 'main':      # 修改DNS记录除status外的项
             try:
                 record_obj_set = models.Record.objects.filter(id=data['id'])
-                del(data['id'])     # data.pop('id') print key
+                del(data['id'])     # data.pop('id') 则会 print key
                 # zone_tag_obj = models.ZoneTag.objects.get(zone_name=data['zone'])
                 zone_tag_obj = record_obj_set.first().zone_tag
                 data['zone'] = zone_tag_obj.zone_name
                 data['zone_tag'] = zone_tag_obj
                 data['update_time'] = timezone.now()
-                record_data_filter(data)
+                a_record_data_filter(data)
                 record_obj_set.update(**data)
 
                 msg['status'] = 200
@@ -941,3 +1005,22 @@ def record_mod(req):
     else:
         return HttpResponse(COMMON_MSG['req_use_post'])
 
+def is_forward_rr(rr:models.Record) -> bool:
+    """ 判断一个 RR 记录是否为 URL转发 记录
+
+    :param rr:
+    :return:
+    """
+    return (rr.type == 'TXT') and (rr.basic in dns_conf.URL_FORWARDER_BASIC_SET)
+
+def is_forward_rr_update_data(rr_update_data:dict) -> bool:
+    """ 判断一个 RR更新数据 是否为 URL转发 类型
+
+    :param rr_update_data: RR更新数据
+    :return:
+    """
+    if (type(rr_update_data) == dict) and ('basic' in list(rr_update_data.keys())):
+        if (rr_update_data['type'] == 'TXT') and (rr_update_data['basic'] in dns_conf.URL_FORWARDER_BASIC_SET):
+            return True
+
+    return False
