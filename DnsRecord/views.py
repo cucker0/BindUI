@@ -870,7 +870,7 @@ def associate_rr_main_mod(rr:models.Record, rr_update_data:dict):
     if is_forward_rr(rr) and is_forward_rr_update_data(rr_update_data):
         count = 0
         # 更新 host
-        if rr.host != rr_update_data['host']:
+        if associate_rr.host != rr_update_data['host']:
             associate_rr.host = rr_update_data['host']
             count += 1
         ## 更新 resolution_line
@@ -883,7 +883,7 @@ def associate_rr_main_mod(rr:models.Record, rr_update_data:dict):
             associate_rr.save()
     # URL显性 或 URL隐性RR更新数据，不改变RR的type（还是URL转发类型） --end
 
-    # URL显性 或 URL隐性RR更新数据，并改变RR的type（改为非URL转发类型）  --start
+    # URL显性 或 URL隐性RR更新数据，并改变RR的type为非URL转发类型  --start
     if is_forward_rr(rr) and (not is_forward_rr_update_data(rr_update_data)):
         rr.associate_rr_id = None
         rr.save()
