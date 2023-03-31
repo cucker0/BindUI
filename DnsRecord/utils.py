@@ -265,3 +265,14 @@ def endwith_dot(fqdn:str) -> str:
         fqdn = f"%s." % (fqdn)
 
     return fqdn
+
+
+def action2status(action: str) -> str:
+    """ 操作 RR 状态的动作 转换为 RR 的 status 值
+
+    :param action:
+    :return:
+    """
+    if action == '_turnOff':
+        return 'off'
+    return 'on'

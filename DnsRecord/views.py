@@ -11,7 +11,7 @@ BASIC_DIR = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(BASIC_DIR)
 from bindUI import dns_conf
 import json
-from .utils import serial, records_data_filter, COMMON_MSG, get_url_forwarder_fqdn, a_record_data_filter
+from .utils import serial, records_data_filter, COMMON_MSG, get_url_forwarder_fqdn, a_record_data_filter, action2status
 
 # Create your views here.
 
@@ -823,18 +823,20 @@ def associate_rr_del(rr:models.Record):
     if rr_obj:
         return rr_obj.delete()
 
-def associate_rr_status_mod(rr:models.Record, action:str):
+def associate_rr_status_mod(rr:models.Record, status:str):
     """ 修改URL显性、URL隐性 RR 关联的 record 的 status 属性(CNAME RR)
 
     :param rr: 类型为dict
-    :param action: 操作。可选项 _turnOff: 停止此RR，其他: 启用此RR
+    :param status: RR 状态。
     :return:
     """
+    if not is_forward_rr(rr):
+        return
     rr_obj = models.Record.objects.get(id=rr.associate_rr_id)
-    if action == '_turnOff':
-        rr_obj.status = 'off'
-    else:
-        rr_obj.status = 'on'
+    if not rr_obj:
+        return
+
+    rr_obj.status = status
     rr_obj.update_time = timezone.now()
     rr_obj.save()
 
@@ -969,17 +971,22 @@ def record_mod(req):
     msg = {'status': 500}
     _type = req.GET.get('type')      #  <==>  type = req.GET['type'] ,两种用法都可以
     if req.method == 'POST':
-        data = json.loads(req.POST.get('data'))  # 一条 json 格式的更新RR 数据(dict类型)
+        data:dict = json.loads(req.POST.get('data'))  # 一条 json 格式的更新RR 操作数据(dict类型)
+        if type(data) != dict:
+            return HttpResponse(COMMON_MSG['req_use_post'])
         if _type == 'status':        # 修改status，开启、停用DNS记录
             if data['id_list']:
                 record_obj_set = models.Record.objects.filter(id__in=data['id_list'])
+                if not record_obj_set:
+                    return HttpResponse(COMMON_MSG['req_use_post'])
             try:
-                if data['action'] == '_turnOff':
-                    record_obj_set.update(status='off')
-                else:
-                    record_obj_set.update(status='on')
+                record_obj_set.update(status=action2status(data['action']))
+
                 # 更新 update_time
                 record_obj_set.update(update_time=timezone.now())
+                # 更新相关联的记录
+                for rr in record_obj_set:
+                    associate_rr_status_mod(rr, action2status(data['action']))
 
                 msg['status'] = 200
             except Exception as e:
@@ -996,6 +1003,9 @@ def record_mod(req):
                 data['update_time'] = timezone.now()
                 a_record_data_filter(data)
                 record_obj_set.update(**data)
+                # 更新相关联的记录
+                for rr in record_obj_set:
+                    associate_rr_main_mod(rr, data)
 
                 msg['status'] = 200
             except Exception as e:
