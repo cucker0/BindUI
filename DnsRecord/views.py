@@ -1024,6 +1024,8 @@ def is_forward_rr(rr:models.Record) -> bool:
     :param rr:
     :return:
     """
+    if not rr.associate_rr_id:
+        return False
     return (rr.type == 'TXT') and (rr.basic in dns_conf.URL_FORWARDER_BASIC_SET)
 
 def is_forward_rr_update_data(rr_update_data:dict) -> bool:
