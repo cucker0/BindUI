@@ -847,8 +847,8 @@ def associate_rr_main_mod(rr:models.Record, rr_update_data:dict):
     :param rr_update_data: URL显性 或 URL隐性 RR 要更新的数据(dict)
     :return:
     """
-    # 非URL转发RR 更新为 URL转发RR --start
     if (not is_forward_rr(rr)) and is_forward_rr_update_data(rr_update_data):
+        # 非URL转发RR 更新为 URL转发RR --start
         rr_obj = associate_cname_rr_add(rr_update_data)
         if not rr_obj:
             return
@@ -857,17 +857,13 @@ def associate_rr_main_mod(rr:models.Record, rr_update_data:dict):
         # 与 rr 关联的 CNAME RR 状态与 rr 的状态保持相同。
         rr_obj.status = rr.status
         rr_obj.save()
-    # 非URL转发RR 更新为 URL转发RR --end
-
-    associate_rr = models.Record.objects.get(id=rr.associate_rr_id)
-    if not associate_rr:
         return
-
-    # URL显性 或 URL隐性 RR 关联的 CNAME  RR 关心的属性：
-    #       type, host, resolution_line
-
-    # URL显性 或 URL隐性RR更新数据，不改变RR的type（还是URL转发类型） --start
-    if is_forward_rr(rr) and is_forward_rr_update_data(rr_update_data):
+        # 非URL转发RR 更新为 URL转发RR --end
+    elif is_forward_rr(rr) and is_forward_rr_update_data(rr_update_data):
+        # URL显性 或 URL隐性RR更新数据，保持URL转发类型  --start
+        associate_rr = models.Record.objects.get(id=rr.associate_rr_id)
+        if not associate_rr:
+            return
         count = 0
         # 更新 host
         if associate_rr.host != rr_update_data['host']:
@@ -881,14 +877,19 @@ def associate_rr_main_mod(rr:models.Record, rr_update_data:dict):
         if count > 0:
             associate_rr.update_time = timezone.now()
             associate_rr.save()
-    # URL显性 或 URL隐性RR更新数据，不改变RR的type（还是URL转发类型） --end
+        # URL显性 或 URL隐性RR更新数据，保持URL转发类型 --end
 
-    # URL显性 或 URL隐性RR更新数据，并改变RR的type为非URL转发类型  --start
-    if is_forward_rr(rr) and (not is_forward_rr_update_data(rr_update_data)):
+    elif is_forward_rr(rr) and (not is_forward_rr_update_data(rr_update_data)):
+        # URL显性 或 URL隐性RR更新数据，更新为非URL转发类型  --start
+        associate_rr = models.Record.objects.get(id=rr.associate_rr_id)
+        if not associate_rr:
+            return
         rr.associate_rr_id = None
+        rr.basic = 0
         rr.save()
         associate_rr.delete()
-    # URL显性 或 URL隐性RR更新数据，并改变RR的type（改为非URL转发类型）  --end
+        # URL显性 或 URL隐性RR更新数据，更新为非URL转发类型  --end
+
 
 @login_required
 def record_add(req):
@@ -1002,10 +1003,12 @@ def record_mod(req):
                 data['zone_tag'] = zone_tag_obj
                 data['update_time'] = timezone.now()
                 a_record_data_filter(data)
-                record_obj_set.update(**data)
-                # 更新相关联的记录
+
+                # 更新相关联的记录，要在“更新 record_obj_set” 之前执行，否则 record_obj_set 会更行
                 for rr in record_obj_set:
                     associate_rr_main_mod(rr, data)
+                # 更新 record_obj_set
+                record_obj_set.update(**data)
 
                 msg['status'] = 200
             except Exception as e:
