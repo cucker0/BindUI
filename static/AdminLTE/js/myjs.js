@@ -2,6 +2,33 @@
  * Created by 0 on 02-27 2016.
  */
 
+
+/**
+ * 字符串格式化
+ *
+ *  //方式1
+ *  var test = '我的{0}是{1}';
+ *  var result = test.format('ID','coco56');
+ *
+ *  //方式2
+ *  var test = '我的{description}是{name}';
+ *  var result = test.format({description:'ID',name:'coco56'});
+ *
+ *
+ * @returns {String|String|*|string}
+ */
+String.prototype.format = function () {
+    // 字符串格式化
+    if (arguments.length === 0) {
+        return this;
+    }
+    for (var s = this, i = 0; i < arguments.length; i++) {
+        s = s.replace(new RegExp("\\{" + i + "\\}", "g"), arguments[i]);
+    }
+    return s;
+};
+
+
 function GetCheckboxValue(selector){
     //获取目标选择器 input checkbox 选中的值，返回为列表
     var _checkbox_val = [];
@@ -596,18 +623,27 @@ function RecordDelteACK(event){
         tag_selector.children().prop("checked", true);      //当前行打勾
         tag_selector.parent().siblings().find('input').removeAttr("checked");       //取消其他行的勾
         $(this).parent().parent().parent().prev().find("input").removeAttr("checked");    //取消 selectAll 勾
-        $("DNSRecordDeleteModalLabel").prop("multiple", 0);     // 标识为非多条操作
+        $("#DNSRecordDeleteModalLabel").prop("multiple", 0);     // 标识为非多条操作
     }else if (event.data.optype == 2){
-        $("DNSRecordDeleteModalLabel").prop("multiple", 1);     // 标识为多条操作
+        $("#DNSRecordDeleteModalLabel").prop("multiple", 1);     // 标识为多条操作
     }
 
     $('#DNSRecordDeleteModalLabel').modal('show');
+    var _tip = "<b>{0}</b>.{1} &emsp;[{2}, {3}] &emsp;记录删除？";
+    var _rr = GetCheckedRecord();
+    var tip = "确定删除所选择的解析记录吗？";
+
+    if (_rr.status) {
+        tip = _tip.format(_rr.host, _rr.zone, _rr.type, _rr.resolution_line);
+    }
+    $("#DNSRecordDeleteModalLabel td .tit").html(tip);
+
 }
 
 function RecordDel(){
     //删除DNS记录（执行删除）
     var _checkbox_val = [];
-    var multiple = $("DNSRecordDeleteModalLabel").prop("multiple");
+    var multiple = $("#DNSRecordDeleteModalLabel").prop("multiple");
     if(multiple == 0){     // 单条操作
         var select_id = $("#table_record_list tbody input:checked").prop('id');
         _checkbox_val.push(select_id);
@@ -650,10 +686,22 @@ function RecordStatusACK(event){
     }
     var _status = $(this).prop('name');
     $("#DNSRecordStatusModalLabel").prop('name', _status);      // 在DNS记录状态操作模态框中标识 DNS记录状态操作动态类型
+    var _tip = "<b>{0}</b>.{1} &emsp;[{2}, {3}] &emsp;记录{4}？";
+    var _rr = GetCheckedRecord();
+    var tip = "暂停记录吗？";
     if (_status == '_turnOff'){
-        $("#DNSRecordStatusModalLabel td .info").text('暂停记录吗？');
+
+        if (_rr.status) {
+            tip = _tip.format(_rr.host, _rr.zone, _rr.type, _rr.resolution_line, "暂停");
+        }
+        $("#DNSRecordStatusModalLabel td .info").html(tip);
+
     } else if(_status == '_turnOn'){
-        $("#DNSRecordStatusModalLabel td .info").text('开启记录吗？');
+        tip = "开启记录吗？";
+        if (_rr.status) {
+            tip = _tip.format(_rr.host, _rr.zone, _rr.type, _rr.resolution_line, "开启");
+        }
+        $("#DNSRecordStatusModalLabel td .info").html(tip);
     }
     $('#DNSRecordStatusModalLabel').modal('show');
 }
@@ -1303,6 +1351,24 @@ function DisalbeDomainZoneEdit(option=true) {
         $("#DomainAddOrModifyModalLabel input[name=zone]").prop("disabled", false);
     }
 }
+
+function GetCheckedRecord() {
+    // 当 #table_record_list 列表中只选中了一条记录时，返回该条记录的信息。数据格式：{status: status, data: {host:host, zone:zone, ...}}
+    var _d = {status: false};
+    var _checkbox_id_list = GetCheckboxAttrSet("#table_record_list", "id");
+    if (_checkbox_id_list.length !== 1) {
+        return _d;
+    }
+    _d.status = true;
+
+    var _tds = $("#table_record_list td input:checked:not([data-check-all])").parent().siblings();
+    _d.host = _tds.find("span").first().text().trim();
+    _d.zone =$("div[zone_tag_name]").text().trim();
+    _d.type = $(_tds[1]).text().trim();
+    _d.resolution_line = $(_tds[2]).text().trim();
+    return _d;
+}
+
 
 $(document).ready(function(){
     //DOM就绪后执行
