@@ -196,6 +196,7 @@ def domain_main_mod(req):
             )
             del (data['id'])  # data.pop('id') 则会 print key
             data['host'] = '@'
+            data['type'] = 'SOA'
             data['zone'] = zone_tag_obj.zone_name
             data['zone_tag'] = zone_tag_obj
             data['serial'] = serial(record_obj_set.get().serial)

@@ -235,12 +235,41 @@ function RedirectCodeShowOrHide() {
     }
 }
 
+var DomainAddOrModifyDefaultValue = {
+    zone: "",
+    data: "",
+    resp_person: "",
+    refresh: 900,
+    retry: 900,
+    expire: 2592000,
+    minimum: 600,
+    primary_ns: "",
+    comment: ""
+};
+
+function ChangeDomainAddModify2Default() {
+    // 修改 添加域名/修改域名 模态框恢复默认值
+    var action_type = $("#DomainAddOrModifyModalLabel").attr("action_type");
+    if(action_type == "add"){  // 恢复默认值
+        $("#DomainAddOrModifyModalLabel input[name=zone]").val(DomainAddOrModifyDefaultValue.zone);
+        $("#DomainAddOrModifyModalLabel input[name=data]").val(DomainAddOrModifyDefaultValue.data);
+        $("#DomainAddOrModifyModalLabel input[name=responsible_mail]").val(DomainAddOrModifyDefaultValue.resp_person);
+        $("#DomainAddOrModifyModalLabel input[name=refresh]").val(DomainAddOrModifyDefaultValue.refresh);
+        $("#DomainAddOrModifyModalLabel input[name=retry]").val(DomainAddOrModifyDefaultValue.retry);
+        $("#DomainAddOrModifyModalLabel input[name=expire]").val(DomainAddOrModifyDefaultValue.expire);
+        $("#DomainAddOrModifyModalLabel input[name=minimum]").val(DomainAddOrModifyDefaultValue.minimum);
+        $("#DomainAddOrModifyModalLabel input[name=primary_ns]").val(DomainAddOrModifyDefaultValue.primary_ns);
+        $("#DomainAddOrModifyModalLabel input[name=comment]").val(DomainAddOrModifyDefaultValue.comment);
+    }
+
+}
+
 function ChangePlaceholder(){
-    var action_type = $("#DNSRecordAddOrModifyModalLabel").prop("action_type");
+    var action_type = $("#DNSRecordAddOrModifyModalLabel").attr("action_type");
     if(action_type == "add"){       // 添加记录，清空host，data值
-        $(".form-horizontal input[name=host]").val("");
-        $(".form-horizontal input[name=data]").val("");
-        $(".form-horizontal input[name=comment]").val("");
+        $("#DNSRecordAddOrModifyModalLabel .form-horizontal input[name=host]").val("");
+        $("#DNSRecordAddOrModifyModalLabel .form-horizontal input[name=data]").val("");
+        $("#DNSRecordAddOrModifyModalLabel .form-horizontal input[name=comment]").val("");
     }
 
     // 添加DNS记录选择记录类型时，自动调整相应的Placeholder提示内容
@@ -417,12 +446,12 @@ function RecordAddACK(){
     $("#DNSRecordAddOrModifyModalLabel").attr("action_type", "add");        //修改 action_type值
 
     //每次点击 添加记录 重置记录类型,并改变Placeholder值
-    $(".form-horizontal input[name=mx]").parent().parent().hide();
-    $(".form-horizontal input[name=host]").val('');
-    $(".form-horizontal select[name=resolution_line]").val('0');
-    $(".form-horizontal input[name=data]").val('');
-    $(".form-horizontal select[name=ttl]").val('600');
-    $(".form-horizontal input[name=comment]").val('');
+    $("#DNSRecordAddOrModifyModalLabel .form-horizontal input[name=mx]").parent().parent().hide();
+    // $("#DNSRecordAddOrModifyModalLabel .form-horizontal input[name=host]").val('');
+    $("#DNSRecordAddOrModifyModalLabel .form-horizontal select[name=resolution_line]").val('0');
+    // $("#DNSRecordAddOrModifyModalLabel .form-horizontal input[name=data]").val('');
+    $("#DNSRecordAddOrModifyModalLabel .form-horizontal select[name=ttl]").val('600');
+    // $("#DNSRecordAddOrModifyModalLabel .form-horizontal input[name=comment]").val('');
     var _domain_name = $("div .nav h2").text();
     if (_domain_name.endsWith('in-addr.arpa')) {
         $(".form-horizontal select[name=type]").val('PTR');
@@ -968,6 +997,8 @@ function DoaminAddACK(){
     $("#DomainAddOrModifyModalLabel .modal-title").html("添加域名");  // 修改modal标题内容
     $("#DomainAddOrModifyModalLabel").attr("action_type", "add");  // 修改 action_type值
     DisalbeDomainZoneEdit(false);
+
+    ChangeDomainAddModify2Default();
 }
 
 function DoaminModifyACK(){
