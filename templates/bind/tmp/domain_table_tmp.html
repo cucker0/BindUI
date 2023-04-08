@@ -17,7 +17,7 @@
                         {% for zone_obj in zone_obj_list %}
                             <tr>
                                 <td><input type="checkbox" id="{{ zone_obj.id }}"></td>
-                                <td>{{ zone_obj.zone_name }}</td>
+                                <td name="zone">{{ zone_obj.zone_name }}</td>
                                 <td>
                                     {% if zone_obj.status == 'on' %}
                                         <span class="glyphicon glyphicon-play-circle green"></span>
@@ -39,6 +39,7 @@
                                         {% elif zone_obj.status == 'off' %}
                                             <li><a action_type=status name="_turnOn" href="javascript:;">开启解析</a></li>
                                         {% endif %}
+                                            <li><a action_type="modify" href="javascript:;">修改</a></li>
                                             <li><a action_type="delete" href="javascript:;">删除域名</a></li>
                                             <li><a action_type="_import_records" href="{% url 'import_dns' %}?domain={{ zone_obj.zone_name }}">导入解析记录</a></li>
                                             <li><a action_type="_export_records" href="javascript:;">导出解析记录</a></li>

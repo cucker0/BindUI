@@ -69,7 +69,7 @@ def domain_status_mod(req):
     if req.method == 'POST':
         data = json.loads(req.POST.get('data'))
         if data['id_list']:
-            print(data['id_list'], type(data['id_list']))
+            # print(data['id_list'], type(data['id_list']))
             zone_tag_list = models.ZoneTag.objects.filter(id__in=data['id_list'])
         try:
             if data['action'] == '_turnOff':
@@ -407,7 +407,7 @@ def dlist_page(req):
         zone_obj_list = None
         search_key = ''
         if data['action'] == 'pagination':
-            zone_obj_list = models.ZoneTag.objects.all()
+            zone_obj_list = models.ZoneTag.objects.all().order_by('id')
         elif data['action'] == 'search':
             try:
                 search_key = data['other']['search_key']
@@ -437,7 +437,7 @@ def domain_resolution_page(req):
         data = json.loads(req.POST.get('data'))
         zone_obj_list = None
         if data['action'] == 'pagination':
-            zone_obj_list = models.ZoneTag.objects.all()
+            zone_obj_list = models.ZoneTag.objects.all().order_by('id')
         elif data['action'] == 'search':
             try:
                 search_key = data['other']['search_key']
@@ -447,7 +447,7 @@ def domain_resolution_page(req):
         zone_obj_perpage_list, pagination_html  = MyPaginator(zone_obj_list, data['page'], data['perpage_num'])
 
     else:
-        zone_obj_list = models.ZoneTag.objects.all()
+        zone_obj_list = models.ZoneTag.objects.all().order_by('id')
         zone_obj_perpage_list, pagination_html  = MyPaginator(zone_obj_list, 1)
 
     ret = render(req, 'bind/tmp/domain_resolution_table_tmp.html',

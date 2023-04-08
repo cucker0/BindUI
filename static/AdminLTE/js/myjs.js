@@ -962,6 +962,8 @@ function EnterdSearch(){
 function DoaminAddACK(){
     // 添加域名确认操作页面
     $("#DomainAddOrModifyModalLabel").modal("show");
+    $("#DomainAddOrModifyModalLabel .modal-title").html("添加域名");  // 修改modal标题内容
+    $("#DomainAddOrModifyModalLabel").attr("action_type", "add");  // 修改 action_type值
 }
 
 function DoaminAdd(){
@@ -1077,11 +1079,11 @@ function DomainStatusACK(){
     $(tag_selector).children().prop('checked', true);
     $(tag_selector).parents().siblings().find("input[type=checkbox]").prop('checked', false);
     var _status = $(this).prop('name');
-    $("#DomainStatusModalLabel").prop('name', _status);      // 在DNS记录状态操作模态框中标识 DNS记录状态操作动态类型
+    $("#DomainStatusModalLabel").prop('name', _status);      // 在DNS记录状态操作模态框中标识 DNS记录状态操作动作类型
     if (_status == '_turnOff'){
-        $("#DomainStatusModalLabel td .info").text('暂停域名吗？');
+        $("#DomainStatusModalLabel td .info").text(GetDomainName() + ' 域名暂停吗？');
     } else if(_status == '_turnOn'){
-        $("#DomainStatusModalLabel td .info").text('开启域名吗？');
+        $("#DomainStatusModalLabel td .info").text(GetDomainName() + ' 域名开启吗？');
     }
     $("#DomainStatusModalLabel").modal('show');
 }
@@ -1089,7 +1091,7 @@ function DomainStatusACK(){
 function DomainStatusModify(){
     // 修改domain状态值
     var _action = '';
-    var _checkbox_val = GetCheckboxAttrSet("#table_domains", "id")
+    var _checkbox_val = GetCheckboxAttrSet("#table_domains", "id");
     var _action = $("#DomainStatusModalLabel").prop('name').trim();
     var __data = {'id_list': _checkbox_val, 'action':_action};
 
@@ -1165,6 +1167,12 @@ function ShowRecordDataCopyButton(event){
     } else {
         $(this).children('a').addClass('hidden');
     }
+}
+
+function GetDomainName() {
+    // 获取 table_domains 表中，选中的域名的名称
+    var _zone = $("#table_domains td input:checked:not([data-check-all])").parent().siblings().filter(":first").text().trim();
+    return _zone;
 }
 
 $(document).ready(function(){
