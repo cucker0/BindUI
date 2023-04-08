@@ -1081,9 +1081,9 @@ function DomainStatusACK(){
     var _status = $(this).prop('name');
     $("#DomainStatusModalLabel").prop('name', _status);      // 在DNS记录状态操作模态框中标识 DNS记录状态操作动作类型
     if (_status == '_turnOff'){
-        $("#DomainStatusModalLabel td .info").text(GetDomainName() + ' 域名暂停吗？');
+        $("#DomainStatusModalLabel td .info").html('<b>' + GetDomainName() + '</b> 域名暂停？');
     } else if(_status == '_turnOn'){
-        $("#DomainStatusModalLabel td .info").text(GetDomainName() + ' 域名开启吗？');
+        $("#DomainStatusModalLabel td .info").html('<b>' + GetDomainName() + '</b> 域名开启？');
     }
     $("#DomainStatusModalLabel").modal('show');
 }
@@ -1129,7 +1129,7 @@ function GetCurrentTrDomain(ths){
 function DomainDeleteACK(){
     // domain删除域名弹出确认框
     var _domain_val = GetCurrentTrDomain(this);
-    $("h4.modal-title#DomiandDeleteModalLabel").html("删除域名: " + _domain_val);
+    $("h4.modal-title#DomiandDeleteModalLabel").html("删除域名: <b>" + _domain_val + "</b>");
 
     var tag_selector = $(this).parent().parent().parent().parent().siblings().filter("input, :first");
     $(tag_selector).children().prop('checked', true);
@@ -1140,7 +1140,7 @@ function DomainDeleteACK(){
 function DomainDelete(){
     // domain删除域名
     var _action = '';
-    var _checkbox_val = GetCheckboxAttrSet("#table_domains", "id")
+    var _checkbox_val = GetCheckboxAttrSet("#table_domains", "id");
     var __data = {'id_list': _checkbox_val};
     console.log(__data);
     $.ajax({
@@ -1172,6 +1172,7 @@ function ShowRecordDataCopyButton(event){
 function GetDomainName() {
     // 获取 table_domains 表中，选中的域名的名称
     var _zone = $("#table_domains td input:checked:not([data-check-all])").parent().siblings().filter(":first").text().trim();
+    // var _zone = $("#table_domains td input:checked:not([data-check-all])").parent().siblings().filter("td[name=zone]").text().trim();
     return _zone;
 }
 
