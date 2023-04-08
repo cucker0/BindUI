@@ -967,10 +967,50 @@ function DoaminAddACK(){
     $("#DomainAddOrModifyModalLabel").modal("show");
     $("#DomainAddOrModifyModalLabel .modal-title").html("添加域名");  // 修改modal标题内容
     $("#DomainAddOrModifyModalLabel").attr("action_type", "add");  // 修改 action_type值
+    DisalbeDomainZoneEdit(false);
 }
 
-function DoaminAdd(){
-    //添加域名 点击 保存按键
+function DoaminModifyACK(){
+    // 修改域名确认操作页面
+    var _domain_val = GetCurrentTrDomain(this);
+    $("#DomainAddOrModifyModalLabel").modal("show");
+    $("#DomainAddOrModifyModalLabel .modal-title").html("修改域名：<b>" + _domain_val + "</b>" );  // 修改modal标题内容
+    $("#DomainAddOrModifyModalLabel").attr("action_type", "modify");  // 修改 action_type值
+
+    var tag_selector = $(this).parent().parent().parent().parent().siblings().filter("input, :first");
+    $(tag_selector).children().prop('checked', true);
+    $(tag_selector).parents().siblings().find("input[type=checkbox]").prop('checked', false);
+
+    // 通过 域名id 获取域名信息
+    $.ajax({
+        url:"/domains/api/get_domain/" + GetCheckedDomainId(),
+        type:"GET",
+        // data:{'data':JSON.stringify({})},
+        dataType:"json",
+        success:function(callback){
+            if (callback){ // 有数据
+                // 向 修改域名 的模态框中填充数据
+                $("#DomainAddOrModifyModalLabel input[name=zone]").val(callback['zone']);
+                $("#DomainAddOrModifyModalLabel input[name=data]").val(callback['data']);
+                $("#DomainAddOrModifyModalLabel input[name=responsible_mail]").val(callback['resp_person']);
+                $("#DomainAddOrModifyModalLabel input[name=refresh]").val(callback['refresh']);
+                $("#DomainAddOrModifyModalLabel input[name=retry]").val(callback['retry']);
+                $("#DomainAddOrModifyModalLabel input[name=expire]").val(callback['expire']);
+                $("#DomainAddOrModifyModalLabel input[name=minimum]").val(callback['minimum']);
+                $("#DomainAddOrModifyModalLabel input[name=primary_ns]").val(callback['primary_ns']);
+                $("#DomainAddOrModifyModalLabel input[name=comment]").val(callback['comment']);
+
+                DisalbeDomainZoneEdit(true);
+            }
+        },
+        error:function(){
+
+        }
+    });
+}
+
+function DoaminAddModify(){
+    // 添加域名/修改域名 点击 保存按钮
 
     var _zone = $("#DomainAddOrModifyModalLabel input[name=zone]").val().trim();
     var _data = $("#DomainAddOrModifyModalLabel input[name=data]").val().trim();
@@ -983,34 +1023,68 @@ function DoaminAdd(){
     var _primary_ns = $("#DomainAddOrModifyModalLabel input[name=primary_ns]").val().trim();
     var _comment = $("#DomainAddOrModifyModalLabel input[name=comment]").val().trim();
 
-    var _data = {
-        'zone': _zone,
-        'data': _data,
-        'resp_person': _responsible_mail,
-        //'serial': _serial,
-        'refresh': _refresh,
-        'retry': _retry,
-        'expire': _expire,
-        'minimum': _minimum,
-        'primary_ns': _primary_ns,
-        'comment':_comment
-    };
+    var action_type = $("#DomainAddOrModifyModalLabel").attr("action_type").trim();
+    var __data;
+    if (action_type === "add") {  // 添加域名
+        __data = {
+            'zone': _zone,
+            'data': _data,
+            'resp_person': _responsible_mail,
+            //'serial': _serial,
+            'refresh': _refresh,
+            'retry': _retry,
+            'expire': _expire,
+            'minimum': _minimum,
+            'primary_ns': _primary_ns,
+            'comment':_comment
+        };
 
-    $.ajax({
-        url:"/domains/domain_curd.html?type=c",
-        type:"POST",
-        data:{'data':JSON.stringify(_data)},
-        dataType:"json",
-        success:function(callback){
-            if (callback['status']  == 200){        // 状态修改成功
-                $("#DomainAddOrModifyModalLabel").modal('hide');
-                location.reload(true);
+        $.ajax({
+            url:"/domains/domain_curd.html?type=c",
+            type:"POST",
+            data:{'data':JSON.stringify(__data)},
+            dataType:"json",
+            success:function(callback){
+                if (callback['status']  == 200){        // 状态修改成功
+                    $("#DomainAddOrModifyModalLabel").modal('hide');
+                    location.reload(true);
+                }
+            },
+            error:function(){
+
             }
-        },
-        error:function(){
+        });
+    } else if (action_type === "modify") {  // 修改域名（除 status 属性以外的属性）
+        __data = {
+            'id': GetCheckedDomainId(),
+            // 'zone': _zone,
+            'data': _data,
+            'resp_person': _responsible_mail,
+            'refresh': _refresh,
+            'retry': _retry,
+            'expire': _expire,
+            'minimum': _minimum,
+            'primary_ns': _primary_ns,
+            'comment':_comment
+        };
 
-        }
-    });
+        $.ajax({
+            url:"/domains/domain_curd.html?type=m",
+            type:"POST",
+            data:{'data':JSON.stringify(__data)},
+            dataType:"json",
+            success:function(callback){
+                if (callback['status']  == 200){  // 状态修改成功
+                    $("#DomainAddOrModifyModalLabel").modal('hide');
+                    DisalbeDomainZoneEdit(false);
+                    location.reload(true);
+                }
+            },
+            error:function(){
+
+            }
+        });
+    }
 
 }
 
@@ -1084,9 +1158,9 @@ function DomainStatusACK(){
     var _status = $(this).prop('name');
     $("#DomainStatusModalLabel").prop('name', _status);      // 在DNS记录状态操作模态框中标识 DNS记录状态操作动作类型
     if (_status == '_turnOff'){
-        $("#DomainStatusModalLabel td .info").html('<b>' + GetDomainName() + '</b> 域名暂停？');
+        $("#DomainStatusModalLabel td .info").html('<b>' + GetCheckedDomainName() + '</b> 域名暂停？');
     } else if(_status == '_turnOn'){
-        $("#DomainStatusModalLabel td .info").html('<b>' + GetDomainName() + '</b> 域名开启？');
+        $("#DomainStatusModalLabel td .info").html('<b>' + GetCheckedDomainName() + '</b> 域名开启？');
     }
     $("#DomainStatusModalLabel").modal('show');
 }
@@ -1132,7 +1206,7 @@ function GetCurrentTrDomain(ths){
 function DomainDeleteACK(){
     // domain删除域名弹出确认框
     var _domain_val = GetCurrentTrDomain(this);
-    $("h4.modal-title#DomiandDeleteModalLabel").html("删除域名: <b>" + _domain_val + "</b>");
+    $("h4.modal-title#DomiandDeleteModalLabel").html("删除域名：<b>" + _domain_val + "</b>");
 
     var tag_selector = $(this).parent().parent().parent().parent().siblings().filter("input, :first");
     $(tag_selector).children().prop('checked', true);
@@ -1172,11 +1246,31 @@ function ShowRecordDataCopyButton(event){
     }
 }
 
-function GetDomainName() {
+function GetCheckedDomainName() {
     // 获取 table_domains 表中，选中的域名的名称
     var _zone = $("#table_domains td input:checked:not([data-check-all])").parent().siblings().filter(":first").text().trim();
     // var _zone = $("#table_domains td input:checked:not([data-check-all])").parent().siblings().filter("td[name=zone]").text().trim();
     return _zone;
+}
+
+function GetCheckedDomainId() {
+    // 获取 table_domains 表中，选中的域名的id
+    var _id = $("#table_domains td input:checked:not([data-check-all])").prop("id").trim();
+    return _id;
+}
+
+/**
+ * 修改域名时，zone(域名) 设置不可编辑/可编辑
+ *
+ * @param option 是否可编辑，true: 不可编辑，false: 可编辑
+ * @constructor
+ */
+function DisalbeDomainZoneEdit(option=true) {
+    if (option) {
+        $("#DomainAddOrModifyModalLabel input[name=zone]").prop("disabled", true);
+    } else {
+        $("#DomainAddOrModifyModalLabel input[name=zone]").prop("disabled", false);
+    }
 }
 
 $(document).ready(function(){
@@ -1264,7 +1358,10 @@ $(document).ready(function(){
 
     // 点击 添加域名 弹出添加域名页（添加域名确认操作页面）
     $(document).on("click", "button[name=add_domain]", DoaminAddACK);
-    $(document).on("click", "#DomainAddOrModifyModalLabel button[name=_save]", DoaminAdd);
+    // 修改domain确认框
+    $(document).on("click", "#domain_box li a[action_type=modify]", DoaminModifyACK);
+    // 点击 添加域名/修改域名 确认操作
+    $(document).on("click", "#DomainAddOrModifyModalLabel button[name=_save]", DoaminAddModify);
 
     //域名列表页点击 DNS解析跳转到DNS解析页
     $(document).on("click", "#table_domains tbody a[name=dns_resolution]", DnsResolutionClick);

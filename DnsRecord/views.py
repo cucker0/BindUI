@@ -5,6 +5,7 @@ from . import models
 from django.db.models import Q
 from django.utils import timezone
 import xlrd, xlwt
+from django.core import serializers
 
 import sys, os
 BASIC_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -94,6 +95,8 @@ def domain_curd(req):
     _type = req.GET.get('type').strip()
     if _type == 'c':        # 新增domain
         resp = domain_add(req)
+    elif _type == 'm':  # 修改 doamin 的主要属性
+        domain_main_mod(req)
     elif _type == 'ns':     # 添加、修改ns记录
         resp = domain_ns(req)
     elif _type == 'status':     # 修改domain状态
@@ -173,6 +176,14 @@ def domain_add(req):
     return msg
 
 
+def domain_main_mod(req):
+    """ 修改 doamin 的主要属性（除了 status）
+
+    :param req:
+    :return:
+    """
+    pass
+
 def domain_ns(req):
     """
     domain NS记录创建、修改
@@ -236,6 +247,41 @@ def domain_man(req, domain_id, optype):
     zone_tag_obj = models.ZoneTag.objects.get(id=domain_id)
     ns_set = models.Record.objects.filter(Q(type='NS') & Q(basic=2) & Q(zone_tag=zone_tag_obj))
     return render(req, 'bind/domain_manager.html', {'zone_tag_obj':zone_tag_obj, 'ns_set': ns_set})
+
+@login_required
+def get_domain_by_id(req, domain_id):
+    """ 通过域名id查询域名信息，即该域名的 SOA 记录
+
+    rr_list_json 是一个 json 字符串，对象的数据格式
+    '''
+    [
+        {
+            "model": "DnsRecord.record",
+            "pk": 115,
+            "fields": {"zone": "hi.com", "host": "@", "type": "SOA", "data": "dns.z.cn.", "ttl": 3600, "mx_priority": null,
+                 "refresh": 900, "retry": 900, "expire": 2592000, "minimum": 600, "serial": 2023000001,
+                 "resp_person": "admin.qq.com.", "primary_ns": ".", "status": "on",
+                 "create_time": "2023-04-08T04:20:01.930Z", "update_time": "2023-04-08T04:20:01.930Z", "comment": "",
+                 "resolution_line": "0", "zone_tag": 5, "basic": 2, "associate_rr_id": null
+            }
+        }
+    ]
+    '''
+
+    :param req:
+    :param domain_id: 域名id，类型为 int。
+    :return: 单个域名信息（json类型）
+    """
+    domain_id = int(domain_id)
+    zone_tag_obj = models.ZoneTag.objects.get(id=domain_id)
+    rr_set = models.Record.objects.filter(Q(type='SOA') & Q(host='@') & Q(basic=2) & Q(zone=zone_tag_obj.zone_name))
+    rr_list_json = serializers.serialize("json", rr_set)
+    rr_list = json.loads(rr_list_json)
+
+    # QuerySet 对象无法直接序列化， json.dumps(rr_set) 报下列错误
+    # TypeError: Object of type Record is not JSON serializable
+    return HttpResponse(json.dumps(rr_list[0]["fields"]))
+
 
 @login_required
 def import_dns(req):

@@ -25,6 +25,7 @@ urlpatterns = [
     url(r'^domains/_import_dns.html', views.import_dns, name='import_dns'),
     url(r'^domains/_export_dns.html', views.export_dns, name='export_dns'),
     url(r'^domains/(?P<domain_id>\d+)/(?P<optype>\w+)', views.domain_man, name='domain_man'),
+    url(r'^domains/api/get_domain/(?P<domain_id>\d+)', views.get_domain_by_id, name='get_domain_by_id'),
 
 
     url(r'^dns/(?P<domain_id>\d+)', views.record_list, name='record_list'),
