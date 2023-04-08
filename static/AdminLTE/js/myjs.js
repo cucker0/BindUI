@@ -1297,7 +1297,7 @@ $(document).ready(function(){
     $("button[data-toggle=modal]").bind('click', RecordAddACK);
 
     //添加记录时点击 保存 按键绑定事件
-    $(".modal-footer  button[name=_save]").bind('click', RecordAddModify);
+    $("#DNSRecordAddOrModifyModalLabel button[name=_save]").bind('click', RecordAddModify);
 
     // 选择/取消 所有项
     //$("table tr input[data-check-all]").bind('click', SelectAll);

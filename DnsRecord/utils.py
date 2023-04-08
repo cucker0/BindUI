@@ -141,27 +141,24 @@ def a_record_data_filter(rr:dict) -> bool:
     :param rr: 格式：{"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data, "mx_priority":_mx, "ttl":_ttl, "comment":_comment, "zone":_zone_tag_name }
     :return: 数据是否合格，True：合格，False: 不合格
     """
-
-    if type(rr) != dict:
-        print('data structure like {"type":_type, "host":_host}, {"type":_type, "host":_host}')
-        return False
-
     if type(rr) != dict:
         print(COMMON_MSG['data_type_error'])
+        print('data structure like {"type":_type, "host":_host}, {"type":_type, "host":_host}')
         return False
-    if rr['type']:
-        rr['type'] = rr['type'].upper()  # type字段转为大写
-    if not (rr['type'] in record_type):  # type不在范围内的返回None
-        print("rr type[%s] is not in the define range." % rr['type'])
-        return False
+    rr_keys = list(rr.keys())
+    if 'type' in rr_keys:
+        if rr['type']:
+            rr['type'] = rr['type'].upper()  # type字段转为大写
+        if not (rr['type'] in record_type):  # type不在范围内的返回None
+            print("rr type[%s] is not in the define range." % rr['type'])
+            return False
     # host为空时，设置默认值 @
-    if not rr['host']:
+    if 'host' in rr_keys and (not rr['host']):
         rr['host'] = '@'
-
-    for k in list(rr.keys()):  # 去除用户提交data各值的左右空格
+    for k in rr_keys:  # 去除用户提交data各值的左右空格
         if type(rr[k]) == str:
             rr[k] = rr[k].strip()
-    if rr['type'] in list(record_request_field.keys()):
+    if 'type' in rr_keys and (rr['type'] in list(record_request_field.keys())):
         lower_set = set(rr.keys()) & set(record_lower_field)
         for f in lower_set:  # CharField要求小写的转换成小写
             if rr[f]:
@@ -192,7 +189,6 @@ def a_record_data_filter(rr:dict) -> bool:
             rr['data'] = endwith_dot(rr['data'])
             if rr['data'] == '':
                 return False
-
             if rr['type'] == 'SOA':
                 if not rr['resp_person'].endswith('.'):
                     rr['resp_person'] = "%s." % (rr['resp_person'])

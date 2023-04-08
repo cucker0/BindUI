@@ -96,7 +96,7 @@ def domain_curd(req):
     if _type == 'c':        # 新增domain
         resp = domain_add(req)
     elif _type == 'm':  # 修改 doamin 的主要属性
-        domain_main_mod(req)
+        resp = domain_main_mod(req)
     elif _type == 'ns':     # 添加、修改ns记录
         resp = domain_ns(req)
     elif _type == 'status':     # 修改domain状态
@@ -173,16 +173,44 @@ def domain_add(req):
             msg['msg'] = "%s create success." %(data['zone'])
         except Exception as e:
             print(e)
-    return msg
+    return HttpResponse(json.dumps(msg))
 
 
 def domain_main_mod(req):
-    """ 修改 doamin 的主要属性（除了 status）
+    """ 修改 doamin 的主要属性（除了 status），就是更新一条 SOA 记录
 
     :param req:
     :return:
     """
-    pass
+    msg = {'status': 500}
+    if req.method == 'POST':
+        data: dict = json.loads(req.POST.get('data'))  # 一条 json 格式的更新RR 操作数据(dict类型)，
+                                                       # 但 data['id'] 该SOA记录对应的 关联的 ZoneTag 的 id
+        if type(data) != dict:
+            return HttpResponse(COMMON_MSG['req_use_post'])
+
+        try:
+            zone_tag_obj = models.ZoneTag.objects.get(id=data['id'])
+            record_obj_set = models.Record.objects.filter(
+                    Q(type='SOA') & Q(host='@') & Q(basic=2) & Q(zone=zone_tag_obj.zone_name)
+            )
+            del (data['id'])  # data.pop('id') 则会 print key
+            data['host'] = '@'
+            data['zone'] = zone_tag_obj.zone_name
+            data['zone_tag'] = zone_tag_obj
+            data['serial'] = serial(record_obj_set.get().serial)
+            data['update_time'] = timezone.now()
+            a_record_data_filter(data)
+            # 更新 record_obj_set
+            record_obj_set.update(**data)
+
+            msg['status'] = 200
+        except Exception as e:
+            print(e)
+
+        return msg
+    else:
+        return COMMON_MSG['req_use_post']
 
 def domain_ns(req):
     """
