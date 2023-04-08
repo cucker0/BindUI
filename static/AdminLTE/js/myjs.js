@@ -993,7 +993,7 @@ function DoaminAdd(){
 
     $.ajax({
         url:"/domains/domain_curd.html?type=c",
-        type:"GET",
+        type:"POST",
         data:{'data':JSON.stringify(_data)},
         dataType:"json",
         success:function(callback){

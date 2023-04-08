@@ -134,7 +134,7 @@ def domain_add(req):
     """
     msg = {'status': 500, 'msg':''}
     try:
-        data = json.loads(req.GET.get('data'))
+        data = json.loads(req.POST.get('data'))
     except Exception as e:
         print(e)
 
@@ -143,7 +143,7 @@ def domain_add(req):
     data['host'] = '@'
     data['ttl'] = 3600
     data['serial'] = serial()
-    data = a_record_data_filter(data)
+    a_record_data_filter(data)
     record_set = models.Record.objects.filter(Q(type='SOA') & Q(zone=data['zone'].strip()) )
     zone_tag_set = models.ZoneTag.objects.filter(zone_name=data['zone'].strip())
 
