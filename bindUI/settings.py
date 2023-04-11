@@ -13,11 +13,12 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 import os
 
 # 在与 settings.py 同级目录下的 __init__.py 中引入pymysql库
-## pymysql repalce mysqldb
+## 如果使用 MySQL 数据库，开启下面几行注释 --start
 #import pymysql
 ## 指定 pymysql 的版本。主要是要比 Django 要求的最低版本要大
 #pymysql.version_info = (11, 1, 0, "final", 0)
 #pymysql.install_as_MySQLdb()
+## 如果使用 MySQL 数据库，开启下面几行注释 --end
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
