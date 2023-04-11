@@ -65,10 +65,10 @@ django.core.exceptions.ImproperlyConfigured: mysqlclient 1.3.13 or newer is requ
     import pymysql
     pymysql.install_as_MySQLdb()
     ```
-2. {python安装根目录}/lib/python3.7/site-packages/django/db/backends/mysql/base.py 注意下面这两行
-```bash
+2. {python安装根目录}/lib/python3.7/site-packages/django/db/backends/mysql/base.py 注释下面这两行
+```python
 if version < (1, 3, 3):
-raise ImproperlyConfigured("mysqlclient 1.3.3 or newer is required; you have %s" % Database.__version__)
+    raise ImproperlyConfigured("mysqlclient 1.3.3 or newer is required; you have %s" % Database.__version__)
 ```
 
 #### 报错2

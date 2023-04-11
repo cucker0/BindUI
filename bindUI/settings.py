@@ -12,9 +12,12 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 
 import os
 
+# 在与 settings.py 同级目录下的 __init__.py 中引入pymysql库
 ## pymysql repalce mysqldb
-import pymysql
-pymysql.install_as_MySQLdb()
+#import pymysql
+## 指定 pymysql 的版本。主要是要比 Django 要求的最低版本要大
+#pymysql.version_info = (11, 1, 0, "final", 0)
+#pymysql.install_as_MySQLdb()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -78,7 +81,7 @@ WSGI_APPLICATION = 'bindUI.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/1.10/ref/settings/#databases
+# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 # DATABASES = {
 #     'default': {
@@ -92,12 +95,15 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'bind_ui',
-        'USER': 'bind_ui',
-        'PASSWORD': 'py123456',
-        'HOST': '127.0.0.1',
+        'USER': 'bind_ui_wr',
+        'PASSWORD': 'Ww123456!',
+        'HOST': '10.100.240.135',
         'PORT': '3306',
     }
 }
+
+# models 默认字段 id 的类型
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
@@ -124,7 +130,7 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'Asia/Shanghai'
-
+USE_TZ = True
 
 # format DateTime
 USE_L10N = False
@@ -135,8 +141,6 @@ USE_I18N = True
 
 # USE_L10N = True
 
-USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
@@ -146,6 +150,18 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR,'static'),
     os.path.join(BASE_DIR,'upload'),
 )
+
+## 生成 ./static/admin 静态资源文件
+# django admin静态文件加载不了问题
+# 1. 先把 setttings.py 中的 STATICFILES_DIRS 注释
+# 2. python3 manage.py collectstatic
+#   会生成 ./static/admin 目录
+# 3. 完成后，手动恢复 setttings.py 配置
+#STATIC_ROOT = os.path.join(BASE_DIR, "static")
+#STATICFILES_FINDERS = (
+#    "django.contrib.staticfiles.finders.FileSystemFinder",
+#    "django.contrib.staticfiles.finders.AppDirectoriesFinder"
+#)
 
 # # upstream源站上线前是否需要测试连接源站URL
 # UPSTREAM_UP_REALSERVER_TEST = {'test':False, 'url':'/do_not_delete/check.html'}
