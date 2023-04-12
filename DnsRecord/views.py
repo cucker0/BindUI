@@ -173,7 +173,7 @@ def domain_add(req):
             msg['msg'] = "%s create success." %(data['zone'])
         except Exception as e:
             print(e)
-    return HttpResponse(json.dumps(msg))
+    return msg
 
 
 def domain_main_mod(req):
