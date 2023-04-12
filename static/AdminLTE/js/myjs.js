@@ -479,11 +479,11 @@ function RecordAddACK(){
     // $("#DNSRecordAddOrModifyModalLabel .form-horizontal input[name=data]").val('');
     $("#DNSRecordAddOrModifyModalLabel .form-horizontal select[name=ttl]").val('600');
     // $("#DNSRecordAddOrModifyModalLabel .form-horizontal input[name=comment]").val('');
-    var _domain_name = $("div .nav h2").text();
-    if (_domain_name.endsWith('in-addr.arpa')) {
+    var _domain_name = $("div[zone_tag_name]").text().trim();
+    if (_domain_name.endsWith('in-addr.arpa') || _domain_name.endsWith('in-addr.arpa.')) {
         $(".form-horizontal select[name=type]").val('PTR');
-        //$(".form-horizontal input[name=host]").attr("placeholder", "填写IP主机位数字（如反向解析IP 192.168.1.11，则填写11）");
-        //$(".form-horizontal input[name=data]").attr("placeholder", "填写对应的正向解析域名，例如：www.dns.com.");
+        $(".form-horizontal input[name=host]").attr("placeholder", "填写IP主机位数字（如反向解析IP 192.168.1.11，则填写11）");
+        $(".form-horizontal input[name=data]").attr("placeholder", "填写对应的正向解析域名，例如：www.dns.com.");
     }else{
         $(".form-horizontal select[name=type]").val('A');
         //$(".form-horizontal input[name=host]").attr("placeholder", "填写子域名（如www），不填写默认保存为@");

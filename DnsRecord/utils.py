@@ -192,6 +192,8 @@ def a_record_data_filter(rr:dict) -> bool:
             if rr['type'] == 'SOA':
                 if not rr['resp_person'].endswith('.'):
                     rr['resp_person'] = "%s." % (rr['resp_person'])
+                if '@' in rr['resp_person']:
+                    rr['resp_person'] = rr['resp_person'].replace('@', '.')
                 if not rr['primary_ns'].endswith('.'):
                     rr['primary_ns'] = "%s." % (rr['primary_ns'])
         else:

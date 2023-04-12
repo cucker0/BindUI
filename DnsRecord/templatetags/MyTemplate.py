@@ -36,7 +36,7 @@ def is_reverse_resulution_domain(domain_name):
     :param domain_name: 域名
     :return: True/False
     """
-    if domain_name.endswith('in-addr.arpa'):
+    if domain_name.endswith('in-addr.arpa') or domain_name.endswith('in-addr.arpa.'):
         return True
     else:
         return False
