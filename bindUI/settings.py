@@ -103,6 +103,18 @@ DATABASES = {
     }
 }
 
+## postgresql DATABASES 连接信息
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'bind_ui',
+#         'USER': 'bind_ui_wr',
+#         'PASSWORD': 'Ww123456!',
+#         'HOST': '10.100.240.135',
+#         'PORT': '5432',
+#     }
+# }
+
 # models 默认字段 id 的类型
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
