@@ -65,7 +65,7 @@ class ZoneTag(models.Model):
     """
     zone_name = models.CharField('zone name', max_length=255, unique=True, db_index=True)
     comment = models.CharField('注释', max_length=255, null=True, blank=True)
-    status = models.CharField('status', max_length=3, choices=status_choices, default='on',help_text='record on/off status')
+    status = models.CharField('status', max_length=3, choices=status_choices, default='on',help_text='zone on/off status')
     create_time = models.DateTimeField('create_time', auto_now_add=True, null=True)
     update_time = models.DateTimeField('update_time', auto_now=True, null=True)
 
