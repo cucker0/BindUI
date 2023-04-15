@@ -1,4 +1,5 @@
 from django.db import models
+from .common_model.model import BasicModel
 import sys, os
 BASIC_DIR = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(BASIC_DIR)
@@ -29,7 +30,7 @@ status_choices = (
     ('off', '暂停'),
 )
 
-class Record(models.Model):
+class Record(BasicModel):
     """
     DNS records
 
@@ -48,9 +49,9 @@ class Record(models.Model):
     resp_person = models.CharField('resp_person', max_length=255, null=True, blank=True, default=None, help_text='Responsible person mail for SOA record')
     primary_ns =  models.CharField('primary_ns', max_length=255, null=True, blank=True, default=None, help_text='Primary name server for SOA record,slav DNS指定Master DNS')
     status = models.CharField('status', max_length=3, choices=status_choices, default='on',help_text='record on/off status')
-    create_time = models.DateTimeField('create_time', auto_now_add=True)
-    update_time = models.DateTimeField('update_time', auto_now=True)
-    comment = models.CharField('comment', max_length=255, null=True, blank=True, default=None, help_text='备注')
+    # create_time = models.DateTimeField('create_time', auto_now_add=True)
+    # update_time = models.DateTimeField('update_time', auto_now=True)
+    # comment = models.CharField('comment', max_length=255, null=True, blank=True, default=None, help_text='备注')
     resolution_line = models.CharField('resolution_line', max_length=32,choices=dns_conf.DNS_RESOLUTION_LINE, default='0', help_text='解析线路')
     zone_tag = models.ForeignKey('ZoneTag', related_name='ZoneTag_Record', on_delete=models.PROTECT)
     basic = models.IntegerField('basic', default=0, help_text='是否为基础记录，记录是否允许重复。0:可重复非基础记录, 1:可重复基础记录， 2:不可重复基础记录，3:被显性URL或隐性URL关联的记录 ，200:隐性URL转发，301:显性URL 301重定向，302:显性URL 302重定向')
@@ -59,15 +60,15 @@ class Record(models.Model):
     def __str__(self):
         return(self.host)
 
-class ZoneTag(models.Model):
+class ZoneTag(BasicModel):
     """
     zone tag
     """
     zone_name = models.CharField('zone name', max_length=255, unique=True, db_index=True)
-    comment = models.CharField('注释', max_length=255, null=True, blank=True)
     status = models.CharField('status', max_length=3, choices=status_choices, default='on',help_text='zone on/off status')
-    create_time = models.DateTimeField('create_time', auto_now_add=True, null=True)
-    update_time = models.DateTimeField('update_time', auto_now=True, null=True)
+    # create_time = models.DateTimeField('create_time', auto_now_add=True, null=True)
+    # update_time = models.DateTimeField('update_time', auto_now=True, null=True)
+    # comment = models.CharField('注释', max_length=255, null=True, blank=True)
 
     def __str__(self):
         return self.zone_name
