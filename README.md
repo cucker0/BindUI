@@ -7,16 +7,18 @@ Bind web admin UI.
 支持多线路智能解析（基于view实现的智能DNS）、批量导入/导出域名记录(RR)、支持常用的RR类型。
 
 
+## 运行环境
+```bash
+Python 3.11
+Django 4
+MySQL 8 | MariaDB 10 | PostgreSQL 15 (任选一个)
+
+```
+
 ## 依赖模块
 ```bash
-django
-Pillow
-pymysql
-IPy
-xlrd
-xlwt
+django Pillow pymysql IPy xlrd xlwt
 ```
-要求 python 3
 
 **安装依赖模块**  
 ```bash
