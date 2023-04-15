@@ -15,12 +15,13 @@ from pathlib import Path
 
 # 在与 settings.py 同级目录下的 __init__.py 中引入pymysql库
 ## 如果使用 MySQL 数据库，开启下面几行注释 --start
-#import pymysql
-## 指定 pymysql 的版本。主要是要比 Django 要求的最低版本要大
-#pymysql.version_info = (11, 1, 0, "final", 0)
-#pymysql.install_as_MySQLdb()
+import pymysql
+# 指定 pymysql 的版本。主要是要比 Django 要求的最低版本要大
+pymysql.version_info = (11, 1, 0, "final", 0)
+pymysql.install_as_MySQLdb()
 ## 如果使用 MySQL 数据库，开启下面几行注释 --end
 
+# 旧版
 # # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -35,7 +36,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-51d2pp-e07hhkk=)cchlc_9_td&=sc^r=96_xr_20f=ixk-&5l'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+# 如果 DEBUG = False，则 Django 不再代理静态文件。所以访问访问静态资源将报 404 错误
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -161,10 +163,17 @@ DATE_FORMAT = 'Y-m-d'
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR,'static'),
-    os.path.join(BASE_DIR,'upload'),
-)
+# 旧版
+# STATICFILES_DIRS = (
+#     os.path.join(BASE_DIR,'static'),
+#     os.path.join(BASE_DIR,'upload'),
+#
+# )
+
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+    BASE_DIR / 'upload',
+]
 
 
 # Default primary key field type

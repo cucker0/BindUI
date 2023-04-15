@@ -17,11 +17,14 @@ Including another URLconf
 
 from django.urls import include, re_path
 from django.contrib import admin
+from django.views.generic.base import RedirectView
 
 urlpatterns = [
     re_path(r'^admin/', admin.site.urls),
     re_path(r'^auth/', include("authentication.urls")),
     # re_path(r'^dns/', include('DnsRecord.urls')),
     re_path(r'^', include('DnsRecord.urls')),
-
+    # 解决 http://xx/favicon.ico  报404的问题
+    # /favicon.ico 302 重定向到 static/favicon.ico
+    re_path(r'^favicon.ico$',RedirectView.as_view(url=r'static/favicon.ico')),
 ]
