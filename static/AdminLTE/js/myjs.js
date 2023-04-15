@@ -265,7 +265,7 @@ function RedirectCodeShowOrHide() {
 var DomainAddOrModifyDefaultValue = {
     zone: "",
     data: "",
-    resp_person: "",
+    mail: "",
     refresh: 900,
     retry: 900,
     expire: 2592000,
@@ -280,7 +280,7 @@ function ChangeDomainAddModify2Default() {
     if(action_type == "add"){  // 恢复默认值
         $("#DomainAddOrModifyModalLabel input[name=zone]").val(DomainAddOrModifyDefaultValue.zone);
         $("#DomainAddOrModifyModalLabel input[name=data]").val(DomainAddOrModifyDefaultValue.data);
-        $("#DomainAddOrModifyModalLabel input[name=responsible_mail]").val(DomainAddOrModifyDefaultValue.resp_person);
+        $("#DomainAddOrModifyModalLabel input[name=mail]").val(DomainAddOrModifyDefaultValue.mail);
         $("#DomainAddOrModifyModalLabel input[name=refresh]").val(DomainAddOrModifyDefaultValue.refresh);
         $("#DomainAddOrModifyModalLabel input[name=retry]").val(DomainAddOrModifyDefaultValue.retry);
         $("#DomainAddOrModifyModalLabel input[name=expire]").val(DomainAddOrModifyDefaultValue.expire);
@@ -1072,7 +1072,7 @@ function DoaminModifyACK(){
                 // 向 修改域名 的模态框中填充数据
                 $("#DomainAddOrModifyModalLabel input[name=zone]").val(callback['zone']);
                 $("#DomainAddOrModifyModalLabel input[name=data]").val(callback['data']);
-                $("#DomainAddOrModifyModalLabel input[name=responsible_mail]").val(callback['resp_person']);
+                $("#DomainAddOrModifyModalLabel input[name=mail]").val(callback['mail']);
                 $("#DomainAddOrModifyModalLabel input[name=refresh]").val(callback['refresh']);
                 $("#DomainAddOrModifyModalLabel input[name=retry]").val(callback['retry']);
                 $("#DomainAddOrModifyModalLabel input[name=expire]").val(callback['expire']);
@@ -1094,7 +1094,7 @@ function DoaminAddModify(){
 
     var _zone = $("#DomainAddOrModifyModalLabel input[name=zone]").val().trim();
     var _data = $("#DomainAddOrModifyModalLabel input[name=data]").val().trim();
-    var _responsible_mail = $("#DomainAddOrModifyModalLabel input[name=responsible_mail]").val().trim();
+    var _mail = $("#DomainAddOrModifyModalLabel input[name=mail]").val().trim();
     //var _serial = $("#DomainAddOrModifyModalLabel input[name=serial]").val().trim();
     var _refresh = $("#DomainAddOrModifyModalLabel input[name=refresh]").val().trim();
     var _retry = $("#DomainAddOrModifyModalLabel input[name=retry]").val().trim();
@@ -1109,7 +1109,7 @@ function DoaminAddModify(){
         __data = {
             'zone': _zone,
             'data': _data,
-            'resp_person': _responsible_mail,
+            'mail': _mail,
             //'serial': _serial,
             'refresh': _refresh,
             'retry': _retry,
@@ -1139,7 +1139,7 @@ function DoaminAddModify(){
             'id': GetCheckedDomainId(),
             // 'zone': _zone,
             'data': _data,
-            'resp_person': _responsible_mail,
+            'mail': _mail,
             'refresh': _refresh,
             'retry': _retry,
             'expire': _expire,

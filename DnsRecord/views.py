@@ -289,7 +289,7 @@ def get_domain_by_id(req, domain_id):
             "pk": 115,
             "fields": {"zone": "hi.com", "host": "@", "type": "SOA", "data": "dns.z.cn.", "ttl": 3600, "mx_priority": null,
                  "refresh": 900, "retry": 900, "expire": 2592000, "minimum": 600, "serial": 2023000001,
-                 "resp_person": "admin.qq.com.", "primary_ns": ".", "status": "on",
+                 "mail": "admin.qq.com.", "primary_ns": ".", "status": "on",
                  "create_time": "2023-04-08T04:20:01.930Z", "update_time": "2023-04-08T04:20:01.930Z", "comment": "",
                  "resolution_line": "0", "zone_tag": 5, "basic": 2, "associate_rr_id": null
             }

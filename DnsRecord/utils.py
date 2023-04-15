@@ -16,7 +16,7 @@ COMMON_MSG = {'req_use_post':'use POST request method please.',
               'data_type_error':'data type is error!',
               }
 # dns记录的字段列表
-record_key = ['zone', 'host', 'type', 'data', 'ttl', 'mx_priority', 'refresh', 'retry', 'expire', 'minimum', 'serial', 'resp_person', 'primary_ns', 'comment',]
+record_key = ['zone', 'host', 'type', 'data', 'ttl', 'mx_priority', 'refresh', 'retry', 'expire', 'minimum', 'serial', 'mail', 'primary_ns', 'comment',]
 # 多个DNS记录类型通用的必填字段列表 
 COMMON_FIELD = ['zone', 'host', 'type', 'data', 'ttl', 'resolution_line', 'comment']
 # 每个DNS记录类型必填的字段
@@ -29,12 +29,12 @@ record_request_field = {
     'AAAA': COMMON_FIELD,
     'SRV': COMMON_FIELD,
     'PTR': COMMON_FIELD,
-    'SOA': ['zone', 'host', 'type', 'data', 'ttl', 'refresh', 'retry', 'expire', 'minimum', 'serial', 'resp_person', 'primary_ns', 'comment'],
+    'SOA': ['zone', 'host', 'type', 'data', 'ttl', 'refresh', 'retry', 'expire', 'minimum', 'serial', 'mail', 'primary_ns', 'comment'],
     'CAA': COMMON_FIELD,
     'URI': COMMON_FIELD,
 }
 # DNS记录的字段值中要求必须小写的字段列表
-record_lower_field = ['zone', 'host', 'resp_person', 'primary_ns']
+record_lower_field = ['zone', 'host', 'mail', 'primary_ns']
 # DNS记录类型列表
 record_type = ('A', 'CNAME', 'MX', 'TXT', 'NS', 'AAAA', 'SRV', 'PTR', 'SOA', 'CAA', 'URI',)
 
@@ -126,8 +126,8 @@ def records_data_filter(data):
                 data[i]['data'] = endwith_dot(data[i]['data'])
 
                 if data[i]['type'] == 'SOA':
-                    if not data[i]['resp_person'].endswith('.'):
-                        data[i]['resp_person'] = "%s." % (data[i]['resp_person'])
+                    if not data[i]['mail'].endswith('.'):
+                        data[i]['mail'] = "%s." % (data[i]['mail'])
                     if not data[i]['primary_ns'].endswith('.'):
                         data[i]['primary_ns'] = "%s." % (data[i]['primary_ns'])
             else:
@@ -190,10 +190,10 @@ def a_record_data_filter(rr:dict) -> bool:
             if rr['data'] == '':
                 return False
             if rr['type'] == 'SOA':
-                if not rr['resp_person'].endswith('.'):
-                    rr['resp_person'] = "%s." % (rr['resp_person'])
-                if '@' in rr['resp_person']:
-                    rr['resp_person'] = rr['resp_person'].replace('@', '.')
+                if not rr['mail'].endswith('.'):
+                    rr['mail'] = "%s." % (rr['mail'])
+                if '@' in rr['mail']:
+                    rr['mail'] = rr['mail'].replace('@', '.')
                 if not rr['primary_ns'].endswith('.'):
                     rr['primary_ns'] = "%s." % (rr['primary_ns'])
         else:

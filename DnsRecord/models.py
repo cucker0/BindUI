@@ -46,7 +46,7 @@ class Record(BasicModel):
     expire = models.IntegerField('expire', null=True, blank=True, default=None, help_text='Expire time for SOA record,Slave DNS在没有Master DNS的情况下权威地提供域名解析服务的时间')
     minimum = models.IntegerField('minimum', null=True, blank=True, default=None, help_text='Minimum time for SOA record(default TTL),最小默认 TTL 值，在未定义全局$TTL时，就会以此值为准')
     serial = models.BigIntegerField('serial', null=True, blank=True, default=None, help_text='serial for SOA record,Zone序列号,不超过10位数字')
-    resp_person = models.CharField('resp_person', max_length=255, null=True, blank=True, default=None, help_text='Responsible person mail for SOA record')
+    mail = models.CharField('mail', max_length=255, null=True, blank=True, default=None, help_text='Responsible person mail for SOA record')
     primary_ns =  models.CharField('primary_ns', max_length=255, null=True, blank=True, default=None, help_text='Primary name server for SOA record,slav DNS指定Master DNS')
     status = models.CharField('status', max_length=3, choices=status_choices, default='on',help_text='record on/off status')
     resolution_line = models.CharField('resolution_line', max_length=32,choices=dns_conf.DNS_RESOLUTION_LINE, default='0', help_text='解析线路')

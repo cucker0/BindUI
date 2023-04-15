@@ -1,6 +1,6 @@
 $TTL 600
 $ORIGIN {{configs.SOA.zone}}.
-@    {{configs.SOA.ttl}}    IN    SOA {{configs.SOA.data}} {{configs.SOA.resp_person}} (
+@    {{configs.SOA.ttl}}    IN    SOA {{configs.SOA.data}} {{configs.SOA.mail}} (
                                         {{configs.SOA.serial}}      ; serial
                                         {{configs.SOA.refresh}}      ; refresh
                                         {{configs.SOA.retry}}      ; retry
