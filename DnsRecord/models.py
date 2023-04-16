@@ -60,6 +60,14 @@ class Record(BasicModel):
     def __str__(self):
         return(self.host)
 
+    class Meta:
+        # app_label 指定 app 标识，缺省为 app name
+        # app_label = ''
+        # 定义表名。默认为 app_label + "_" + model_name的小写
+        db_table = 'record'
+        # Admin 后台显示的表名
+        verbose_name = verbose_name_plural = "Record"
+
 class ZoneTag(BasicModel):
     """
     zone tag
@@ -73,4 +81,9 @@ class ZoneTag(BasicModel):
     def __str__(self):
         return self.zone_name
 
+    class Meta:
+        # 定义表名
+        db_table = 'zonetag'
+        # Admin 后台显示的表名
+        verbose_name = verbose_name_plural = "ZoneTag"
 
