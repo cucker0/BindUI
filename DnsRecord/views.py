@@ -390,9 +390,9 @@ def export_dns(req):
             response = HttpResponse(content_type='application/ms-excel')        # 设置response响应头，指定文件类型
             response['Content-Disposition'] = 'attachment; filename="%s.xls"' %(data['zone'])   # 设置Content-Disposition 和文件名
 
-            # 生成excel文件
+            # 生成excel文件 --start
             book = xlwt.Workbook(encoding='utf-8')
-            sheet = book.add_sheet('Sheet1', cell_overwrite_ok=True)
+            sheet = book.add_sheet(data['zone'], cell_overwrite_ok=True)
             row0 = ['主机记录', '记录类型', resolution_line, '记录值', 'MX优先级', 'TTL', '状态', '备注']
             # 设置列宽、高
             sheet.col(0).width = 6000
@@ -416,7 +416,7 @@ def export_dns(req):
                 sheet.write(k, 5, v.ttl)
                 sheet.write(k, 6, v.status)
                 sheet.write(k, 7, v.comment )
-            # 生成excel文件完成
+            # 生成excel文件 --end
 
             book.save(response)    # excel文件保存到 http请求 stream中
 
@@ -434,10 +434,10 @@ def export_dns(req):
             domain_obj['resolution_line_info'] = resolution_line
 
             response = HttpResponse(content_type='text/plain; charset=utf-8')       # 设置response响应头，指定文件类型
-            response['Content-Disposition'] = 'attachment; filename="%s.txt"' %(data['zone'])       # 设置Content-Disposition 和文件名
-            t = loader.get_template('bind/tmp/export_dns_record.txt')       # 通过template模板渲染成文件流
+            response['Content-Disposition'] = 'attachment; filename="%s.txt"' %(data['zone'])       # 设置Content-Disposition和文件名
+            t = loader.get_template('bind/tmp/export_dns_record.txt')
             # c = Context({'configs': domain_obj})
-            response.write(t.render({'configs': domain_obj}))
+            response.write(t.render({'configs': domain_obj}))  # 通过template模板渲染成文件流
             return response
 
 
