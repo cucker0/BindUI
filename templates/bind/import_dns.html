@@ -2,8 +2,8 @@
 {% load static %}
 
 {% block head %}
-    <link rel="stylesheet" href="/static/AdminLTE/css/common.css">
-    <script src="/static/AdminLTE/js/myjs.js"></script>
+    <link rel="stylesheet" href="{% static 'AdminLTE/css/common.css' %}">
+    <script src="{% static 'AdminLTE/js/myjs.js' %}"></script>
 {% endblock %}
 
 
@@ -12,7 +12,6 @@
         <div class="title_2">批量导入记录</div>
         <p domain="{{ domain }}" name="import_dns_domain">域名：{{ domain }}</p>
         <div class="col-xs-12">
-{#            <div class="col-xs-2">上传Excel文件(<a href="/static/system/dns.xls">下载模板</a>) </div>#}
             <div class="col-xs-2">上传Excel文件(<a href="{% static 'system/dns.xls' %}">下载模板</a>) </div>
             <div class="col-xs-2"><input name='import_dns_file'  type="file"></div>
             <div class="col-xs-1 ">
