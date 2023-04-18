@@ -6,7 +6,7 @@ After=network.target
 [Service]
 Type=forking
 PIDFile=/usr/local/bind/var/named.pid
-ExecStart=/usr/local/bind/sbin/named -n 4 -u named -c /usr/local/bind/etc/named.conf
+ExecStart=/usr/local/bind/sbin/named -u named -c /usr/local/bind/etc/named.conf
 ExecReload=/bin/sh -c '/usr/local/bind/sbin/rndc reload > /dev/null 2>&1 || /bin/kill -HUP $MAINPID'
 ExecStop=/bin/sh -c '/usr/local/bind/sbin/rndc stop > /dev/null 2>&1 || /bin/kill -TERM $MAINPID'
 PrivateTmp=true
