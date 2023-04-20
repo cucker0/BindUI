@@ -285,7 +285,7 @@ def get_domain_by_id(req, domain_id):
     '''
     [
         {
-            "model": "DnsRecord.record",
+            "model": "dns.record",
             "pk": 115,
             "fields": {"zone": "hi.com", "host": "@", "type": "SOA", "data": "dns.z.cn.", "ttl": 3600, "mx_priority": null,
                  "refresh": 900, "retry": 900, "expire": 2592000, "minimum": 600, "serial": 2023000001,

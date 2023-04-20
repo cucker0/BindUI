@@ -318,11 +318,11 @@ var _recordPlaceholder = {
 };
 
 function ChangePlaceholder(){
-    var action_type = $("#DNSRecordAddOrModifyModalLabel").attr("action_type");
+    var action_type = $("#RecordAddOrModifyModalLabel").attr("action_type");
     if(action_type == "add"){       // 添加记录，清空host，data值
-        $("#DNSRecordAddOrModifyModalLabel .form-horizontal input[name=host]").val("");
-        $("#DNSRecordAddOrModifyModalLabel .form-horizontal input[name=data]").val("");
-        $("#DNSRecordAddOrModifyModalLabel .form-horizontal input[name=comment]").val("");
+        $("#RecordAddOrModifyModalLabel .form-horizontal input[name=host]").val("");
+        $("#RecordAddOrModifyModalLabel .form-horizontal input[name=data]").val("");
+        $("#RecordAddOrModifyModalLabel .form-horizontal input[name=comment]").val("");
     }
 
     // 添加DNS记录选择记录类型时，自动调整相应的Placeholder提示内容
@@ -401,7 +401,7 @@ function ClearRecordAddModModal(){
 }
 
 
-function ImportDnsRecordACK(){
+function ImportRecordACK(){
     // 批量导入DNS记录
     var record_set = [];
     var _zone_tag_name = $("p[name=import_dns_domain]").attr("domain").trim();
@@ -437,24 +437,24 @@ function ImportDnsRecordACK(){
     }
 }
 
-function ExportDnsRecord(){
+function ExportRecord(){
     // 点击导出DNS解析记录
-    $('#ExportDnsRecordModalLabel').modal('show');
+    $('#ExportRecordModalLabel').modal('show');
     var _domain = $($(this).parent().parent().parent().parent().siblings()[1]).html();
-    var _modal_title = $("#ExportDnsRecordModalLabel h4").html();
+    var _modal_title = $("#ExportRecordModalLabel h4").html();
     _modal_title = _domain + ' ' +  _modal_title;
 
-    $("#ExportDnsRecordModalLabel h4").html(_modal_title);
-    $("#ExportDnsRecordModalLabel h4").attr('domain', _domain);
+    $("#ExportRecordModalLabel h4").html(_modal_title);
+    $("#ExportRecordModalLabel h4").attr('domain', _domain);
 
 
 
 }
 
-function ExportDnsRecordACK(){
+function ExportRecordACK(){
     // 确认导出DNS解析记录
     var _export_dns_record_type = $("select[name=export_dns_record_type]")[0].value.trim();
-    var _zone = $("#ExportDnsRecordModalLabel h4").attr('domain')
+    var _zone = $("#ExportRecordModalLabel h4").attr('domain')
     var __data = {'export_dns_record_type': _export_dns_record_type, 'zone':_zone}
 
     var url = "/domains/_export_dns.html?data=" + JSON.stringify(__data);
@@ -471,7 +471,7 @@ function ExportDnsRecordACK(){
         success: function (response, status, request) {
             //当向服务端发起的请求执行成功完成后，自动调用
             if(request['status'] == 200){
-                $('#ExportDnsRecordModalLabel').modal('hide');
+                $('#ExportRecordModalLabel').modal('hide');
                 $("select[name=export_dns_record_type]").val('0')
                 window.location.href = url;     //下载文件
             }
@@ -495,16 +495,16 @@ function  GetCheckboxAttrSet(selector, attr){
 
 function RecordAddACK(){
     // 添加DNS记录确认操作页面
-    $("#DNSRecordAddOrModifyModalLabel .modal-title").html("添加记录");         //修改modal标题内容
-    $("#DNSRecordAddOrModifyModalLabel").attr("action_type", "add");        //修改 action_type值
+    $("#RecordAddOrModifyModalLabel .modal-title").html("添加记录");         //修改modal标题内容
+    $("#RecordAddOrModifyModalLabel").attr("action_type", "add");        //修改 action_type值
 
     //每次点击 添加记录 重置记录类型,并改变Placeholder值
-    $("#DNSRecordAddOrModifyModalLabel .form-horizontal input[name=mx]").parent().parent().hide();
-    // $("#DNSRecordAddOrModifyModalLabel .form-horizontal input[name=host]").val('');
-    $("#DNSRecordAddOrModifyModalLabel .form-horizontal select[name=resolution_line]").val('0');
-    // $("#DNSRecordAddOrModifyModalLabel .form-horizontal input[name=data]").val('');
-    $("#DNSRecordAddOrModifyModalLabel .form-horizontal select[name=ttl]").val('600');
-    // $("#DNSRecordAddOrModifyModalLabel .form-horizontal input[name=comment]").val('');
+    $("#RecordAddOrModifyModalLabel .form-horizontal input[name=mx]").parent().parent().hide();
+    // $("#RecordAddOrModifyModalLabel .form-horizontal input[name=host]").val('');
+    $("#RecordAddOrModifyModalLabel .form-horizontal select[name=resolution_line]").val('0');
+    // $("#RecordAddOrModifyModalLabel .form-horizontal input[name=data]").val('');
+    $("#RecordAddOrModifyModalLabel .form-horizontal select[name=ttl]").val('600');
+    // $("#RecordAddOrModifyModalLabel .form-horizontal input[name=comment]").val('');
     var _domain_name = $("div[zone_tag_name]").text().trim();
     if (_domain_name.endsWith('in-addr.arpa') || _domain_name.endsWith('in-addr.arpa.')) {
         $(".form-horizontal select[name=type]").val('PTR');
@@ -520,10 +520,10 @@ function RecordAddACK(){
 
 function RecordModifyACK(){
     //DNS记录修改确认操作页面
-    $("#DNSRecordAddOrModifyModalLabel .modal-title").html("修改记录");     //修改modal标题内容
-    $("#DNSRecordAddOrModifyModalLabel").attr("action_type", "modify");        //修改 action_type值
+    $("#RecordAddOrModifyModalLabel .modal-title").html("修改记录");     //修改modal标题内容
+    $("#RecordAddOrModifyModalLabel").attr("action_type", "modify");        //修改 action_type值
 
-    $('#DNSRecordAddOrModifyModalLabel').modal('show');
+    $('#RecordAddOrModifyModalLabel').modal('show');
     var _tag_selector = $(this).parent().siblings();
     var _id = $(_tag_selector[0]).children().attr("id");
     var _host = $(_tag_selector[1]).children('span').text();
@@ -549,7 +549,7 @@ function RecordModifyACK(){
     $(".form-horizontal input[name=mx]").val(_mx_priority);
     $(".form-horizontal select[name=ttl]").val(_ttl);
     $(".form-horizontal input[name=comment]").val(_comment);
-    $("#DNSRecordAddOrModifyModalLabel .modal-title").prop("id", _id);
+    $("#RecordAddOrModifyModalLabel .modal-title").prop("id", _id);
 
     MXShowOrHide();
     RedirectCodeShowOrHide();
@@ -586,7 +586,7 @@ function RecordAddModify(){
     } else if (__data.host == "") {
         __data.host =  '@'
     }
-    var action_type = $("#DNSRecordAddOrModifyModalLabel").attr("action_type");
+    var action_type = $("#RecordAddOrModifyModalLabel").attr("action_type");
     if (action_type == "add"){  //添加记录
         var record_set = [];
         record_set.push(__data);
@@ -598,7 +598,7 @@ function RecordAddModify(){
             success: function (callback) {
                 //当向服务端发起的请求执行成功完成后，自动调用
                 if (callback['status'] == 200){     //刷新当前页面,status=500 添加记录失败。
-                    $("#DNSRecordAddOrModifyModalLabel").modal('hide');
+                    $("#RecordAddOrModifyModalLabel").modal('hide');
                     ClickPage( { 'data':{'optype':5} } );       // 分页器中查看最后一页
                     //location.reload(true);
                 }
@@ -608,8 +608,8 @@ function RecordAddModify(){
             }
         });
     } else if (action_type == "modify"){        //修改记录
-        var _id = $("#DNSRecordAddOrModifyModalLabel .modal-title").prop("id");
-        $("#DNSRecordAddOrModifyModalLabel .modal-title").removeProp("id");
+        var _id = $("#RecordAddOrModifyModalLabel .modal-title").prop("id");
+        $("#RecordAddOrModifyModalLabel .modal-title").removeProp("id");
         __data['id'] = _id;
         //var history_search_key = $("#table_record_list").attr("history_search_key");
         //var _history_search_key = $("#table_record_list").attr("history_search_key").trim();
@@ -622,7 +622,7 @@ function RecordAddModify(){
                 //当向服务端发起的请求执行成功完成后，自动调用
                 if (callback['status'] == 200){ //刷新当前页面,status=500 添加记录失败。
                     //location.reload(true);
-                    $("#DNSRecordAddOrModifyModalLabel").modal('hide');
+                    $("#RecordAddOrModifyModalLabel").modal('hide');
                     ClickPage( { 'data':{'optype':3} } );
                     //if(_history_search_key == ""){
                     //    ClickPage( { 'data':{'optype':3} } );
@@ -649,12 +649,12 @@ function RecordDelteACK(event){
         tag_selector.children().prop("checked", true);      //当前行打勾
         tag_selector.parent().siblings().find('input').removeAttr("checked");       //取消其他行的勾
         $(this).parent().parent().parent().prev().find("input").removeAttr("checked");    //取消 selectAll 勾
-        $("#DNSRecordDeleteModalLabel").prop("multiple", 0);     // 标识为非多条操作
+        $("#RecordDeleteModalLabel").prop("multiple", 0);     // 标识为非多条操作
     }else if (event.data.optype == 2){
-        $("#DNSRecordDeleteModalLabel").prop("multiple", 1);     // 标识为多条操作
+        $("#RecordDeleteModalLabel").prop("multiple", 1);     // 标识为多条操作
     }
 
-    $('#DNSRecordDeleteModalLabel').modal('show');
+    $('#RecordDeleteModalLabel').modal('show');
     var _tip = "<b>{0}</b>.{1} &emsp;[{2}, {3}] &emsp;记录删除？";
     var _rr = GetCheckedRecord();
     var tip = "确定删除所选择的解析记录吗？";
@@ -662,14 +662,14 @@ function RecordDelteACK(event){
     if (_rr.status) {
         tip = _tip.format(_rr.host, _rr.zone, _rr.type, _rr.resolution_line);
     }
-    $("#DNSRecordDeleteModalLabel td .tit").html(tip);
+    $("#RecordDeleteModalLabel td .tit").html(tip);
 
 }
 
 function RecordDel(){
     //删除DNS记录（执行删除）
     var _checkbox_val = [];
-    var multiple = $("#DNSRecordDeleteModalLabel").prop("multiple");
+    var multiple = $("#RecordDeleteModalLabel").prop("multiple");
     if(multiple == 0){     // 单条操作
         var select_id = $("#table_record_list tbody input:checked").prop('id');
         _checkbox_val.push(select_id);
@@ -689,7 +689,7 @@ function RecordDel(){
             //当向服务端发起的请求执行成功完成后，自动调用
             if (callback['status'] == 200) {
                 //location.reload(true);      //刷新当前页面,status=500 添加记录失败。
-                $("#DNSRecordDeleteModalLabel").modal('hide');
+                $("#RecordDeleteModalLabel").modal('hide');
                 ClickPage({'data':{'optype':3}});
             }
         },
@@ -706,12 +706,12 @@ function RecordStatusACK(event){
         tag_selector.children().prop("checked", true);      //当前行打勾
         tag_selector.parent().siblings().find('input').removeAttr("checked");       //取消其他行的勾
         $(this).parent().parent().parent().prev().find("input").removeAttr("checked");    //取消 selectAll 勾
-        $("#DNSRecordStatusModalLabel").prop("multiple", 0);
+        $("#RecordStatusModalLabel").prop("multiple", 0);
     } else if(event.data.optype == 2){      //多条操作
-        $("#DNSRecordStatusModalLabel").prop("multiple", 1);
+        $("#RecordStatusModalLabel").prop("multiple", 1);
     }
     var _status = $(this).prop('name');
-    $("#DNSRecordStatusModalLabel").prop('name', _status);      // 在DNS记录状态操作模态框中标识 DNS记录状态操作动态类型
+    $("#RecordStatusModalLabel").prop('name', _status);      // 在DNS记录状态操作模态框中标识 DNS记录状态操作动态类型
     var _tip = "<b>{0}</b>.{1} &emsp;[{2}, {3}] &emsp;记录{4}？";
     var _rr = GetCheckedRecord();
     var tip = "暂停记录吗？";
@@ -720,23 +720,23 @@ function RecordStatusACK(event){
         if (_rr.status) {
             tip = _tip.format(_rr.host, _rr.zone, _rr.type, _rr.resolution_line, "暂停");
         }
-        $("#DNSRecordStatusModalLabel td .info").html(tip);
+        $("#RecordStatusModalLabel td .info").html(tip);
 
     } else if(_status == '_turnOn'){
         tip = "开启记录吗？";
         if (_rr.status) {
             tip = _tip.format(_rr.host, _rr.zone, _rr.type, _rr.resolution_line, "开启");
         }
-        $("#DNSRecordStatusModalLabel td .info").html(tip);
+        $("#RecordStatusModalLabel td .info").html(tip);
     }
-    $('#DNSRecordStatusModalLabel').modal('show');
+    $('#RecordStatusModalLabel').modal('show');
 }
 
 function RedcordStatusModify(){
     // 修改记录状态
     var _checkbox_val = [];
     var _action = '';
-    var multiple = $("#DNSRecordStatusModalLabel").prop("multiple");
+    var multiple = $("#RecordStatusModalLabel").prop("multiple");
     //var _history_search_key = $("#table_record_list").attr("history_search_key").trim();
     if(multiple == 0){
         var select_id = $("#table_record_list tbody input:checked").prop('id');
@@ -745,10 +745,10 @@ function RedcordStatusModify(){
         _action = $(this).prop('name');
     }else if(multiple == 1){
         _checkbox_val = GetCheckboxAttrSet("#table_record_list", 'id');
-        _action = $("#DNSRecordStatusModalLabel").prop('name');
+        _action = $("#RecordStatusModalLabel").prop('name');
     }
     _checkbox_val = GetCheckboxAttrSet("#table_record_list", 'id');
-    _action = $("#DNSRecordStatusModalLabel").prop('name');
+    _action = $("#RecordStatusModalLabel").prop('name');
 
 
     var data = {'action':_action, 'id_list':_checkbox_val};
@@ -761,7 +761,7 @@ function RedcordStatusModify(){
         success:function(callback){
             if (callback['status']  == 200){        // 状态修改成功
                 //location.reload(true);
-                $("#DNSRecordStatusModalLabel").modal('hide');
+                $("#RecordStatusModalLabel").modal('hide');
                 //if(_history_search_key == ""){
                 //    ClickPage({'data':{'optype':3}});
                 //}else {
@@ -1013,7 +1013,7 @@ function DomainSelectPerPageNum(){
     DomainPage({'data':{'optype': 0}});
 }
 
-function DnsRecordSearch(){
+function RecordSearch(){
     // DNS记录搜索
     var _search_key = $("input[name=dns_record_search]").val().trim();
     //$("input[name=dns_record_search]").val('');
@@ -1043,13 +1043,13 @@ function EnterdSearch(){
         var _event = e || window.event;
         if (_event.keyCode == 13) {
             //if (document.activeElement.name == 'dns_record_search'){
-            //    DnsRecordSearch();
+            //    RecordSearch();
             //} else if (document.activeElement.name == 'domain_resolution_search'){
             //    DomainResolutionSearch();
             //}
             switch (document.activeElement.name) {
                 case 'dns_record_search':
-                    DnsRecordSearch();
+                    RecordSearch();
                     break;
                 case 'domain_resolution_search':
                     DomainResolutionSearch();
@@ -1420,7 +1420,7 @@ $(document).ready(function(){
     $("button[data-toggle=modal]").bind('click', RecordAddACK);
 
     //添加记录时点击 保存 按键绑定事件
-    $("#DNSRecordAddOrModifyModalLabel button[name=_save]").bind('click', RecordAddModify);
+    $("#RecordAddOrModifyModalLabel button[name=_save]").bind('click', RecordAddModify);
 
     // 选择/取消 所有项
     //$("table tr input[data-check-all]").bind('click', SelectAll);
@@ -1441,8 +1441,8 @@ $(document).ready(function(){
     $(document).on("click", ".box-title button[action_type=status]", {'optype': 2},  RecordStatusACK);
 
     // 记录状态操作 确认按钮绑定事件（执行记录状态操作）
-    //$("#DNSRecordStatusModalLabel button[name=_modify_status_ok]").bind('click', RedcordStatusModify);
-    $(document).on("click", "#DNSRecordStatusModalLabel button[name=_modify_status_ok]", RedcordStatusModify);
+    //$("#RecordStatusModalLabel button[name=_modify_status_ok]").bind('click', RedcordStatusModify);
+    $(document).on("click", "#RecordStatusModalLabel button[name=_modify_status_ok]", RedcordStatusModify);
 
     // DNS记录展示页的操作绑定事件--修改操作按钮
     //$("table a[action_type=modify]").bind('click', RecordModifyACK);
@@ -1471,7 +1471,7 @@ $(document).ready(function(){
     $(document).on("click", "#domain_box button[name=jump-page]", {'optype': 2}, DomainPage);       // 点击分页导航器上输入页码直接跳转
 
     // DNS记录搜按钮绑搜索事件
-    $(document).on("click", "div button[name=dns_record_search_submit]", DnsRecordSearch);
+    $(document).on("click", "div button[name=dns_record_search_submit]", RecordSearch);
 
     // 域名解析页 搜索按钮绑定事件
     $(document).on("click", "div button[name=domain_resolution_search_submit]", DomainResolutionSearch);
@@ -1520,13 +1520,13 @@ $(document).ready(function(){
     $(document).on("click", "button[name=upload_import_dns_file]", UploadImportDNSFile);
 
     // 确认导入批量导入DNS记录
-    $(document).on("click", 'button[name=import_dns_confirm]', ImportDnsRecordACK);
+    $(document).on("click", 'button[name=import_dns_confirm]', ImportRecordACK);
 
     // 点击 导出DNS解析记录 按钮
-    $(document).on("click", 'ul li a[action_type=_export_records]', ExportDnsRecord);
+    $(document).on("click", 'ul li a[action_type=_export_records]', ExportRecord);
 
     // 确认 导出DNS解析记录
-    $(document).on("click", 'button[name=_export_dns_record_ok]', ExportDnsRecordACK);
+    $(document).on("click", 'button[name=_export_dns_record_ok]', ExportRecordACK);
 
     // 鼠标移动到 record 记录值时显示复制按钮,离开时隐藏
     $(document).on('mouseenter', '#table_record_list .record_data', {'val': true}, ShowRecordDataCopyButton)

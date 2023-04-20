@@ -47,14 +47,14 @@
 
 {% block content %}
     <!-- Modal 1  删除记录 -->
-    <div class="modal fade" id="DNSRecordDeleteModalLabel" multiple="" tabindex="-10" role="dialog"
-         aria-labelledby="DNSRecordDeleteModalLabel">
+    <div class="modal fade" id="RecordDeleteModalLabel" multiple="" tabindex="-10" role="dialog"
+         aria-labelledby="RecordDeleteModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                             aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="DNSRecordDeleteModalLabel">删除解析记录</h4>
+                    <h4 class="modal-title" id="RecordDeleteModalLabel">删除解析记录</h4>
                 </div>
                 <div class="modal-body">
                     <table class="ui-popmsg">
@@ -78,7 +78,7 @@
 
 
     <!-- Modal 2 添加记录/修改记录 -->
-    <div class="modal fade" id="DNSRecordAddOrModifyModalLabel" action_type="add" tabindex="-20" role="dialog" aria-labelledby="DNSRecordAddOrModifyModalLabel">
+    <div class="modal fade" id="RecordAddOrModifyModalLabel" action_type="add" tabindex="-20" role="dialog" aria-labelledby="RecordAddOrModifyModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -221,14 +221,14 @@ mail： 将域名解析为mail.qcloud.com，通常用于解析邮箱服务器。
     <!-- Modal 2 end -->
 
     <!-- Modal 3 修改记录状态值 -->
-    <div class="modal fade" id="DNSRecordStatusModalLabel" multiple="" name="" tabindex="-30" role="dialog"
-         aria-labelledby="DNSRecordStatusModalLabel">
+    <div class="modal fade" id="RecordStatusModalLabel" multiple="" name="" tabindex="-30" role="dialog"
+         aria-labelledby="RecordStatusModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                             aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="DNSRecordStatusModalLabel">记录状态操作</h4>
+                    <h4 class="modal-title" id="RecordStatusModalLabel">记录状态操作</h4>
                 </div>
                 <div class="modal-body">
                     <table class="ui-popmsg">
@@ -260,7 +260,7 @@ mail： 将域名解析为mail.qcloud.com，通常用于解析邮箱服务器。
                 <div class="box-header">
                     <h2 class="box-title">
                         <!-- Button trigger modal -->
-                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#DNSRecordAddOrModifyModalLabel">+
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#RecordAddOrModifyModalLabel">+
                             添加记录
                         </button>
                         <button type="button" action_type="status" name="_turnOff" class="btn btn-default">暂停</button>
