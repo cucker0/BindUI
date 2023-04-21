@@ -20,7 +20,7 @@
             //点击复制host全值到剪贴板
             new ClipboardJS('.get_full_host', {
             text: function(trigger) {
-                var _zone_name = $("#table_record_list").attr("domain").trim();
+                var _zone_name = $("#table_record_list").attr("zone_name").trim();
                 var _host = $(trigger).prev().text().trim();
                 var _full_host = _host + '.' + _zone_name;
                 if (_host === '@') {

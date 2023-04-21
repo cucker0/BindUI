@@ -914,14 +914,21 @@ def rlist_page(req):
 def associate_cname_rr_add(rr_data:dict) -> models.Record:
     """新建一条给指定的显性URL 或 隐性URL 关联的 CNAME 记录
 
-    :param rr_data: 用于新建 RR 的数据，类型为 dict
+    :param rr_data: 用于新建 RR 的raw数据，类型为 dict
     :return: 新建 或 更新的 对象
     """
     # models.Record.objects.update_or_create() 返回结果为
     # Return a tuple (object, created), where created is a boolean
     # cname_rr 的 data 数据从数据库中读取
-    cname_rr = {'host':rr_data['host'], 'type':'CNAME', 'data':get_url_forwarder_fqdn(), 'ttl':rr_data['ttl'], 'basic':3, 'zone':rr_data['zone'] }
-    obj, opt_type = models.Record.objects.update_or_create(**cname_rr)
+    rr_cname_raw = {
+        'host': rr_data['host'],
+        'type': 'CNAME',
+        'data': get_url_forwarder_fqdn(),
+        'ttl': rr_data['ttl'],
+        'basic': 3,
+        'zone_id': rr_data['zone_id']
+    }
+    obj, opt_type = models.Record.objects.update_or_create(**rr_cname_raw)
     return obj
 
 def associate_rr_del(rr:models.Record):
@@ -1016,19 +1023,17 @@ def record_add(req):
         try:
             data = json.loads(data)
             msg['total'] = len(data)
-            for i in data:
-                if not a_record_data_filter(i):
-                    print("%s 检查过滤RR数据失败。" % i)
+            for rr_raw in data:
+                if not a_record_data_filter(rr_raw):
+                    print("%s 检查过滤RR数据失败。" % rr_raw)
                     continue
-                # zone_obj = models.Zone.objects.get(id=int(i['zone_id']))
-                # i['zone'] = zone_obj
                 # 新建 显性URL、隐性URL 记录时，需要创建一条关联的 CNAME 记录  --start
-                if type(i) == dict and 'basic' in list(i.keys()):
-                    if i['type'] == 'TXT' and i['basic'] in (dns_conf.URL_FORWARDER_BASIC_SET):
-                        obj = associate_cname_rr_add(i)
-                        i['associate_rr_id'] = obj.id
+                if type(rr_raw) == dict and 'basic' in list(rr_raw.keys()):
+                    if rr_raw['type'] == 'TXT' and rr_raw['basic'] in (dns_conf.URL_FORWARDER_BASIC_SET):
+                        obj = associate_cname_rr_add(rr_raw)
+                        rr_raw['associate_rr_id'] = obj.id
                 # 新建 显性URL、隐性URL 记录时，需要创建一条关联的 CNAME 记录  --end
-                models.Record.objects.update_or_create(**i)
+                models.Record.objects.update_or_create(**rr_raw)
                 msg['success_total'] += 1
             if msg['success_total'] == 0:
                 msg['status'] = 500
