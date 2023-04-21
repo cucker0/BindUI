@@ -34,7 +34,7 @@ record_request_field = {
     'URI': COMMON_FIELD,
 }
 # DNS记录的字段值中要求必须小写的字段列表
-record_lower_field = ['zone', 'host', 'mail', 'primary_ns']
+record_lower_field = ['host', 'mail', 'primary_ns']
 # DNS记录类型列表
 record_type = ('A', 'CNAME', 'MX', 'TXT', 'NS', 'AAAA', 'SRV', 'PTR', 'SOA', 'CAA', 'URI',)
 
@@ -71,7 +71,7 @@ def records_data_filter(data):
     """ 多条 rr 数据过滤
 
     更新或创建 record 根据type过滤 data key,把非必要字段都留空,把type字段转为大写，CharField字段要求小写的转为小写
-    :param data: 接收到 web 端的数据，格式：[{"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data, "mx_priority":_mx, "ttl":_ttl, "comment":_comment, "zone":_zone_tag_name }]
+    :param data: 接收到 web 端的数据，格式：[{"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data, "mx_priority":_mx, "ttl":_ttl, "comment":_comment, "zone":_zone_name }]
         要更新或创建 的 record数据
     :return: 返回过滤后的data或业务处理异常消息
     """
@@ -138,7 +138,7 @@ def a_record_data_filter(rr:dict) -> bool:
     """ 单个 rr 数据过滤
 
     更新或创建 record 根据type过滤 data key，把非必要字段都留空,把type字段转为大写，CharField字段要求小写的转为小写
-    :param rr: 格式：{"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data, "mx_priority":_mx, "ttl":_ttl, "comment":_comment, "zone":_zone_tag_name }
+    :param rr: 格式：{"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data, "mx_priority":_mx, "ttl":_ttl, "comment":_comment, "zone":_zone_name }
     :return: 数据是否合格，True：合格，False: 不合格
     """
     if type(rr) != dict:

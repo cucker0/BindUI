@@ -30,7 +30,7 @@ urlpatterns = [
     re_path(r'^domains/api/get_domain/(?P<zone_id>\d+)', views.get_domain_by_id, name='get_domain_by_id'),
 
 
-    re_path(r'^dns/(?P<domain_id>\d+)', views.record_list, name='record_list'),
+    re_path(r'^dns/(?P<zone_id>\d+)', views.record_list, name='record_list'),
     re_path(r'^dns/add.html', views.record_add, name='record_add'),
     re_path(r'^dns/del.html', views.record_del, name='record_del'),
     re_path(r'^dns/mod.html', views.record_mod, name='record_mod'),

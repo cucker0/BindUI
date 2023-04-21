@@ -404,7 +404,7 @@ function ClearRecordAddModModal(){
 function ImportRecordACK(){
     // 批量导入DNS记录
     var record_set = [];
-    var _zone_tag_name = $("p[name=import_dns_domain]").attr("domain").trim();
+    var _zone_name = $("p[name=import_dns_domain]").attr("domain").trim();
     $("#table_import_dns tbody tr").each(function(){
         var _record = {};
         _record['host'] = $($(this).find('td')).children()[0].value.trim();
@@ -413,7 +413,7 @@ function ImportRecordACK(){
         _record['ttl'] = $($(this).find('td')).children()[3].value.trim();
         _record['resolution_line'] = $($(this).find('td')).children()[4].value.trim();
         _record['comment'] = $($(this).find('td')).children()[5].value.trim();
-        _record['zone'] = _zone_tag_name;
+        _record['zone'] = _zone_name;
         record_set.push(_record);
     });
     //console.log(record_set);
@@ -505,7 +505,7 @@ function RecordAddACK(){
     // $("#RecordAddOrModifyModalLabel .form-horizontal input[name=data]").val('');
     $("#RecordAddOrModifyModalLabel .form-horizontal select[name=ttl]").val('600');
     // $("#RecordAddOrModifyModalLabel .form-horizontal input[name=comment]").val('');
-    var _domain_name = $("div[zone_tag_name]").text().trim();
+    var _domain_name = $("div[zone_name]").text().trim();
     if (_domain_name.endsWith('in-addr.arpa') || _domain_name.endsWith('in-addr.arpa.')) {
         $(".form-horizontal select[name=type]").val('PTR');
         $(".form-horizontal input[name=host]").attr("placeholder", "填写IP主机位数字（如反向解析IP 192.168.1.11，则填写11）");
@@ -563,10 +563,19 @@ function RecordAddModify(){
     var _data = $(".modal-body input[name=data]").val().trim();
     var _mx = $(".modal-body input[name=mx]").val().trim();
     var _ttl = $(".modal-body select[name=ttl]").val().trim();
-    var _zone_tag_name = $("#table_record_list").attr("domain").trim();
+    var _zone_id = $("#table_record_list").attr("zone_id").trim();
     var _comment = $(".modal-body input[name=comment]").val().trim();
     var _redirect_code = $(".modal-body select[name=redirect_code]").val().trim();
-    var __data = {"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data, "mx_priority":_mx, "ttl":_ttl, "comment":_comment, "zone":_zone_tag_name };
+    var __data = {
+        type: _type,
+        host: _host,
+        resolution_line: _resolution_line,
+        data: _data,
+        mx_priority: _mx,
+        ttl: _ttl,
+        comment: _comment,
+        zone_id: _zone_id
+    };
 
     // 显性URL，添加额外的 redirect_code
     switch (__data.type) {
@@ -835,9 +844,9 @@ function ClickPage(event){
 
     _other = {'search_key':_search_key};
     if (page_num != active_page || (event.data.optype != 1) || (event.data.optype != 2)){
-        var _zone_tag_name = $("#table_record_list").attr("domain").trim();
+        var _zone_id = $("#table_record_list").attr("zone_id").trim();
 
-        var __data = {'action':_action, 'page':page_num, 'zone':_zone_tag_name, 'perpage_num':perpage_num, 'other':_other}
+        var __data = {'action':_action, 'page':page_num, 'zone_id':_zone_id, 'perpage_num':perpage_num, 'other':_other}
         //console.log(__data);
         var html = $.ajax({
             url: "/dns/rlist_page.html",
@@ -1390,7 +1399,7 @@ function GetCheckedRecord() {
 
     var _tds = $("#table_record_list td input:checked:not([data-check-all])").parent().siblings();
     _d.host = _tds.find("span").first().text().trim();
-    _d.zone =$("div[zone_tag_name]").text().trim();
+    _d.zone =$("div[zone_name]").text().trim();
     _d.type = $(_tds[1]).text().trim();
     _d.resolution_line = $(_tds[2]).text().trim();
     return _d;

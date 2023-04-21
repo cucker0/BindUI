@@ -846,7 +846,7 @@ def  MyPaginator(obj_set, page=1, perpage_num=20, pagiformart=[1, 3, 1]):
     return sub_obj_set, pagination_html
 
 @login_required
-def record_list(req, domain_id):
+def record_list(req, zone_id):
     """
     域名解析展示列表
     :param req:
@@ -861,7 +861,7 @@ def record_list(req, domain_id):
             page = 1
     else:
         page = 1
-    zone_obj = models.Zone.objects.get(id=domain_id)
+    zone_obj = models.Zone.objects.get(id=zone_id)
     record_obj_list = zone_obj.record_set.filter(basic__in=dns_conf.BASIC_SET2SHOW).order_by('id')
 
     record_obj_perpage_list, pagination_html  = MyPaginator(record_obj_list, page)
@@ -882,7 +882,7 @@ def rlist_page(req):
     """
     if req.method == 'POST':
         data = json.loads(req.POST.get('data'))
-        zone_obj = models.Zone.objects.get(zone_name=data['zone_name'])
+        zone_obj = models.Zone.objects.get(id=data['zone_id'])
         record_obj_list = None
         search_key = data['other']['search_key'] or ''
 
@@ -1020,8 +1020,8 @@ def record_add(req):
                 if not a_record_data_filter(i):
                     print("%s 检查过滤RR数据失败。" % i)
                     continue
-                zone_obj = models.Zone.objects.get(id=int(i['zone_id']))
-                i['zone'] = zone_obj
+                # zone_obj = models.Zone.objects.get(id=int(i['zone_id']))
+                # i['zone'] = zone_obj
                 # 新建 显性URL、隐性URL 记录时，需要创建一条关联的 CNAME 记录  --start
                 if type(i) == dict and 'basic' in list(i.keys()):
                     if i['type'] == 'TXT' and i['basic'] in (dns_conf.URL_FORWARDER_BASIC_SET):

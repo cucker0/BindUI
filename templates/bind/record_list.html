@@ -20,11 +20,11 @@
             //点击复制host全值到剪贴板
             new ClipboardJS('.get_full_host', {
             text: function(trigger) {
-                var _zone_tag_name = $("#table_record_list").attr("domain").trim();
+                var _zone_name = $("#table_record_list").attr("domain").trim();
                 var _host = $(trigger).prev().text().trim();
-                var _full_host = _host + '.' + _zone_tag_name;
+                var _full_host = _host + '.' + _zone_name;
                 if (_host === '@') {
-                    _full_host = _zone_tag_name;
+                    _full_host = _zone_name;
                 }
 {#                console.log(_full_host);#}
                     return _full_host;
@@ -93,7 +93,7 @@
                         <div class="form-group">
                             <label class="col-sm-2 control-label">记录类型</label>
                             <div class="col-sm-10">
-                                {% if zone_tag_obj.zone_name|is_reverse_resulution_domain %}
+                                {% if zone_obj.zone_name|is_reverse_resulution_domain %}
                                     <select name="type">
                                         <option value="PTR">PTR</option>
                                     </select>
@@ -250,8 +250,8 @@ mail： 将域名解析为mail.qcloud.com，通常用于解析邮箱服务器。
     </div><!-- /.modal 3-->
 
     <div class="nav nav-pills"> <!-- 右侧栏标题 -->
-        <div zone_tag_name="" class="col-xs-12 title_2" ><a href="/domains/rlist"><span
-            class="iconfont icon-fanhui3 title_2"></span></a>{{ zone_tag_obj.zone_name }}
+        <div zone_name="" class="col-xs-12 title_2" ><a href="/domains/rlist"><span
+            class="iconfont icon-fanhui3 title_2"></span></a>{{ zone_obj.zone_name }}
         </div>
     </div>
     <div>
