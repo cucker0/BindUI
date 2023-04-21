@@ -121,7 +121,7 @@ def domain_delete(req):
                 for zone_obj in zone_set:
                     record_set = zone_obj.record_set.all()
                     record_set.delete()     # 删除dns记录
-                ret = zone_set.delete()      # 删除zone
+                zone_set.delete()      # 删除zone
                 msg['status'] = 200
             except Exception as e:
                 print(e)
@@ -137,6 +137,22 @@ def domain_add(req):
     """
     msg = {'status': 500, 'msg':''}
     try:
+        # data 数据格式
+        """
+        __data = {
+            rr: {
+                data: _data,
+                mail: _mail,
+                refresh: _refresh,
+                retry: _retry,
+                expire: _expire,
+                minimum: _minimum,
+                primary_ns: _primary_ns,
+                comment: _comment
+            },
+            zone_name: _zone_name
+        }
+        """
         data = json.loads(req.POST.get('data'))
     except Exception as e:
         print(e)
@@ -185,24 +201,45 @@ def domain_main_mod(req):
     """
     msg = {'status': 500}
     if req.method == 'POST':
-        data: dict = json.loads(req.POST.get('data'))  # 一条 json 格式的更新RR 操作数据(dict类型)，
-                                                       # 但 data['id'] 该SOA记录对应的 关联的 ZoneTag 的 id
+        # data 格式
+        """
+        __data = {
+            rr: {
+                data: _data,
+                mail: _mail,
+                refresh: _refresh,
+                retry: _retry,
+                expire: _expire,
+                minimum: _minimum,
+                primary_ns: _primary_ns,
+                comment: _comment
+            },
+            zone_id: GetCheckedDomainId()
+        }
+        """
+        data: dict = json.loads(req.POST.get('data'))
         if type(data) != dict:
             return HttpResponse(COMMON_MSG['req_use_post'])
 
         try:
-            zone_obj = models.Zone.objects.get(id=data['id'])
             record_obj_set = models.Record.objects.filter(
-                    Q(type='SOA') & Q(host='@') & Q(basic=2) & Q(zone=zone_obj.zone_name)
+                Q(type='SOA') & Q(host='@') & Q(basic=2) & Q(zone_id=int(data['zone_id']))
             )
-            del (data['id'])  # data.pop('id') 则会 print key
-            data['host'] = '@'
-            data['type'] = 'SOA'
-            data['serial'] = serial(record_obj_set.get().serial)
-            data['update_time'] = timezone.now()
-            a_record_data_filter(data)
+            if not record_obj_set:
+                return msg
+            rr_raw = data['rr']
+            rr_raw['host'] = '@'
+            rr_raw['type'] = 'SOA'
+            rr_raw['serial'] = serial(record_obj_set.get().serial)
+            rr_raw['update_time'] = timezone.now()
+            a_record_data_filter(rr_raw)
             # 更新 record_obj_set
-            record_obj_set.update(**data)
+            record_obj_set.update(**rr_raw)
+            # 更新 zone
+            zone_obj = models.Zone.objects.get(id=int(data['zone_id']))
+            zone_obj.update_time = record_obj_set.first().update_time
+            zone_obj.comment = record_obj_set.first().comment
+            zone_obj.save()
 
             msg['status'] = 200
         except Exception as e:

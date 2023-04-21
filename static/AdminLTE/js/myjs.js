@@ -1093,20 +1093,20 @@ function DoaminModifyACK(){
         // data:{'data':JSON.stringify({})},
         dataType:"json",
         success:function(callback){
-            if (callback){ // 有数据
-                // 向 修改域名 的模态框中填充数据
-                $("#DomainAddOrModifyModalLabel input[name=zone]").val(callback['zone']);
-                $("#DomainAddOrModifyModalLabel input[name=data]").val(callback['data']);
-                $("#DomainAddOrModifyModalLabel input[name=mail]").val(callback['mail']);
-                $("#DomainAddOrModifyModalLabel input[name=refresh]").val(callback['refresh']);
-                $("#DomainAddOrModifyModalLabel input[name=retry]").val(callback['retry']);
-                $("#DomainAddOrModifyModalLabel input[name=expire]").val(callback['expire']);
-                $("#DomainAddOrModifyModalLabel input[name=minimum]").val(callback['minimum']);
-                $("#DomainAddOrModifyModalLabel input[name=primary_ns]").val(callback['primary_ns']);
-                $("#DomainAddOrModifyModalLabel input[name=comment]").val(callback['comment']);
-
-                DisalbeDomainZoneEdit(true);
+            if (!callback) {
+                return;
             }
+            $("#DomainAddOrModifyModalLabel input[name=zone_name]").val(GetCheckedDomainName);
+            $("#DomainAddOrModifyModalLabel input[name=data]").val(callback['data']);
+            $("#DomainAddOrModifyModalLabel input[name=mail]").val(callback['mail']);
+            $("#DomainAddOrModifyModalLabel input[name=refresh]").val(callback['refresh']);
+            $("#DomainAddOrModifyModalLabel input[name=retry]").val(callback['retry']);
+            $("#DomainAddOrModifyModalLabel input[name=expire]").val(callback['expire']);
+            $("#DomainAddOrModifyModalLabel input[name=minimum]").val(callback['minimum']);
+            $("#DomainAddOrModifyModalLabel input[name=primary_ns]").val(callback['primary_ns']);
+            $("#DomainAddOrModifyModalLabel input[name=comment]").val(callback['comment']);
+
+            DisalbeDomainZoneEdit(true);
         },
         error:function(){
 
@@ -1161,16 +1161,17 @@ function DoaminAddModify(){
         });
     } else if (action_type === "modify") {  // 修改域名（除 status 属性以外的属性）
         __data = {
-            'id': GetCheckedDomainId(),
-            // 'zone': _zone,
-            'data': _data,
-            'mail': _mail,
-            'refresh': _refresh,
-            'retry': _retry,
-            'expire': _expire,
-            'minimum': _minimum,
-            'primary_ns': _primary_ns,
-            'comment':_comment
+            rr: {
+                data: _data,
+                mail: _mail,
+                refresh: _refresh,
+                retry: _retry,
+                expire: _expire,
+                minimum: _minimum,
+                primary_ns: _primary_ns,
+                comment: _comment
+            },
+            zone_id: GetCheckedDomainId()
         };
 
         $.ajax({
@@ -1324,7 +1325,7 @@ function DomainDelete(){
     var _action = '';
     var _checkbox_val = GetCheckboxAttrSet("#table_domains", "id");
     var __data = {'id_list': _checkbox_val};
-    console.log(__data);
+    // console.log(__data);
     $.ajax({
         url:"/domains/domain_curd.html?type=d",
         type:"POST",
@@ -1353,15 +1354,15 @@ function ShowRecordDataCopyButton(event){
 
 function GetCheckedDomainName() {
     // 获取 table_domains 表中，选中的域名的名称
-    var _zone = $("#table_domains td input:checked:not([data-check-all])").parent().siblings().filter(":first").text().trim();
+    var _zone_name = $("#table_domains td input:checked:not([data-check-all])").parent().siblings().filter(":first").text().trim();
     // var _zone = $("#table_domains td input:checked:not([data-check-all])").parent().siblings().filter("td[name=zone]").text().trim();
-    return _zone;
+    return _zone_name;
 }
 
 function GetCheckedDomainId() {
     // 获取 table_domains 表中，选中的域名的id
     var _id = $("#table_domains td input:checked:not([data-check-all])").prop("id").trim();
-    return _id;
+    return parseInt(_id);
 }
 
 /**
@@ -1372,9 +1373,9 @@ function GetCheckedDomainId() {
  */
 function DisalbeDomainZoneEdit(option=true) {
     if (option) {
-        $("#DomainAddOrModifyModalLabel input[name=zone]").prop("disabled", true);
+        $("#DomainAddOrModifyModalLabel input[name=zone_name]").prop("disabled", true);
     } else {
-        $("#DomainAddOrModifyModalLabel input[name=zone]").prop("disabled", false);
+        $("#DomainAddOrModifyModalLabel input[name=zone_name]").prop("disabled", false);
     }
 }
 
