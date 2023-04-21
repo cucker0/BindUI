@@ -103,8 +103,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'HOST': '10.100.240.135',
         'PORT': '3306',
-        'NAME': 'bind_ui',
-        'USER': 'bind_ui_wr',
+        'NAME': 'dns',
+        'USER': 'dns_wr',
         'PASSWORD': 'Ww123456!',
     }
 }

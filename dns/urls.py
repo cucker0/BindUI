@@ -26,8 +26,8 @@ urlpatterns = [
     re_path(r'^domains/domain_curd.html', views.domain_curd, name='domain_curd'),
     re_path(r'^domains/_import_dns.html', views.import_dns, name='import_dns'),
     re_path(r'^domains/_export_dns.html', views.export_dns, name='export_dns'),
-    re_path(r'^domains/(?P<domain_id>\d+)/(?P<optype>\w+)', views.domain_man, name='domain_man'),
-    re_path(r'^domains/api/get_domain/(?P<domain_id>\d+)', views.get_domain_by_id, name='get_domain_by_id'),
+    re_path(r'^domains/(?P<zone_id>\d+)/(?P<optype>\w+)', views.domain_man, name='domain_man'),
+    re_path(r'^domains/api/get_domain/(?P<zone_id>\d+)', views.get_domain_by_id, name='get_domain_by_id'),
 
 
     re_path(r'^dns/(?P<domain_id>\d+)', views.record_list, name='record_list'),

@@ -1117,10 +1117,9 @@ function DoaminModifyACK(){
 function DoaminAddModify(){
     // 添加域名/修改域名 点击 保存按钮
 
-    var _zone = $("#DomainAddOrModifyModalLabel input[name=zone]").val().trim();
+    var _zone_name = $("#DomainAddOrModifyModalLabel input[name=zone_name]").val().trim();
     var _data = $("#DomainAddOrModifyModalLabel input[name=data]").val().trim();
     var _mail = $("#DomainAddOrModifyModalLabel input[name=mail]").val().trim();
-    //var _serial = $("#DomainAddOrModifyModalLabel input[name=serial]").val().trim();
     var _refresh = $("#DomainAddOrModifyModalLabel input[name=refresh]").val().trim();
     var _retry = $("#DomainAddOrModifyModalLabel input[name=retry]").val().trim();
     var _expire = $("#DomainAddOrModifyModalLabel input[name=expire]").val().trim();
@@ -1132,16 +1131,17 @@ function DoaminAddModify(){
     var __data;
     if (action_type === "add") {  // 添加域名
         __data = {
-            'zone': _zone,
-            'data': _data,
-            'mail': _mail,
-            //'serial': _serial,
-            'refresh': _refresh,
-            'retry': _retry,
-            'expire': _expire,
-            'minimum': _minimum,
-            'primary_ns': _primary_ns,
-            'comment':_comment
+            rr: {
+                data: _data,
+                mail: _mail,
+                refresh: _refresh,
+                retry: _retry,
+                expire: _expire,
+                minimum: _minimum,
+                primary_ns: _primary_ns,
+                comment: _comment
+            },
+            zone_name: _zone_name
         };
 
         $.ajax({

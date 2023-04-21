@@ -6,8 +6,8 @@ from django.db.models import Q
 from django.utils import timezone
 import xlrd, xlwt
 from django.core import serializers
-
 import sys, os
+
 BASIC_DIR = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(BASIC_DIR)
 from bindUI import dns_conf
@@ -34,7 +34,7 @@ def index(req):
     :param req:
     :return:
     """
-    zone_count = models.ZoneTag.objects.all().count()
+    zone_count = models.Zone.objects.all().count()
     return render(req, 'bind/index.html', {'zone_count': zone_count})
 
 @login_required
@@ -52,7 +52,7 @@ def domain_list(req):
             page = 1
     else:
         page = 1
-    zone_obj_list = models.ZoneTag.objects.all().order_by('id')
+    zone_obj_list = models.Zone.objects.all().order_by('id')
     zone_obj_perpage_list, pagination_html = MyPaginator(zone_obj_list, page)
     return render(req, 'bind/domain_list.html', {
         'zone_obj_list': zone_obj_list,
@@ -71,14 +71,14 @@ def domain_status_mod(req):
         data = json.loads(req.POST.get('data'))
         if data['id_list']:
             # print(data['id_list'], type(data['id_list']))
-            zone_tag_list = models.ZoneTag.objects.filter(id__in=data['id_list'])
+            zone_set = models.Zone.objects.filter(id__in=data['id_list'])
         try:
             if data['action'] == '_turnOff':
-                zone_tag_list.update(status='off')
+                zone_set.update(status='off')
             else:
-                zone_tag_list.update(status='on')
+                zone_set.update(status='on')
             # 更新 update_time
-            zone_tag_list.update(update_time=timezone.now())
+            zone_set.update(update_time=timezone.now())
             msg['status'] = 200
         except Exception as e:
             print(e)
@@ -116,12 +116,12 @@ def domain_delete(req):
     if req.method == "POST":
         data = json.loads(req.POST.get('data'))
         if data['id_list']:
-            zone_tag_list = models.ZoneTag.objects.filter(id__in=data['id_list'])
+            zone_set = models.Zone.objects.filter(id__in=data['id_list'])
             try:
-                for zone_tag_obj in zone_tag_list:
-                    record_set = zone_tag_obj.ZoneTag_Record.all()
+                for zone_obj in zone_set:
+                    record_set = zone_obj.ZoneTag_Record.all()
                     record_set.delete()     # 删除dns记录
-                zone_tag_list.delete()      # 删除zone_tag
+                zone_set.delete()      # 删除zone
                 msg['status'] = 200
             except Exception as e:
                 print(e)
@@ -140,37 +140,38 @@ def domain_add(req):
         data = json.loads(req.POST.get('data'))
     except Exception as e:
         print(e)
+    rr_raw = data['rr']
+    rr_raw['type'] = 'SOA'
+    rr_raw['basic'] = 2       # 标识为不可重复的基础记录
+    rr_raw['host'] = '@'
+    rr_raw['ttl'] = 3600
+    rr_raw['serial'] = serial()
+    a_record_data_filter(rr_raw)
 
-    data['type'] = 'SOA'
-    data['basic'] = 2       # 标识为不可重复的基础记录
-    data['host'] = '@'
-    data['ttl'] = 3600
-    data['serial'] = serial()
-    a_record_data_filter(data)
-    record_set = models.Record.objects.filter(Q(type='SOA') & Q(zone=data['zone'].strip()) )
-    zone_tag_set = models.ZoneTag.objects.filter(zone_name=data['zone'].strip())
+    zone_obj = models.Zone.objects.filter(zone_name=data['zone_name'].strip()).first()
+    record_set = None
 
-    if zone_tag_set:
-        msg['msg'] += "zone_tag:%s exist; " %(data['zone'])
+    if zone_obj:
+        msg['msg'] += "zone:%s exist; " %(data['zone_name'])
+        record_set = models.Record.objects.filter(Q(type='SOA') & Q(zone_id=zone_obj.id))
     else:
-        zone_tag_ins = { 'zone_name':data['zone'] }
+        zone_raw = {'zone_name': data['zone_name']}
         try:
-            if data['comment']:
-                zone_tag_ins['comment'] = data['comment']
+            if rr_raw['comment']:
+                zone_raw['comment'] = rr_raw['comment']
         except KeyError:
-            zone_tag_ins['comment'] = None
-
-        models.ZoneTag.objects.create(**zone_tag_ins)
+            zone_raw['comment'] = None
+        # 新建zone
+        zone_obj = models.Zone.objects.create(**zone_raw)
 
     if record_set:
-        msg['msg'] += "record SOA:%s exist!; " %(data['zone'])
+        msg['msg'] += "record SOA: %s exist!; " %(record_set.first().zone.zone_name)
     else:
         try:
-            zone_tag_obj = models.ZoneTag.objects.get(zone_name=data['zone'].strip())
-            data['zone_tag'] = zone_tag_obj
-            models.Record.objects.create(**data)
+            rr_raw['zone_id'] = zone_obj.id
+            models.Record.objects.create(**rr_raw)
             msg['status'] = 200
-            msg['msg'] = "%s create success." %(data['zone'])
+            msg['msg'] = "%s create success." %(data['zone_name'])
         except Exception as e:
             print(e)
     return msg
@@ -190,15 +191,13 @@ def domain_main_mod(req):
             return HttpResponse(COMMON_MSG['req_use_post'])
 
         try:
-            zone_tag_obj = models.ZoneTag.objects.get(id=data['id'])
+            zone_obj = models.Zone.objects.get(id=data['id'])
             record_obj_set = models.Record.objects.filter(
-                    Q(type='SOA') & Q(host='@') & Q(basic=2) & Q(zone=zone_tag_obj.zone_name)
+                    Q(type='SOA') & Q(host='@') & Q(basic=2) & Q(zone=zone_obj.zone_name)
             )
             del (data['id'])  # data.pop('id') 则会 print key
             data['host'] = '@'
             data['type'] = 'SOA'
-            data['zone'] = zone_tag_obj.zone_name
-            data['zone_tag'] = zone_tag_obj
             data['serial'] = serial(record_obj_set.get().serial)
             data['update_time'] = timezone.now()
             a_record_data_filter(data)
@@ -222,18 +221,18 @@ def domain_ns(req):
     msg = {'status': 500, 'msg':''}
     try:
         data = json.loads(req.GET.get('data'))
-        zone = data['zone'].strip()
+        zone_id = data['zone_id'].strip()
         ns_submit_set = set(data['ns_list'])        # 提交更新的domain NS集合
-        zone_tag_obj = models.ZoneTag.objects.get(zone_name=zone)
-        if zone_tag_obj:        # zone必须存在
-            ns_obj_set = models.Record.objects.filter(Q(host='@') & Q(type='NS') & Q(zone=zone))
+        zone_obj = models.Zone.objects.get(id=zone_id)
+        if zone_obj:        # zone必须存在
+            ns_obj_set = models.Record.objects.filter(Q(host='@') & Q(type='NS') & Q(zone_id=zone_id))
             ns_data_set = set()
             for i in ns_obj_set:
                 ns_data_set.add(i.data)        # 数据库中已经存在domain NS集合
             ns_toadd_set = ns_submit_set - ns_data_set      # 需要创建的domain NS data字段集合
             ns_todelete_set = ns_data_set - ns_submit_set   # 需要删除的domian NS data字段集合
             for i in ns_toadd_set:
-                ns_instance = {'zone':zone, 'host':'@', 'type':'NS', 'data':i.strip(), 'ttl':10800, 'basic':2, 'zone_tag':zone_tag_obj }
+                ns_instance = {'host':'@', 'type':'NS', 'data':i.strip(), 'ttl':10800, 'basic':2, 'zone':zone_obj }
                 a_record_data_filter(ns_instance)
                 models.Record.objects.update_or_create(**ns_instance)
                 msg['msg'] += "domain ns:%s create success; " %(i.strip())
@@ -244,7 +243,7 @@ def domain_ns(req):
                 msg['msg'] += "domain ns:%s delete success; " %(i.strip())
 
             # 更新 update_time
-            models.ZoneTag.objects.filter(zone_name=zone).update(update_time=timezone.now())
+            models.Zone.objects.filter(id=zone_id).update(update_time=timezone.now())
         msg['status'] = 200
     except Exception as e:
         print(e)
@@ -258,7 +257,7 @@ def domain_resolution_list(req):
     :param req:
     :return:
     """
-    zone_obj_list = models.ZoneTag.objects.all().order_by('id')
+    zone_obj_list = models.Zone.objects.all().order_by('id')
     zone_obj_perpage_list, pagination_html  = MyPaginator(zone_obj_list, 1, 10)
     return render(req, 'bind/domain_resolution_list.html',
                   {'zone_obj_list': zone_obj_perpage_list,
@@ -266,19 +265,19 @@ def domain_resolution_list(req):
                    })
 
 @login_required
-def domain_man(req, domain_id, optype):
+def domain_man(req, zone_id, optype):
     """
     域名管理
     :param req:
     :return:
     """
-    domain_id = int(domain_id)
-    zone_tag_obj = models.ZoneTag.objects.get(id=domain_id)
-    ns_set = models.Record.objects.filter(Q(type='NS') & Q(basic=2) & Q(zone_tag=zone_tag_obj))
-    return render(req, 'bind/domain_manager.html', {'zone_tag_obj':zone_tag_obj, 'ns_set': ns_set})
+    zone_id = int(zone_id)
+    zone_obj = models.Zone.objects.get(id=zone_id)
+    ns_set = models.Record.objects.filter(Q(type='NS') & Q(basic=2) & Q(zone=zone_obj))
+    return render(req, 'bind/domain_manager.html', {'zone_obj':zone_obj, 'ns_set': ns_set})
 
 @login_required
-def get_domain_by_id(req, domain_id):
+def get_domain_by_id(req, zone_id):
     """ 通过域名id查询域名信息，即该域名的 SOA 记录
 
     rr_list_json 是一个 json 字符串，对象的数据格式
@@ -287,11 +286,11 @@ def get_domain_by_id(req, domain_id):
         {
             "model": "dns.record",
             "pk": 115,
-            "fields": {"zone": "hi.com", "host": "@", "type": "SOA", "data": "dns.z.cn.", "ttl": 3600, "mx_priority": null,
+            "fields": {"host": "@", "type": "SOA", "data": "dns.z.cn.", "ttl": 3600, "mx_priority": null,
                  "refresh": 900, "retry": 900, "expire": 2592000, "minimum": 600, "serial": 2023000001,
                  "mail": "admin.qq.com.", "primary_ns": ".", "status": "on",
                  "create_time": "2023-04-08T04:20:01.930Z", "update_time": "2023-04-08T04:20:01.930Z", "comment": "",
-                 "resolution_line": "0", "zone_tag": 5, "basic": 2, "associate_rr_id": null
+                 "resolution_line": "0", "zone": 5, "basic": 2, "associate_rr_id": null
             }
         }
     ]
@@ -301,9 +300,9 @@ def get_domain_by_id(req, domain_id):
     :param domain_id: 域名id，类型为 int。
     :return: 单个域名信息（json类型）
     """
-    domain_id = int(domain_id)
-    zone_tag_obj = models.ZoneTag.objects.get(id=domain_id)
-    rr_set = models.Record.objects.filter(Q(type='SOA') & Q(host='@') & Q(basic=2) & Q(zone=zone_tag_obj.zone_name))
+    zone_id = int(zone_id)
+    zone_obj = models.Zone.objects.get(id=zone_id)
+    rr_set = models.Record.objects.filter(Q(type='SOA') & Q(host='@') & Q(basic=2) & Q(zone_id=zone_obj.id))
     rr_list_json = serializers.serialize("json", rr_set)
     rr_list = json.loads(rr_list_json)
 
@@ -384,15 +383,15 @@ def export_dns(req):
                 l = '%s:%s ' %(i[0], i[1])
                 resolution_line += l
         if data['export_dns_record_type'] == '0':       # 导出excel表格类型数据
-            zone_tag_obj = models.ZoneTag.objects.get(zone_name=data['zone'])
-            record_obj_list = zone_tag_obj.ZoneTag_Record.filter( ~Q(type='SOA') )
+            zone_obj = models.Zone.objects.get(zone_name=data['zone_name'])
+            record_obj_list = zone_obj.ZoneTag_Record.filter( ~Q(type='SOA') )
 
             response = HttpResponse(content_type='application/ms-excel')        # 设置response响应头，指定文件类型
-            response['Content-Disposition'] = 'attachment; filename="%s.xls"' %(data['zone'])   # 设置Content-Disposition 和文件名
+            response['Content-Disposition'] = 'attachment; filename="%s.xls"' %(data['zone_name'])   # 设置Content-Disposition 和文件名
 
             # 生成excel文件 --start
             book = xlwt.Workbook(encoding='utf-8')
-            sheet = book.add_sheet(data['zone'], cell_overwrite_ok=True)
+            sheet = book.add_sheet(data['zone_name'], cell_overwrite_ok=True)
             row0 = ['主机记录', '记录类型', resolution_line, '记录值', 'MX优先级', 'TTL', '状态', '备注']
             # 设置列宽、高
             sheet.col(0).width = 6000
@@ -423,10 +422,10 @@ def export_dns(req):
             return response
         elif data['export_dns_record_type'] == '1':     # 导出zone文本类型数据
             domain_obj = {}
-            zone_tag_obj = models.ZoneTag.objects.get(zone_name=data['zone'])
-            record_obj_soa = zone_tag_obj.ZoneTag_Record.get(type='SOA')
-            record_obj_ns = zone_tag_obj.ZoneTag_Record.filter( Q(type='NS') )
-            record_obj_other = zone_tag_obj.ZoneTag_Record.filter( ~Q(type__in=['SOA', 'NS']) )
+            zone_obj = models.Zone.objects.get(zone_name=data['zone_name'])
+            record_obj_soa = zone_obj.ZoneTag_Record.get(type='SOA')
+            record_obj_ns = zone_obj.ZoneTag_Record.filter( Q(type='NS') )
+            record_obj_other = zone_obj.ZoneTag_Record.filter( ~Q(type__in=['SOA', 'NS']) )
 
             domain_obj['SOA'] = record_obj_soa
             domain_obj['NS'] = record_obj_ns
@@ -434,7 +433,7 @@ def export_dns(req):
             domain_obj['resolution_line_info'] = resolution_line
 
             response = HttpResponse(content_type='text/plain; charset=utf-8')       # 设置response响应头，指定文件类型
-            response['Content-Disposition'] = 'attachment; filename="%s.txt"' %(data['zone'])       # 设置Content-Disposition和文件名
+            response['Content-Disposition'] = 'attachment; filename="%s.txt"' %(data['zone_name'])       # 设置Content-Disposition和文件名
             t = loader.get_template('bind/tmp/export_dns_record.txt')
             # c = Context({'configs': domain_obj})
             response.write(t.render({'configs': domain_obj}))  # 通过template模板渲染成文件流
@@ -454,8 +453,8 @@ def export_dns(req):
 #     book = xlwt.Workbook(encoding='utf-8')
 #     sheet = book.add_sheet('Sheet1', cell_overwrite_ok=True)
 #     row = ['主机记录', '记录类型', '解析线路', '记录值', 'MX优先级', 'TTL', '状态', '备注']
-#     zone_tag_obj = models.ZoneTag.objects.get(zone_name='paiconf.com')
-#     record_obj_list = zone_tag_obj.ZoneTag_Record.filter( ~Q(type='SOA') )
+#     zone_obj = models.Zone.objects.get(zone_name='paiconf.com')
+#     record_obj_list = zone_obj.record_set.filter( ~Q(type='SOA') )
 #
 #     for i in range(0, len(row)):
 #         sheet.write_merge(0, 0, i, i, row[i], set_style('Times New Roman', 220, True))
@@ -482,11 +481,11 @@ def dlist_page(req):
         zone_obj_list = None
         search_key = ''
         if data['action'] == 'pagination':
-            zone_obj_list = models.ZoneTag.objects.all().order_by('id')
+            zone_obj_list = models.Zone.objects.all().order_by('id')
         elif data['action'] == 'search':
             try:
                 search_key = data['other']['search_key']
-                zone_obj_list = models.ZoneTag.objects.filter(Q(zone_name__icontains=search_key) | Q(comment__icontains=search_key)).order_by('id')
+                zone_obj_list = models.Zone.objects.filter(Q(zone_name__icontains=search_key) | Q(comment__icontains=search_key)).order_by('id')
             except Exception as e:
                 print(e)
         zone_obj_perpage_list, pagination_html  = MyPaginator(zone_obj_list, data['page'], data['perpage_num'])
@@ -512,17 +511,17 @@ def domain_resolution_page(req):
         data = json.loads(req.POST.get('data'))
         zone_obj_list = None
         if data['action'] == 'pagination':
-            zone_obj_list = models.ZoneTag.objects.all().order_by('id')
+            zone_obj_list = models.Zone.objects.all().order_by('id')
         elif data['action'] == 'search':
             try:
                 search_key = data['other']['search_key']
-                zone_obj_list = models.ZoneTag.objects.filter(Q(zone_name__icontains=search_key) | Q(comment__icontains=search_key)).order_by('id')
+                zone_obj_list = models.Zone.objects.filter(Q(zone_name__icontains=search_key) | Q(comment__icontains=search_key)).order_by('id')
             except Exception as e:
                 print(e)
         zone_obj_perpage_list, pagination_html  = MyPaginator(zone_obj_list, data['page'], data['perpage_num'])
 
     else:
-        zone_obj_list = models.ZoneTag.objects.all().order_by('id')
+        zone_obj_list = models.Zone.objects.all().order_by('id')
         zone_obj_perpage_list, pagination_html  = MyPaginator(zone_obj_list, 1)
 
     ret = render(req, 'bind/tmp/domain_resolution_table_tmp.html',
@@ -825,14 +824,14 @@ def record_list(req, domain_id):
             page = 1
     else:
         page = 1
-    zone_tag_obj = models.ZoneTag.objects.get(id=domain_id)
-    record_obj_list = zone_tag_obj.ZoneTag_Record.filter(basic__in=dns_conf.BASIC_SET2SHOW).order_by('id')
+    zone_obj = models.Zone.objects.get(id=domain_id)
+    record_obj_list = zone_obj.ZoneTag_Record.filter(basic__in=dns_conf.BASIC_SET2SHOW).order_by('id')
 
     record_obj_perpage_list, pagination_html  = MyPaginator(record_obj_list, page)
     return render(req, 'bind/record_list.html',
                   {'record_obj_list': record_obj_perpage_list,
                    'pagination_html': pagination_html,
-                   'zone_tag_obj': zone_tag_obj,
+                   'zone_obj': zone_obj,
                    'DNS_RESOLUTION_LINE': dns_conf.DNS_RESOLUTION_LINE,
                    'is_search': is_search
                    })
@@ -846,7 +845,7 @@ def rlist_page(req):
     """
     if req.method == 'POST':
         data = json.loads(req.POST.get('data'))
-        zone_tag_obj = models.ZoneTag.objects.get(zone_name=data['zone'])
+        zone_obj = models.Zone.objects.get(zone_name=data['zone_name'])
         record_obj_list = None
         search_key = data['other']['search_key'] or ''
 
@@ -854,12 +853,12 @@ def rlist_page(req):
         if data['action'] == 'pagination':
             if search_key == '':
                 # basic code 含义 0:可重复非基础记录, 1:可重复基础记录， 2:不可重复基础记录，3:被显性URL或隐性URL关联的记录 ，200:隐性URL转发，301:显性URL 301重定向，302:显性URL 302重定向
-                record_obj_list = zone_tag_obj.ZoneTag_Record.filter(basic__in=dns_conf.BASIC_SET2SHOW).order_by('id')
+                record_obj_list = zone_obj.ZoneTag_Record.filter(basic__in=dns_conf.BASIC_SET2SHOW).order_by('id')
             else:
-                record_obj_list = zone_tag_obj.ZoneTag_Record.filter(Q(basic__in=dns_conf.BASIC_SET2SHOW) & (Q(host__icontains=search_key) | Q(data__icontains=search_key) | Q(comment__icontains=search_key) ) ).order_by('id')
+                record_obj_list = zone_obj.ZoneTag_Record.filter(Q(basic__in=dns_conf.BASIC_SET2SHOW) & (Q(host__icontains=search_key) | Q(data__icontains=search_key) | Q(comment__icontains=search_key) ) ).order_by('id')
         elif data['action'] == 'search':
             try:
-                record_obj_list = zone_tag_obj.ZoneTag_Record.filter(Q(basic__in=dns_conf.BASIC_SET2SHOW) & (Q(host__icontains=search_key) | Q(data__icontains=search_key) | Q(comment__icontains=search_key) ) ).order_by('id')
+                record_obj_list = zone_obj.ZoneTag_Record.filter(Q(basic__in=dns_conf.BASIC_SET2SHOW) & (Q(host__icontains=search_key) | Q(data__icontains=search_key) | Q(comment__icontains=search_key) ) ).order_by('id')
 
             except Exception as e:
                 print(e)
@@ -868,7 +867,7 @@ def rlist_page(req):
     ret = render(req, 'bind/tmp/domain_record_table_tmp.html',
                   {'record_obj_list': record_obj_perpage_list,
                    'pagination_html': pagination_html,
-                   'zone_tag_obj': zone_tag_obj,
+                   'zone_obj': zone_obj,
                    'DNS_RESOLUTION_LINE': dns_conf.DNS_RESOLUTION_LINE,
                    # 'history_search_key':search_key
                    })
@@ -884,7 +883,7 @@ def associate_cname_rr_add(rr_data:dict) -> models.Record:
     # models.Record.objects.update_or_create() 返回结果为
     # Return a tuple (object, created), where created is a boolean
     # cname_rr 的 data 数据从数据库中读取
-    cname_rr = {'zone':rr_data['zone'], 'host':rr_data['host'], 'type':'CNAME', 'data':get_url_forwarder_fqdn(), 'ttl':rr_data['ttl'], 'basic':3, 'zone_tag':rr_data['zone_tag'] }
+    cname_rr = {'host':rr_data['host'], 'type':'CNAME', 'data':get_url_forwarder_fqdn(), 'ttl':rr_data['ttl'], 'basic':3, 'zone':rr_data['zone'] }
     obj, opt_type = models.Record.objects.update_or_create(**cname_rr)
     return obj
 
@@ -970,7 +969,7 @@ def associate_rr_main_mod(rr:models.Record, rr_update_data:dict):
 def record_add(req):
     """
     添加解析记录，批量导入DNS记录
-    接收到的data： [{"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data, "mx_priority":_mx, "ttl":_ttl, "comment":_comment, "zone":_zone_tag_name }]
+    接收到的data： [{"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data, "mx_priority":_mx, "ttl":_ttl, "comment":_comment, "zone":_zone_name }]
     :param req:
     :return:
     """
@@ -984,8 +983,8 @@ def record_add(req):
                 if not a_record_data_filter(i):
                     print("%s 检查过滤RR数据失败。" % i)
                     continue
-                zone_tag_obj = models.ZoneTag.objects.get(zone_name=i['zone'].strip())
-                i['zone_tag'] = zone_tag_obj
+                zone_obj = models.Zone.objects.get(id=int(i['zone_id']))
+                i['zone'] = zone_obj
                 # 新建 显性URL、隐性URL 记录时，需要创建一条关联的 CNAME 记录  --start
                 if type(i) == dict and 'basic' in list(i.keys()):
                     if i['type'] == 'TXT' and i['basic'] in (dns_conf.URL_FORWARDER_BASIC_SET):
@@ -1070,20 +1069,18 @@ def record_mod(req):
 
         elif _type == 'main':      # 修改DNS记录除status外的项
             try:
-                record_obj_set = models.Record.objects.filter(id=data['id'])
+                record_set = models.Record.objects.filter(id=data['id'])
                 del(data['id'])     # data.pop('id') 则会 print key
-                # zone_tag_obj = models.ZoneTag.objects.get(zone_name=data['zone'])
-                zone_tag_obj = record_obj_set.first().zone_tag
-                data['zone'] = zone_tag_obj.zone_name
-                data['zone_tag'] = zone_tag_obj
+                zone_obj = record_set.first().zone
+                data['zone'] = zone_obj
                 data['update_time'] = timezone.now()
                 a_record_data_filter(data)
 
                 # 更新相关联的记录，要在“更新 record_obj_set” 之前执行，否则 record_obj_set 会更行
-                for rr in record_obj_set:
+                for rr in record_set:
                     associate_rr_main_mod(rr, data)
                 # 更新 record_obj_set
-                record_obj_set.update(**data)
+                record_set.update(**data)
 
                 msg['status'] = 200
             except Exception as e:

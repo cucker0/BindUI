@@ -1,11 +1,10 @@
 from django.db import models
 from .common_model.model import BasicModel
 import sys, os
+
 BASIC_DIR = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(BASIC_DIR)
 from bindUI import dns_conf
-
-
 
 # Create your models here.
 
