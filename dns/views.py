@@ -119,9 +119,9 @@ def domain_delete(req):
             zone_set = models.Zone.objects.filter(id__in=data['id_list'])
             try:
                 for zone_obj in zone_set:
-                    record_set = zone_obj.ZoneTag_Record.all()
+                    record_set = zone_obj.record_set.all()
                     record_set.delete()     # 删除dns记录
-                zone_set.delete()      # 删除zone
+                ret = zone_set.delete()      # 删除zone
                 msg['status'] = 200
             except Exception as e:
                 print(e)
@@ -384,7 +384,7 @@ def export_dns(req):
                 resolution_line += l
         if data['export_dns_record_type'] == '0':       # 导出excel表格类型数据
             zone_obj = models.Zone.objects.get(zone_name=data['zone_name'])
-            record_obj_list = zone_obj.ZoneTag_Record.filter( ~Q(type='SOA') )
+            record_obj_list = zone_obj.record_set.filter( ~Q(type='SOA') )
 
             response = HttpResponse(content_type='application/ms-excel')        # 设置response响应头，指定文件类型
             response['Content-Disposition'] = 'attachment; filename="%s.xls"' %(data['zone_name'])   # 设置Content-Disposition 和文件名
@@ -423,9 +423,9 @@ def export_dns(req):
         elif data['export_dns_record_type'] == '1':     # 导出zone文本类型数据
             domain_obj = {}
             zone_obj = models.Zone.objects.get(zone_name=data['zone_name'])
-            record_obj_soa = zone_obj.ZoneTag_Record.get(type='SOA')
-            record_obj_ns = zone_obj.ZoneTag_Record.filter( Q(type='NS') )
-            record_obj_other = zone_obj.ZoneTag_Record.filter( ~Q(type__in=['SOA', 'NS']) )
+            record_obj_soa = zone_obj.record_set.get(type='SOA')
+            record_obj_ns = zone_obj.record_set.filter( Q(type='NS') )
+            record_obj_other = zone_obj.record_set.filter( ~Q(type__in=['SOA', 'NS']) )
 
             domain_obj['SOA'] = record_obj_soa
             domain_obj['NS'] = record_obj_ns
@@ -825,7 +825,7 @@ def record_list(req, domain_id):
     else:
         page = 1
     zone_obj = models.Zone.objects.get(id=domain_id)
-    record_obj_list = zone_obj.ZoneTag_Record.filter(basic__in=dns_conf.BASIC_SET2SHOW).order_by('id')
+    record_obj_list = zone_obj.record_set.filter(basic__in=dns_conf.BASIC_SET2SHOW).order_by('id')
 
     record_obj_perpage_list, pagination_html  = MyPaginator(record_obj_list, page)
     return render(req, 'bind/record_list.html',
@@ -853,12 +853,12 @@ def rlist_page(req):
         if data['action'] == 'pagination':
             if search_key == '':
                 # basic code 含义 0:可重复非基础记录, 1:可重复基础记录， 2:不可重复基础记录，3:被显性URL或隐性URL关联的记录 ，200:隐性URL转发，301:显性URL 301重定向，302:显性URL 302重定向
-                record_obj_list = zone_obj.ZoneTag_Record.filter(basic__in=dns_conf.BASIC_SET2SHOW).order_by('id')
+                record_obj_list = zone_obj.record_set.filter(basic__in=dns_conf.BASIC_SET2SHOW).order_by('id')
             else:
-                record_obj_list = zone_obj.ZoneTag_Record.filter(Q(basic__in=dns_conf.BASIC_SET2SHOW) & (Q(host__icontains=search_key) | Q(data__icontains=search_key) | Q(comment__icontains=search_key) ) ).order_by('id')
+                record_obj_list = zone_obj.record_set.filter(Q(basic__in=dns_conf.BASIC_SET2SHOW) & (Q(host__icontains=search_key) | Q(data__icontains=search_key) | Q(comment__icontains=search_key) ) ).order_by('id')
         elif data['action'] == 'search':
             try:
-                record_obj_list = zone_obj.ZoneTag_Record.filter(Q(basic__in=dns_conf.BASIC_SET2SHOW) & (Q(host__icontains=search_key) | Q(data__icontains=search_key) | Q(comment__icontains=search_key) ) ).order_by('id')
+                record_obj_list = zone_obj.record_set.filter(Q(basic__in=dns_conf.BASIC_SET2SHOW) & (Q(host__icontains=search_key) | Q(data__icontains=search_key) | Q(comment__icontains=search_key) ) ).order_by('id')
 
             except Exception as e:
                 print(e)

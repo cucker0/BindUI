@@ -1433,12 +1433,12 @@ $(document).ready(function(){
 
     // 记录删除 确认按钮绑定事件（执行删除）
     //$(".modal-footer button[name=_delete_ok]").bind('click', RecordDel);
-    $(document).on("click", ".modal-footer button[name=_delete_ok]", {'optype': 1}, RecordDel);
+    $(document).on("click", "#RecordDeleteModalLabel button[name=_rr_delete_ok]", {'optype': 1}, RecordDel);
 
     // DNS记录展示页的操作绑定事件--状态操作按钮(记录状态操作确认)
     //$("table a[action_type=status]").bind('click', RecordStatusACK);
-    $(document).on("click", "table a[action_type=status]", {'optype': 1},  RecordStatusACK);
-    $(document).on("click", ".box-title button[action_type=status]", {'optype': 2},  RecordStatusACK);
+    $(document).on("click", "#table_record_list a[action_type=status]", {'optype': 1},  RecordStatusACK);
+    $(document).on("click", ".rr-status-operate button[action_type=status]", {'optype': 2},  RecordStatusACK);
 
     // 记录状态操作 确认按钮绑定事件（执行记录状态操作）
     //$("#RecordStatusModalLabel button[name=_modify_status_ok]").bind('click', RedcordStatusModify);
