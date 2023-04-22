@@ -1417,6 +1417,23 @@ function GetCheckedRecord() {
     return _d;
 }
 
+/**
+ * 导入DNS解析记录时，mx_priority input框是否可输入
+ *
+ * @constructor
+ */
+function MxPriorityInputAutoDisable() {
+    console.log($(this).val());
+    var _type = $(this).val();
+    var mx_priority_input_ele = $(this).parent().siblings().find("input[name=mx_priority]");
+    console.log(mx_priority_input_ele[0]);
+    if (_type === 'MX') {
+        mx_priority_input_ele.prop('disabled', false);
+    } else {
+        mx_priority_input_ele.val('');
+        mx_priority_input_ele.prop('disabled', true);
+    }
+}
 
 $(document).ready(function(){
     //DOM就绪后执行
@@ -1553,6 +1570,9 @@ $(document).ready(function(){
     // 鼠标移动到 record 记录值时显示复制按钮,离开时隐藏
     $(document).on('mouseenter', '#table_record_list .record_data', {'val': true}, ShowRecordDataCopyButton)
     $(document).on('mouseleave', '#table_record_list .record_data', {'val': false}, ShowRecordDataCopyButton)
+
+    // 导入DNS解析记录时，mx_priority input框是否可输入
+    $(document).on("change", '#table_import_dns select[name=type]', MxPriorityInputAutoDisable);
 });
 
 
