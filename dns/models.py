@@ -38,7 +38,7 @@ class Record(BasicModel):
     type = models.CharField('type', max_length=64, choices=record_type_choices, default='A', help_text='DNS data type')
     data = models.CharField('data', max_length=255, help_text='IP address / Host name / Full domain name')
     ttl = models.IntegerField('ttl', null=True, blank=True, default=None, help_text='Time to live')
-    mx_priority = models.CharField('mx_priority', max_length=255, null=True, blank=True, default=None, help_text='MX Priority')
+    mx_priority = models.IntegerField('mx_priority', null=True, blank=True, default=None, help_text='MX Priority')
     refresh = models.IntegerField('refresh', null=True, blank=True, default=None, help_text='Refresh time for SOA record,Slave DNS向Master DNS进行Serial对比同步间隔时间,Master DNSnotify参数关闭时有效')
     retry = models.IntegerField('retry', null=True, blank=True, default=None, help_text='Retry time for SOA record,当Slave DNS获取Master DNS Serial更新失败时,重试时间')
     expire = models.IntegerField('expire', null=True, blank=True, default=None, help_text='Expire time for SOA record,Slave DNS在没有Master DNS的情况下权威地提供域名解析服务的时间')
