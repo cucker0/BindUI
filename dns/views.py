@@ -364,7 +364,6 @@ def import_dns(req):
         zone_obj = models.Zone.objects.get(id=int(zone_id))
         return render(req, 'bind/import_dns.html', {'zone_obj': zone_obj})
     elif req.method == 'POST':
-        data = {'status':0}
         file_obj = req.FILES.get('file',)
 
         fp = xlrd.open_workbook(file_contents=file_obj.read())

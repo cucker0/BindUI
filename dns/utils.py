@@ -168,6 +168,9 @@ def a_record_data_filter(rr:dict) -> bool:
             rr[key] = None
         if rr['type'] != 'MX':
             rr['mx_priority'] = None
+        if rr['type'] == 'MX':
+            if ('mx_priority' not in rr_keys) or (not rr['mx_priority']):
+                rr['mx_priority'] = '10'
 
         if rr['type'] == 'A':  # data字段过滤，要求IPv4
             if not check_ipv4(rr['data']):

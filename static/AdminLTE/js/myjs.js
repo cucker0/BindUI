@@ -411,9 +411,12 @@ function ImportRecordACK(){
         _record['host'] = $($(this).find('td')).children()[0].value.trim();
         _record['type'] = $($(this).find('td')).children()[1].value.trim();
         _record['data'] = $($(this).find('td')).children()[2].value.trim();
-        _record['ttl'] = $($(this).find('td')).children()[3].value.trim();
-        _record['resolution_line'] = $($(this).find('td')).children()[4].value.trim();
-        _record['comment'] = $($(this).find('td')).children()[5].value.trim();
+        _record['ttl'] = $($(this).find('td')).children()[4].value.trim();
+        _record['resolution_line'] = $($(this).find('td')).children()[5].value.trim();
+        _record['comment'] = $($(this).find('td')).children()[6].value.trim();
+        if (_record.type === 'MX') {
+            _record['mx_priority'] = $($(this).find('td')).children()[3].value.trim();
+        }
         _record['zone_id'] = _zone_id;
         record_set.push(_record);
     });
@@ -428,6 +431,7 @@ function ImportRecordACK(){
                 //当向服务端发起的请求执行成功完成后，自动调用
                 if (callback['status'] == 200){     //刷新当前页面,status=500 添加记录失败。
                     $("#table_import_dns").html('');
+                    console.log("恭喜，导入DSN记录成功！");
                 }
             },
             error: function () {
@@ -1538,7 +1542,7 @@ $(document).ready(function(){
     $(document).on("click", "button[name=upload_import_dns_file]", UploadImportDNSFile);
 
     // 确认导入批量导入DNS记录
-    $(document).on("click", '#table_domains button[name=import_dns_confirm]', ImportRecordACK);
+    $(document).on("click", 'button[name=import_dns_confirm]', ImportRecordACK);
 
     // 点击 导出DNS解析记录 按钮
     $(document).on("click", '#table_domains ul li a[action_type=_export_records]', ExportRecord);

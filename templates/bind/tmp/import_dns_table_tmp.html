@@ -4,6 +4,7 @@
                     <th class="th-w2-2">主机记录</th>
                     <th class="th-w2-2">记录类型</th>
                     <th class="th-w2-2">记录值</th>
+                    <th class="th-w2-2">MX优先级</th>
                     <th class="th-w2-2">TTL</th>
                     <th class="th-w2-2">解析线路</th>
                     <th class="th-w2-2">备注(可不填)</th>
@@ -22,11 +23,16 @@
                                 <option value="NS" {% if i.1|upper == 'NS' %} selected {% endif %}>NS</option>
                                 <option value="AAAA" {% if i.1|upper == 'AAAA' %} selected {% endif %}>AAAA</option>
                                 <option value="SRV" {% if i.1|upper == 'SRV' %} selected {% endif %}>SRV</option>
-                                <option value="REDIRECT_URL" {% if i.1|upper == 'REDIRECT_URL' %} selected {% endif %}>显性URL</option>
-                                <option value="FORWARD_URL" {% if i.1|upper == 'FORWARD_URL' %} selected {% endif %}>隐性URL</option>
+                                <option value="PTR" {% if i.1|upper == 'PTR' %} selected {% endif %}>SRV</option>
+                                <option value="CAA" {% if i.1|upper == 'CAA' %} selected {% endif %}>SRV</option>
+                                <option value="URI" {% if i.1|upper == 'URI' %} selected {% endif %}>SRV</option>
+{#                                <option value="REDIRECT_URL" {% if i.1|upper == 'REDIRECT_URL' %} selected {% endif %}>显性URL</option>#}
+{#                                <option value="FORWARD_URL" {% if i.1|upper == 'FORWARD_URL' %} selected {% endif %}>隐性URL</option>#}
                             </select>
                         </td>
                         <td><input value="{{ i.2 }}"></td>
+                        {# MX优先级 #}
+                        <td><input value="{{ i.3 }}"></td>
                         <td>
                             <select name="ttl">
                                 <option value="60">1分钟</option>
@@ -40,11 +46,11 @@
                         <td>
                             <select name="resolution_line">
                                 {% for j in DNS_RESOLUTION_LINE %}
-                                    <option value="{{ j.0 }}" {% if i.3 == j.0 %} selected {% endif %}>{{ j.1 }}</option>
+                                    <option value="{{ j.0 }}" {% if i.4 == j.0 %} selected {% endif %}>{{ j.1 }}</option>
                                 {% endfor %}
                             </select>
                         </td>
-                        <td><input size="50" value="{{ i.4 }}"></td>
+                        <td><input size="50" value="{{ i.5 }}"></td>
                     </tr>
                     {% endfor %}
                 </tbody>
