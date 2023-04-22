@@ -404,7 +404,8 @@ function ClearRecordAddModModal(){
 function ImportRecordACK(){
     // 批量导入DNS记录
     var record_set = [];
-    var _zone_name = $("p[name=import_dns_domain]").attr("domain").trim();
+    var _zone_id = $("p[name=import_dns_domain]").attr("zone_id").trim();
+    _zone_id = parseInt(_zone_id);
     $("#table_import_dns tbody tr").each(function(){
         var _record = {};
         _record['host'] = $($(this).find('td')).children()[0].value.trim();
@@ -413,7 +414,7 @@ function ImportRecordACK(){
         _record['ttl'] = $($(this).find('td')).children()[3].value.trim();
         _record['resolution_line'] = $($(this).find('td')).children()[4].value.trim();
         _record['comment'] = $($(this).find('td')).children()[5].value.trim();
-        _record['zone'] = _zone_name;
+        _record['zone_id'] = _zone_id;
         record_set.push(_record);
     });
     //console.log(record_set);
@@ -440,12 +441,14 @@ function ImportRecordACK(){
 function ExportRecord(){
     // 点击导出DNS解析记录
     $('#ExportRecordModalLabel').modal('show');
-    var _domain = $($(this).parent().parent().parent().parent().siblings()[1]).html();
+    var _zone_name = $($(this).parent().parent().parent().parent().siblings()[1]).html();
+    var _zone_id = $($(this).parent().parent().parent().parent().siblings()[0]).find("input").attr("id");
     var _modal_title = $("#ExportRecordModalLabel h4").html();
-    _modal_title = _domain + ' ' +  _modal_title;
+    _modal_title = _zone_name + ' ' +  _modal_title;
 
     $("#ExportRecordModalLabel h4").html(_modal_title);
-    $("#ExportRecordModalLabel h4").attr('domain', _domain);
+    $("#ExportRecordModalLabel h4").attr('zone_name', _zone_name);
+    $("#ExportRecordModalLabel h4").attr('zone_id', _zone_id);
 
 
 
@@ -453,9 +456,10 @@ function ExportRecord(){
 
 function ExportRecordACK(){
     // 确认导出DNS解析记录
-    var _export_dns_record_type = $("select[name=export_dns_record_type]")[0].value.trim();
-    var _zone = $("#ExportRecordModalLabel h4").attr('domain')
-    var __data = {'export_dns_record_type': _export_dns_record_type, 'zone':_zone}
+    var _record_format_type = $("select[name=record_format_type]")[0].value.trim();
+    // var _zone_name = $("#ExportRecordModalLabel h4").attr('zone_name');
+    var _zone_id = $("#ExportRecordModalLabel h4").attr('zone_id');
+    var __data = {record_format_type: _record_format_type, zone_id:_zone_id}
 
     var url = "/domains/_export_dns.html?data=" + JSON.stringify(__data);
 
@@ -468,11 +472,13 @@ function ExportRecordACK(){
         //beforeSend:function(XMLHttpRequest){
         //    // 请求前执行
         //},
-        success: function (response, status, request) {
+        success: function (callback) {
             //当向服务端发起的请求执行成功完成后，自动调用
-            if(request['status'] == 200){
+            if(callback['status'] == 200){
                 $('#ExportRecordModalLabel').modal('hide');
-                $("select[name=export_dns_record_type]").val('0')
+                $("select[name=record_format_type]").val('0')
+                $("#ExportRecordModalLabel h4").attr('zone_name', '');
+                $("#ExportRecordModalLabel h4").attr('zone_id', '');
                 window.location.href = url;     //下载文件
             }
         },
@@ -1234,18 +1240,20 @@ function AddDomainNS(){
     //新建domain ns记录，输入NS主机名后，提交到后台
     var _ns_list = [];
     var ele_ul = $(this).parent().parent().siblings();
-    var _zone = $(ele_ul).find("li[name=zone]").text().trim();
+    var _zone_name = $(ele_ul).find("li[zone_name]").attr('zone_name').trim();
+    var _zone_id = $(ele_ul).find("li[zone_id]").attr('zone_id').trim();
+    _zone_id = parseInt(_zone_id);
     $(ele_ul).find("input[name=ns]").each(function (i) {
         var _ns = $(this).val().trim();
         if ( !(_ns == '' || _ns == undefined) ){
             _ns_list.push(_ns);
         }
     });
-    var __data = {'zone':_zone, 'ns_list': _ns_list};
+    var __data = {zone_id:_zone_id, ns_list:_ns_list};
     $.ajax({
         url:"/domains/domain_curd.html?type=ns",
-        type:"GET",
-        data:{'data':JSON.stringify(__data)},
+        type: "POST",
+        data: {data: JSON.stringify(__data)},
         dataType:"json",
         success:function(callback){
             if (callback['status']  == 200){        // 状态修改成功
@@ -1530,10 +1538,10 @@ $(document).ready(function(){
     $(document).on("click", "button[name=upload_import_dns_file]", UploadImportDNSFile);
 
     // 确认导入批量导入DNS记录
-    $(document).on("click", 'button[name=import_dns_confirm]', ImportRecordACK);
+    $(document).on("click", '#table_domains button[name=import_dns_confirm]', ImportRecordACK);
 
     // 点击 导出DNS解析记录 按钮
-    $(document).on("click", 'ul li a[action_type=_export_records]', ExportRecord);
+    $(document).on("click", '#table_domains ul li a[action_type=_export_records]', ExportRecord);
 
     // 确认 导出DNS解析记录
     $(document).on("click", 'button[name=_export_dns_record_ok]', ExportRecordACK);

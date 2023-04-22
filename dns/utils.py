@@ -138,7 +138,7 @@ def a_record_data_filter(rr:dict) -> bool:
     """ 单个 rr 数据过滤
 
     更新或创建 record 根据type过滤 data key，把非必要字段都留空,把type字段转为大写，CharField字段要求小写的转为小写
-    :param rr: 格式：{"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data, "mx_priority":_mx, "ttl":_ttl, "comment":_comment, "zone":_zone_name }
+    :param rr: 格式：{"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data, "mx_priority":_mx, "ttl":_ttl, "comment":_comment, "zone": zone_obj }
     :return: 数据是否合格，True：合格，False: 不合格
     """
     if type(rr) != dict:
@@ -198,7 +198,6 @@ def a_record_data_filter(rr:dict) -> bool:
                     rr['primary_ns'] = "%s." % (rr['primary_ns'])
         else:
             pass
-
     return True
 
 def serial(num=0):

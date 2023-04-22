@@ -1,15 +1,15 @@
 $TTL 600
-$ORIGIN {{configs.SOA.zone}}.
-@    {{configs.SOA.ttl}}    IN    SOA {{configs.SOA.data}} {{configs.SOA.mail}} (
-                                        {{configs.SOA.serial}}        ; serial
-                                        {{configs.SOA.refresh}}        ; refresh
-                                        {{configs.SOA.retry}}        ; retry
-                                        {{configs.SOA.expire}}        ; expire
-                                        {{configs.SOA.minimum}} )        ; minimum
-{% for i in configs.NS %}{{i.host}} {{i.ttl}}        IN NS        {{i.data}}
+$ORIGIN {{domain_obj.SOA.zone}}.
+@    {{domain_obj.SOA.ttl}}    IN    SOA {{domain_obj.SOA.data}} {{domain_obj.SOA.mail}} (
+                                        {{domain_obj.SOA.serial}}        ; serial
+                                        {{domain_obj.SOA.refresh}}        ; refresh
+                                        {{domain_obj.SOA.retry}}        ; retry
+                                        {{domain_obj.SOA.expire}}        ; expire
+                                        {{domain_obj.SOA.minimum}} )        ; minimum
+{% for i in domain_obj.NS %}{{i.host}} {{i.ttl}}        IN NS        {{i.data}}
 {% endfor %}
 
-;{{configs.resolution_line_info}}
+;{{domain_obj.resolution_line_info}}
 ;主机名 TTL        Class 类型 Data        ;备注    ;解析线路
-{% for i in configs.OTHER %}{{i.host}} {{i.ttl}}        IN A {{i.data}}        ;{{i.comment}}    ;{{i.resolution_line}}
+{% for i in domain_obj.OTHER %}{{i.host}} {{i.ttl}}        IN A {{i.data}}        ;{{i.comment}}    ;{{i.resolution_line}}
 {% endfor %}

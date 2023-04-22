@@ -256,9 +256,11 @@ def domain_ns(req):
     :return:
     """
     msg = {'status': 500, 'msg':''}
+    if req.method != 'POST':
+        return COMMON_MSG['req_use_post']
     try:
-        data = json.loads(req.GET.get('data'))
-        zone_id = data['zone_id'].strip()
+        data = json.loads(req.POST.get('data'))
+        zone_id = int(data['zone_id'])
         ns_submit_set = set(data['ns_list'])        # 提交更新的domain NS集合
         zone_obj = models.Zone.objects.get(id=zone_id)
         if zone_obj:        # zone必须存在
@@ -280,7 +282,9 @@ def domain_ns(req):
                 msg['msg'] += "domain ns:%s delete success; " %(i.strip())
 
             # 更新 update_time
-            models.Zone.objects.filter(id=zone_id).update(update_time=timezone.now())
+            # models.Zone.objects.filter(id=zone_id).update(update_time=timezone.now())
+            zone_obj.update_time = timezone.now()
+            zone_obj.save()
         msg['status'] = 200
     except Exception as e:
         print(e)
@@ -356,8 +360,9 @@ def import_dns(req):
     :return:
     """
     if req.method == 'GET':
-        domain = req.GET.get('domain')
-        return render(req, 'bind/import_dns.html', {'domain':domain })
+        zone_id = req.GET.get('zone_id')
+        zone_obj = models.Zone.objects.get(id=int(zone_id))
+        return render(req, 'bind/import_dns.html', {'zone_obj': zone_obj})
     elif req.method == 'POST':
         data = {'status':0}
         file_obj = req.FILES.get('file',)
@@ -368,7 +373,10 @@ def import_dns(req):
         for i in range(1, sheet.nrows):
             content_list.append(sheet.row_values(i))
         # print(content_list)
-        return render(req, 'bind/tmp/import_dns_table_tmp.html', {'content_list': content_list, 'DNS_RESOLUTION_LINE':dns_conf.DNS_RESOLUTION_LINE})
+        return render(req,'bind/tmp/import_dns_table_tmp.html',
+                      {'content_list': content_list,
+                       'DNS_RESOLUTION_LINE': dns_conf.DNS_RESOLUTION_LINE
+                       })
 
 def set_style(name, height, bold=False):
     """
@@ -419,16 +427,16 @@ def export_dns(req):
         for i in dns_conf.DNS_RESOLUTION_LINE:
                 l = '%s:%s ' %(i[0], i[1])
                 resolution_line += l
-        if data['export_dns_record_type'] == '0':       # 导出excel表格类型数据
-            zone_obj = models.Zone.objects.get(zone_name=data['zone_name'])
+        if data['record_format_type'] == '0':       # 导出excel表格类型数据
+            zone_obj = models.Zone.objects.get(id=data['zone_id'])
             record_obj_list = zone_obj.record_set.filter( ~Q(type='SOA') )
 
             response = HttpResponse(content_type='application/ms-excel')        # 设置response响应头，指定文件类型
-            response['Content-Disposition'] = 'attachment; filename="%s.xls"' %(data['zone_name'])   # 设置Content-Disposition 和文件名
+            response['Content-Disposition'] = 'attachment; filename="%s.xls"' %(zone_obj.zone_name)   # 设置Content-Disposition 和文件名
 
             # 生成excel文件 --start
             book = xlwt.Workbook(encoding='utf-8')
-            sheet = book.add_sheet(data['zone_name'], cell_overwrite_ok=True)
+            sheet = book.add_sheet(zone_obj.zone_name, cell_overwrite_ok=True)
             row0 = ['主机记录', '记录类型', resolution_line, '记录值', 'MX优先级', 'TTL', '状态', '备注']
             # 设置列宽、高
             sheet.col(0).width = 6000
@@ -457,9 +465,9 @@ def export_dns(req):
             book.save(response)    # excel文件保存到 http请求 stream中
 
             return response
-        elif data['export_dns_record_type'] == '1':     # 导出zone文本类型数据
+        elif data['record_format_type'] == '1':     # 导出zone文本类型数据
             domain_obj = {}
-            zone_obj = models.Zone.objects.get(zone_name=data['zone_name'])
+            zone_obj = models.Zone.objects.get(id=data['zone_id'])
             record_obj_soa = zone_obj.record_set.get(type='SOA')
             record_obj_ns = zone_obj.record_set.filter( Q(type='NS') )
             record_obj_other = zone_obj.record_set.filter( ~Q(type__in=['SOA', 'NS']) )
@@ -470,14 +478,13 @@ def export_dns(req):
             domain_obj['resolution_line_info'] = resolution_line
 
             response = HttpResponse(content_type='text/plain; charset=utf-8')       # 设置response响应头，指定文件类型
-            response['Content-Disposition'] = 'attachment; filename="%s.txt"' %(data['zone_name'])       # 设置Content-Disposition和文件名
+            response['Content-Disposition'] = 'attachment; filename="%s.txt"' %(zone_obj.zone_name)       # 设置Content-Disposition和文件名
             t = loader.get_template('bind/tmp/export_dns_record.txt')
-            # c = Context({'configs': domain_obj})
-            response.write(t.render({'configs': domain_obj}))  # 通过template模板渲染成文件流
+            # c = Context({'domain_obj': domain_obj})
+            response.write(t.render({'domain_obj': domain_obj}))  # 通过template模板渲染成文件流
             return response
 
-
-    elif req.method == 'POST':
+    if req.method == 'POST':
         msg = {'status': 200}
         return HttpResponse(json.dumps(msg))
 
