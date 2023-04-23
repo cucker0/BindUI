@@ -4,7 +4,7 @@ div, p, span, td {
 }
 
 /* input 输入框内的闪烁光标恢复自动 */
-input {
+input, textarea {
     caret-color: auto;
 }
 
@@ -12,102 +12,102 @@ ul li {
     list-style: none;
 }
 
-.dd-left{
+.dd-left {
     float: left;
     width: 40%;
     /*border-right: 1px solid #DDD;*/
 }
 
-.dd-middle{
+.dd-middle {
     float: left;
     width: 30%;
 }
 
-.dd-right{
+.dd-right {
     float: left;
     width: 30%;
 }
 
-.cursor1{
+.cursor1 {
     cursor: pointer;
 }
 
-.dd-middle label{
+.dd-middle label {
     font-weight: normal;
     margin-bottom: 0;
 }
 
-.dd-subdiv{
+.dd-subdiv {
     width: 46%;
     margin-top: 10px;
     margin-left: 30px;
 }
 
-.green{
-    color: #008d4c; !important;
+.green {
+    color: #008d4c !important;
 }
 
-.orange{
-    color: darkorange; !important;
+.orange {
+    color: darkorange !important;
 }
 
-.red{
-    color: red; !important;
+.red {
+    color: red !important;
 }
 
-.margin-t10{
+.margin-t10 {
     margin-top: 10px;
 }
 
-.margin-t30{
+.margin-t30 {
     margin-top: 30px;
 }
 
-.margin-t50{
+.margin-t50 {
     margin-top: 50px;
 }
 
-.width-50{
+.width-50 {
     width: 50px;
 }
 
-.margin-L10{
+.margin-L10 {
     margin-left: 10px;
 }
 
-.margin-L30{
+.margin-L30 {
     margin-left: 30px;
 }
 
-.margin-L50{
+.margin-L50 {
     margin-left: 50px;
 }
 
-.site_active{
+.site_active {
     color: #1ab7ea;
 }
 
-.site_box{
+.site_box {
     margin-top: 10px;
 }
 
-table{
+table {
     cursor: default;
 }
 
-.maintain_group_select{
+.maintain_group_select {
     height: 34px;
 }
 
-.mygray-light{
+.mygray-light {
     color: #999 !important;
 }
 
-.mywidth95{
+.mywidth95 {
     width: 95% !important;
 }
 
-input.upload{
+input.upload {
     position: absolute;
     top: 0;
     right: 0;
@@ -119,71 +119,71 @@ input.upload{
     opacity: 0;
 }
 
-.th-w1-1{
+.th-w1-1 {
     width: 10px;
 }
 
-.th-w1-2{
+.th-w1-2 {
     width: 35%;
 }
 
-.th-w1-3{
+.th-w1-3 {
     width: 5%;
 }
 
-.th-w1-4{
+.th-w1-4 {
     width: 20%;
 }
 
-.th-w1-5{
+.th-w1-5 {
     width: 10%;
 }
 
-.th-w1-6{
+.th-w1-6 {
     width: 30%;
 }
 
-.th-w2-1{
+.th-w2-1 {
     width: 10px;
 }
 
-.th-w2-2{
+.th-w2-2 {
     width: 15%;
 }
 
-.th-w2-3{
+.th-w2-3 {
     width: 5%;
 }
 
-.th-w2-4{
+.th-w2-4 {
     width: 10%;
 }
 
-.th-w2-5{
+.th-w2-5 {
     width: 20%;
 }
 
-.th-w2-6{
+.th-w2-6 {
     width: 5%;
 }
 
-.th-w2-7{
+.th-w2-7 {
     width: 5%;
 }
 
-.th-w2-8{
+.th-w2-8 {
     width: 5%;
 }
 
-.th-w2-9{
+.th-w2-9 {
     width: 10%;
 }
 
-.th-w2-10{
+.th-w2-10 {
     width: 10%;
 }
 
-.th-w2-11{
+.th-w2-11 {
     width: 15%;
 }
 
@@ -216,7 +216,7 @@ input.upload{
     font: 40px/80px normal;
 }
 
-.content .products-box .product-box p{
+.content .products-box .product-box p {
     width: 110px;
     float: right;
 }
