@@ -1,4 +1,14 @@
-ul li{
+/* html 点击 div 等元素隐藏闪烁光标 */
+div, p, span, td {
+    caret-color: transparent;
+}
+
+/* input 输入框内的闪烁光标恢复自动 */
+input {
+    caret-color: auto;
+}
+
+ul li {
     list-style: none;
 }
 

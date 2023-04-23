@@ -1444,6 +1444,11 @@ function MxPriorityInputAutoDisable() {
     }
 }
 
+function ClearPreviousInput() {
+    // input 框内的 x，清空该 input 输入的内容
+    $(this).prev("input").val('');
+}
+
 $(document).ready(function(){
     // DOM就绪后执行
 
@@ -1568,20 +1573,23 @@ $(document).ready(function(){
     $(document).on("click", "button[name=upload_import_dns_file]", UploadImportDNSFile);
 
     // 确认导入批量导入DNS记录
-    $(document).on("click", 'button[name=import_dns_confirm]', ImportRecordACK);
+    $(document).on("click", "button[name=import_dns_confirm]", ImportRecordACK);
 
     // 点击 导出DNS解析记录 按钮
-    $(document).on("click", '#table_domains ul li a[action_type=_export_records]', ExportRecord);
+    $(document).on("click", "#table_domains ul li a[action_type=_export_records]", ExportRecord);
 
     // 确认 导出DNS解析记录
-    $(document).on("click", 'button[name=_export_dns_record_ok]', ExportRecordACK);
+    $(document).on("click", "button[name=_export_dns_record_ok]", ExportRecordACK);
 
     // 鼠标移动到 record 记录值时显示复制按钮,离开时隐藏
-    $(document).on('mouseenter', '#table_record_list .record_data', {'val': true}, ShowRecordDataCopyButton)
-    $(document).on('mouseleave', '#table_record_list .record_data', {'val': false}, ShowRecordDataCopyButton)
+    $(document).on("mouseenter", "#table_record_list .record_data", {'val': true}, ShowRecordDataCopyButton)
+    $(document).on("mouseleave", "#table_record_list .record_data", {'val': false}, ShowRecordDataCopyButton)
 
     // 导入DNS解析记录时，mx_priority input框是否可输入
     $(document).on("change", '#table_import_dns select[name=type]', MxPriorityInputAutoDisable);
+
+    // input 框内的 x，清空该 input 输入的内容
+    $(document).on("click", "span[name=clear-previous-input]", ClearPreviousInput);
 });
 
 
