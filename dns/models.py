@@ -48,7 +48,8 @@ class Record(BasicModel):
     primary_ns =  models.CharField('primary_ns', max_length=255, null=True, blank=True, default=None, help_text='Primary name server for SOA record,slav DNS指定Master DNS')
     status = models.CharField('status', max_length=3, choices=status_choices, default='on',help_text='record on/off status')
     resolution_line = models.CharField('resolution_line', max_length=32,choices=dns_conf.DNS_RESOLUTION_LINE, default='0', help_text='解析线路')
-    basic = models.IntegerField('basic', default=0, help_text='是否为基础记录，记录是否允许重复。0:可重复非基础记录, 1:可重复基础记录， 2:不可重复基础记录，3:被显性URL或隐性URL关联的记录 ，200:隐性URL转发，301:显性URL 301重定向，302:显性URL 302重定向')
+    basic = models.IntegerField('basic', default=0, help_text='是否为基础记录，记录是否允许重复。0:可重复非基础记录, 1:可重复基础记录， 2:不可重复基础记录，3:被显性URL或隐性URL关联的记录 ，200:隐性URL转发，301:显性URL 301重定向，302:显性URL 302重定向。'
+                                                              '基础记录是指除SOA、NS之外的记录；重复部分是指host、type、zone_id字段的组合')
     associate_rr_id = models.IntegerField('associate_rr_id', null=True, blank=True, default=None, help_text='关联的 Resource Record ID，用于显性URL、隐性URL')
     zone = models.ForeignKey('Zone', related_name='record_set', on_delete=models.PROTECT, help_text='关联的zone实例，字段为zone_id')
     # create_time = models.DateTimeField('create_time', auto_now_add=True)
