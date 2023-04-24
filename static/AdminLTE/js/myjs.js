@@ -163,9 +163,9 @@ function UploadFile(selector, action){
     }
 }
 
-function UploadImportDNSFile(){
+function UploadImportDNSFile() {
     // 上传导入DNS文件
-     var form_data = new FormData();
+    var form_data = new FormData();
     var selector = $('input[name=import_dns_file]')
     // var name = $(selector).val();
     form_data.append('file', $(selector)[0].files[0]);
@@ -450,7 +450,8 @@ function ExportRecord(){
     $('#ExportRecordModalLabel').modal('show');
     var _zone_name = $($(this).parent().parent().parent().parent().siblings()[1]).html();
     var _zone_id = $($(this).parent().parent().parent().parent().siblings()[0]).find("input").attr("id");
-    var _modal_title = $("#ExportRecordModalLabel h4").html();
+    // var _modal_title = $("#ExportRecordModalLabel h4").html();
+    var _modal_title = '导出DNS解析记录';
     _modal_title = _zone_name + ' ' +  _modal_title;
 
     $("#ExportRecordModalLabel h4").html(_modal_title);

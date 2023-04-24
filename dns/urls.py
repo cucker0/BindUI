@@ -34,7 +34,7 @@ urlpatterns = [
     re_path(r'^dns/add.html', views.record_add, name='record_add'),
     re_path(r'^dns/del.html', views.record_del, name='record_del'),
     re_path(r'^dns/mod.html', views.record_mod, name='record_mod'),
-    re_path(r'^dns/rr_api/list.json', views.record_mod, name='record_mod'),
+    # re_path(r'^dns/rr_api/list.json', views.record_mod, name='record_mod'),
     re_path(r'^dns/rlist_page.html', views.rlist_page, name='/rlist_page'),
     re_path(r'^$', views.index),
 ]
