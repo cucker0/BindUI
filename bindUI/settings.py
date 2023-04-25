@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 from pathlib import Path
 
-# 在与 settings.py 同级目录下的 __init__.py 中引入pymysql库
 ## 如果使用 MySQL 数据库，开启下面几行注释 --start
 import pymysql
 # 指定 pymysql 的版本。主要是要比 Django 要求的最低版本要大
@@ -115,8 +114,8 @@ DATABASES = {
 #         'ENGINE': 'django.db.backends.postgresql',
 #         'HOST': '10.100.240.135',
 #         'PORT': '5432',
-#         'NAME': 'bind_ui',
-#         'USER': 'bind_ui_wr',
+#         'NAME': 'dns',
+#         'USER': 'dns_wr',
 #         'PASSWORD': 'Ww123456!',
 #     }
 # }
