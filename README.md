@@ -6,6 +6,28 @@ Bind web admin UI.
 
 支持多线路智能解析（基于view实现的智能DNS）、批量导入/导出域名记录(RR)、支持常用的RR类型。
 
+## 快速体验
+```bash
+docker run -d --name dns \
+ --restart=always \
+ -p 53:53/udp \
+ -p 53:53/tcp \
+ -p 127.0.0.1:953:953/tcp \
+ -p 80:80/tcp \
+ -p 8000:8000/tcp \
+ cucker/dns:all-2.2
+```
+
+* Port Info
+    ```
+    EXPOSE 53/udp 53/tcp 953/tcp 80/tcp 8000/tcp 3306/tcp
+    53/udp -> bind
+    53/tcp -> bind
+    953/tcp -> bind
+    80/tcp -> url-forwarder
+    8000/tcp -> BindUI
+    3306/tcp -> MySQL
+    ```
 
 ## 运行环境
 ```bash
@@ -62,15 +84,12 @@ django.core.exceptions.ImproperlyConfigured: mysqlclient 1.3.13 or newer is requ
 
 **解决方法**
 
-1. 在每个app目录的__init__.py文件添加下面的内容
-    ```python
-    import pymysql
-    pymysql.install_as_MySQLdb()
-    ```
-2. {python安装根目录}/lib/python3.7/site-packages/django/db/backends/mysql/base.py 注释下面这两行
-```python
-if version < (1, 3, 3):
-    raise ImproperlyConfigured("mysqlclient 1.3.3 or newer is required; you have %s" % Database.__version__)
+./bindUI/settings.py 添加下面的配置
+```bash
+import pymysql
+# 指定 pymysql 的版本。主要是要比 Django 要求的最低版本要大
+pymysql.version_info = (11, 1, 0, "final", 0)
+pymysql.install_as_MySQLdb()
 ```
 
 #### 报错2
