@@ -295,7 +295,7 @@ var _recordPlaceholder = {
     host: {
         mx: "通常填写@，不填写默认保存为@",
         srv: "填写格式为：服务.协议（如_ldap._tcp）",
-        ptr: "填写IP主机位数字（如反向解析IP 192.168.1.11，则填写11）",
+        ptr: "填写IP主机位数字（如反向解析IP 192.168.1.11，则填写11），IPv6 示例 2.0.0.0.0.0.0.0.0.0.0.0.7.8.9.0",
         soa: "填写@，不填写默认保存为@",
         uri: "填写子域名（如www），格式：_service._proto，如：_ftp._tcp",
         common: "填写子域名（如www），*表示泛域名，不填写默认保存为@",
@@ -525,15 +525,15 @@ function RecordAddACK(){
     // $("#RecordAddOrModifyModalLabel .form-horizontal input[name=data]").val('');
     $("#RecordAddOrModifyModalLabel .form-horizontal select[name=ttl]").val('600');
     // $("#RecordAddOrModifyModalLabel .form-horizontal input[name=comment]").val('');
-    var _domain_name = $("div[zone_tag_name]").text().trim();
+    var _domain_name = $("div[zone_name]").text().trim();
     if (_domain_name.endsWith('in-addr.arpa')
         || _domain_name.endsWith('in-addr.arpa.')
         || _domain_name.endsWith('ip6.arpa.')
         || _domain_name.endsWith('ip6.arpa')
     ) {
         $(".form-horizontal select[name=type]").val('PTR');
-        $(".form-horizontal input[name=host]").attr("placeholder", "填写IP主机位数字（如反向解析IP 192.168.1.11，则填写11）");
-        $(".form-horizontal input[name=data]").attr("placeholder", "填写对应的正向解析域名，例如：www.dns.com.");
+        $(".form-horizontal input[name=host]").attr("placeholder", _recordPlaceholder.host.ptr);
+        $(".form-horizontal input[name=data]").attr("placeholder", _recordPlaceholder.data.ptr);
     }else{
         $(".form-horizontal select[name=type]").val('A');
         // $(".form-horizontal input[name=host]").attr("placeholder", "填写子域名（如www），不填写默认保存为@");
