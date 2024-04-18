@@ -525,8 +525,12 @@ function RecordAddACK(){
     // $("#RecordAddOrModifyModalLabel .form-horizontal input[name=data]").val('');
     $("#RecordAddOrModifyModalLabel .form-horizontal select[name=ttl]").val('600');
     // $("#RecordAddOrModifyModalLabel .form-horizontal input[name=comment]").val('');
-    var _domain_name = $("div[zone_name]").text().trim();
-    if (_domain_name.endsWith('in-addr.arpa') || _domain_name.endsWith('in-addr.arpa.')) {
+    var _domain_name = $("div[zone_tag_name]").text().trim();
+    if (_domain_name.endsWith('in-addr.arpa')
+        || _domain_name.endsWith('in-addr.arpa.')
+        || _domain_name.endsWith('ip6.arpa.')
+        || _domain_name.endsWith('ip6.arpa')
+    ) {
         $(".form-horizontal select[name=type]").val('PTR');
         $(".form-horizontal input[name=host]").attr("placeholder", "填写IP主机位数字（如反向解析IP 192.168.1.11，则填写11）");
         $(".form-horizontal input[name=data]").attr("placeholder", "填写对应的正向解析域名，例如：www.dns.com.");
