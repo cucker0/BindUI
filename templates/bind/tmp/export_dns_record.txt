@@ -11,5 +11,5 @@ $ORIGIN {{domain_obj.SOA.zone}}.
 
 ;{{domain_obj.resolution_line_info}}
 ;主机名 TTL        Class 类型 Data        ;备注    ;解析线路
-{% for i in domain_obj.OTHER %}{{i.host}} {{i.ttl}}        IN A {{i.data}}        ;{{i.comment}}    ;{{i.resolution_line}}
+{% for i in domain_obj.OTHER %}{{i.host}} {{i.ttl}}        IN {{i.type}} {{i.data}}        ;{{i.comment}}    ;{{i.resolution_line}}
 {% endfor %}
