@@ -65,6 +65,15 @@ python3 manage.py makemigrations
 python3 manage.py migrate
 ``` 
 
+## 系统架构
+本系统包含3个项目，分别是BindUI、url-forwarder和BIND。BindUI是一个基于Django架构的WEB项目，负责域名管理的可视化图形界面操作；url-forwarder是一个基于Spring Boot架构的WEB项目，也是一个URL转发器，负责显性URL、隐性URL记录的转发；BIND是一个开源的DNS软件，负责DNS的解析。
+
+url-forwarder 项目：https://gitee.com/cucker/url-forwarder
+
+* 系统架构示意图
+![image](https://github.com/cucker0/file_store/blob/master/BindUI/%E5%9F%9F%E5%90%8D%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84.png)  
+
+
 ## 操作页面
 ![image](https://github.com/cucker0/file_store/blob/master/BindUI/01.png)  
 ![image](https://github.com/cucker0/file_store/blob/master/BindUI/02.png)  
