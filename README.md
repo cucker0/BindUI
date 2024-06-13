@@ -4,7 +4,7 @@ Bind web admin UI.
 
 一款基于 BIND、DLZ、MySQL/PostgreSQL、Djano 的WEB可视化域名管理系统。
 
-支持多线路智能解析（基于view实现的智能DNS）、批量导入/导出域名记录(RR)、支持常用的RR类型。
+支持多线路智能解析（基于view实现的智能DNS）、批量导入/导出域名记录(RR)、支持常用的RR类型，支持显性URL、隐性URL记录的转发。
 
 ## 快速体验
 ```bash
