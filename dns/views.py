@@ -1119,12 +1119,15 @@ def record_mod(req):
             try:
                 record_set = models.Record.objects.filter(id=data['id'])
                 del(data['id'])     # data.pop('id') 则会 print key
+                if 'zone_id' in data.keys():
+                    del(data['zone_id'])
+
                 zone_obj = record_set.first().zone
                 data['zone'] = zone_obj
                 data['update_time'] = timezone.now()
                 a_record_data_filter(data)
 
-                # 更新相关联的记录，要在“更新 record_obj_set” 之前执行，否则 record_obj_set 会更行
+                # 更新相关联的记录，要在“更新 record_obj_set” 之前执行，否则 record_obj_set 会更新
                 for rr in record_set:
                     associate_rr_main_mod(rr, data)
                 # 更新 record_obj_set
