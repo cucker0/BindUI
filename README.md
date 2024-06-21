@@ -18,6 +18,12 @@ docker run -d --name dns \
  cucker/dns:all-2.2
 ```
 
+* BindUI Account Info
+    ```bash
+    url：http://<IP>:8000
+    user：admin
+    password：Dns123456!
+    ```
 * Port Info
     ```
     EXPOSE 53/udp 53/tcp 953/tcp 80/tcp 8000/tcp 3306/tcp
@@ -28,53 +34,76 @@ docker run -d --name dns \
     8000/tcp -> BindUI
     3306/tcp -> MySQL
     ```
-
+* Database
+  ```bash
+  ## database：dns
+  user2：'dns_wr'@'%'
+  password：Ww123456!
+  
+  user3：'dns_r'@'%'
+  password：Rr123456!
+  ```
 ## 运行环境
 ```bash
+Linux
 Python 3.11
 Django 4
+JDK 17
+Spring boot 3
 MySQL 8 | MariaDB 10 | PostgreSQL 15 (任选一个)
-
+Bind 9.12.1 | Bind 9.16.39 (任选一个)
 ```
 
-## 依赖模块
-```bash
-django Pillow pymysql IPy xlrd xlwt
-```
+## 系统部署
+参考 [部署智能 DNS 域名管理系](https://www.yuque.com/cucker/udwka0/cdx5ec7do39ov1c1?singleDoc#)
 
-**安装依赖模块**  
-```bash
-pip3 install -r ./requirements.txt
-```
+## 系统架构、组件功能
+本系统包含3个组件，分别是BindUI、url-forwarder 和 BIND。
 
-## 初始化
-```bash
-cd <项目的根路径>
-python3 manage.py migrate
-python3 manage.py makemigrations
-python3 manage.py migrate
-
-// 创新 Django 超级用户，用于 WEB 登录
-python3 manage.py createsuperuser
-```
-
-如果是非 初始化时，修改了表的设计，则运行下列命令合并表的变动
-```bash
-cd <项目的根路径>
-python3 manage.py makemigrations
-python3 manage.py migrate
-``` 
-
-## 系统架构
-本系统包含3个项目，分别是BindUI、url-forwarder和BIND。
-BindUI是一个基于Django架构的WEB项目，负责域名管理的可视化图形界面操作；
-url-forwarder是一个基于Spring Boot架构的WEB项目，也是一个URL转发器，负责显性URL、隐性URL记录的转发；
-BIND是一个开源的DNS软件，负责DNS的解析。
+* BindUI  
+  BindUI 是一个基于 Django 架构的 WEB 项目，负责域名管理的可视化图形界面操作；
+* url-forwarder  
+url-forwarder 是一个 URL 转发器，一个基于 Spring Boot 架构的 WEB 项目，负责 显性 URL、隐性 URL 记录的转发。
 
 url-forwarder 项目：https://gitee.com/cucker/url-forwarder
+* BIND  
+BIND 是一个开源的DNS软件，负责DNS的解析。
 
-* 系统架构示意图
+* **系统架构示意图**
 ![image](https://github.com/cucker0/file_store/blob/master/BindUI/%E5%9F%9F%E5%90%8D%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84.png)  
+
+
+* **组件功能**
+![image](https://github.com/cucker0/file_store/blob/master/BindUI/%E7%BB%84%E4%BB%B6%E5%8A%9F%E8%83%BD%E8%AE%BE%E8%AE%A1.png)
+
+### 工作原理
+* 为什么域名的RR记录可以从数据库读取？
+
+答：是因为扩展了 BIND DLZ 驱动。
+  
+  DLZ 允许 BIND 直接从外部数据库检索 zone 数据。
+  
+  DLZ 驱动程序支持多种数据库后端，包括 PostgreSQL、MySQL 和 LDA P等，其中 dlz-postgres 是连接 PostgreSQL 的驱动，dlz-mysql 是连接 MySQL 的驱动。
+* 显性 URL、隐性 URL 是怎样工作的？
+
+答：  
+**DNS层：**  
+一条显性URL 或 一条隐性URL记录都是由两条相关联的记录共同实现的。
+
+一条是type字段为 'CNAME' 的记录（CNAME记录），主要用于查找URL转发器地址。data字段的值为URL转发器地址（URL转发服务器的A记录的FQDN值），该记录的basic字段值为3。
+
+另一条是type字段为 'TXT' 的记录（TXT记录），主要用于保存要转发的目标HTTP URL。该记录的data字段的值为要转发的目标HTTP URL，associate_rr_id字段的值为关联的CNAME记录的id。
+
+basic字段的值是根据type类型和转发需求来确定，如果是“302 URL重定向”，那么basic字段值为302；  
+如果是“301 URL重定向”，那么basic值为301；  
+如果是隐性URL，那么basic值为200。
+
+**WEB层：**  
+URL转发器用于实现显性URL和隐性URL记录的转发。
+
+显性URL记录使用URL重定向技术实现，包含302 URL重定向 和 301 URL重定向。
+
+隐性URL记录使用 HTML iframe 内联框架技术实现。
 
 
 ## 操作页面
@@ -87,8 +116,8 @@ url-forwarder 项目：https://gitee.com/cucker/url-forwarder
 ![image](https://github.com/cucker0/file_store/blob/master/BindUI/06.png)  
 
 ## 注意
-### mysql连接驱动改为 pymysql
-#### 报错1  
+### mysql 连接驱动改为 pymysql
+* 报错1  
 ```text
 执行python manager.py 相关操作报错：
 django.core.exceptions.ImproperlyConfigured: mysqlclient 1.3.13 or newer is required; you have 0.9.3.
@@ -104,7 +133,7 @@ pymysql.version_info = (11, 1, 0, "final", 0)
 pymysql.install_as_MySQLdb()
 ```
 
-#### 报错2
+* 报错2
 ```text
 AttributeError: 'str' object has no attribute 'decode'
 ```
