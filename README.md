@@ -55,7 +55,10 @@ Bind 9.12.1 | Bind 9.16.39 (任选一个)
 ```
 
 ## 系统部署
-参考 [部署智能 DNS 域名管理系](https://www.yuque.com/cucker/udwka0/cdx5ec7do39ov1c1?singleDoc#)
+* 参考 [部署智能 DNS 域名管理系](https://www.yuque.com/cucker/udwka0/cdx5ec7do39ov1c1?singleDoc#)
+
+## 手册
+* [BindUI 智能 DNS 域名管理系使用文档](https://www.yuque.com/cucker/udwka0/emk0i5bcgfrcv4m9?singleDoc#)
 
 ## 系统架构、组件功能
 本系统包含3个组件，分别是BindUI、url-forwarder 和 BIND。
@@ -77,13 +80,29 @@ BIND 是一个开源的DNS软件，负责DNS的解析。
 ![image](https://github.com/cucker0/file_store/blob/master/BindUI/%E7%BB%84%E4%BB%B6%E5%8A%9F%E8%83%BD%E8%AE%BE%E8%AE%A1.png)
 
 ### 工作原理
-* 为什么域名的RR记录可以从数据库读取？
+* 为什么 BIND 可以从数据库中加载 zone 数据？
 
-答：是因为扩展了 BIND DLZ 驱动。
+答：  
+是因为 BIND 扩展了 DLZ 驱动。
   
-  DLZ 允许 BIND 直接从外部数据库检索 zone 数据。
+DLZ 允许 BIND 直接从外部数据库检索 zone 数据。
   
-  DLZ 驱动程序支持多种数据库后端，包括 PostgreSQL、MySQL 和 LDA P等，其中 dlz-postgres 是连接 PostgreSQL 的驱动，dlz-mysql 是连接 MySQL 的驱动。
+DLZ 驱动程序支持多种数据库后端，包括 PostgreSQL、MySQL 和 LDA P等，其中 dlz-postgres 是连接 PostgreSQL 的驱动，dlz-mysql 是连接 MySQL 的驱动。
+
+* 多线路智能DNS解析是如何实现的？
+
+答：  
+BIND 中可配置多个 view，一个线路配置一个 view。  
+当配置了多个 view 时，则是按照配置文件中 view 的位置顺序从上往下逐个匹配，当客户的 IP 与 view 的 match-clients 子句所指定的 ACL 匹配时，则该客户IP与此view匹配，应用此 view，并停止匹配其他 view。
+
+如果希望把一个view作为默认的view(当没有匹配到任何的view时，就应用默认的view。例如定义名为default的view)，则在配置文件中把该view放到所有view的后面。
+
+**关于ACL**  
+用户可以自定义 ACL， 一个 ACL 中可定义了若干个网络。
+
+BIND 内置了4个ACL，分别是any、none、localhost 和 localnets ACL。
+
+
 * 显性 URL、隐性 URL 是怎样工作的？
 
 答：  
