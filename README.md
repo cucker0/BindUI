@@ -89,6 +89,8 @@ DLZ 允许 BIND 直接从外部数据库检索 zone 数据。
   
 DLZ 驱动程序支持多种数据库后端，包括 PostgreSQL、MySQL 和 LDA P等，其中 dlz-postgres 是连接 PostgreSQL 的驱动，dlz-mysql 是连接 MySQL 的驱动。
 
+说明：DLZ是BIND 9的扩展驱动（从BIND 9.4.0开始默认集成了DLZ drivers[^1]，从BIND 9.17.19开始弃用DLZ drivers，从BIND 9.18开始移除DLZ drivers[^2]
+
 * 多线路智能DNS解析是如何实现的？
 
 答：  
@@ -113,9 +115,7 @@ BIND 内置了4个ACL，分别是any、none、localhost 和 localnets ACL。
 
 另一条是type字段为 'TXT' 的记录（TXT记录），主要用于保存要转发的目标HTTP URL。该记录的data字段的值为要转发的目标HTTP URL，associate_rr_id字段的值为关联的CNAME记录的id。
 
-basic字段的值是根据type类型和转发需求来确定，如果是“302 URL重定向”，那么basic字段值为302；  
-如果是“301 URL重定向”，那么basic值为301；  
-如果是隐性URL，那么basic值为200。
+basic字段的值是根据type类型和转发需求来确定，具体参考 "record 表设计" 的 basic 字段说明。
 
 **WEB层：**  
 URL转发器用于实现显性URL和隐性URL记录的转发。
@@ -123,6 +123,94 @@ URL转发器用于实现显性URL和隐性URL记录的转发。
 显性URL记录使用URL重定向技术实现，包含302 URL重定向 和 301 URL重定向。
 
 隐性URL记录使用 HTML iframe 内联框架技术实现。
+
+## 数据模型设计
+主要的表有 record、zone 表，record 表用于保存 RR 数据，zone 表用于保存 zone（区域）数据。
+
+* zone 表设计
+
+|序号 |字段        |数据类型    |长度  |默认  |非空  |描述                       |
+|:-- |:--         |:--       |:--  |:--  |:--  |:--                        |
+|1   |id          | bigint   |     |     |是    | 主键，自动递增              |
+|2   |zone_name   | varchar  |255  |     |是    | zone名称，域名。要求唯一     |
+|3   |status      | varchar  |3    |'on' |是    | zone的启/停状态            |
+|4   |create_time | datetime |     |     |     | 创建时间                   |
+|5   |update_time | datetime |     |     |     | 最近更新时间                |
+|6   |comment     | varchar  |255  |     |     | 备注                      |
+
+说明：
+
+(1) status字段的可选值：'on' 表示开启，'off' 表示停用。
+
+(2) 为提高查询效率，可基于zone_name字段创建索引。
+
+* record 表设计
+
+|序号|字段            |数据类型   |长度 |默认 |非空  |描述                              |
+|:--|:--             |:--      |:-- |:--  |:--  |:--                                |
+|1  |id              |bigint   |    |     |是   |主键，自动递增                    |
+|2  |host            |varchar  |255 |'@'  |是   |主机                              |
+|3  |type            |varchar  |64  |'A'  |是   |RR类型                            |
+|4  |data            |varchar  |255 |     |是   |RR值                              |
+|5  |ttl             |int      |    |     |     |TTL存活时间（秒）                 |
+|6  |mx_priority     |int      |    |     |     |MX优先级（1-50），值越小越优先    |
+|7  |refresh         |int      |    |     |     |SOA记录的同步间隔时间（秒）       |
+|8  |retry           |         |    |     |     |SOA记录的同步失败的重试时间（秒） |
+|9  |expire          |int      |    |     |     |SOA记录的过期时间（秒）           |
+|10 |minimum         |int      |    |     |     |SOA记录的最小默认TTL值（秒）      |
+|11 |serial          |int      |    |     |     |SOA记录的序列号                   |
+|12 |mail            |varchar  |255 |     |     |域名负责人邮箱（SOA记录）         |
+|13 |primary_ns      |varchar  |255 |     |     |SOA记录的主DNS服务器              |
+|14 |status          |varchar  |3   |'on' |是   |RR的启/停状态                     |
+|15 |resolution_line |varchar  |32  |'0'  |是   |解析线路标识                      |
+|16 |basic           |int      |    |0    |是   |其他信息                          |
+|17 |associate_rr_id |int      |    |     |     |关联record的id                    |
+|18 |zone_id         |bigint   |    |     |是   |外键，关联zone的id                |
+|19 |create_time     |datetime |    |     |     |创建时间                          |
+|20 |update_time     |datetime |    |     |     |最近更新时间                      |
+|21 |comment         |varchar  |255 |     |     |备注                              |
+
+说明：
+
+(1) type字段的常用可选项：
+```text
+CNAME：别名记录，给域名取别名。
+AAAA：IPv6记录，将域名指向一个IPv6地址。
+NS：委派DNS zone使用指定的权威DNS服务器。
+MX：邮件交换记录，用于给域指定邮件服务器。
+SRV：通用服务定位记录。用于查询指定服务的信息，如服务名、通信协议、域名、优先级、权重、服务端口等信息。
+TXT：文本记录。用于保存描述性文本。
+PRT：指向主机记录或别名记录的指针。常用于DNS反向解析，指将IP地址映射到主机记录。
+CAA：DNS证书颁发机构授权，约束主机/域可接受的CA。
+URI：可用于发布从主机名到URI的映射。
+SOA：zone的起始授权记录，一个zone在同一个view下有且仅有一条SOA记录。用于指定有关DNS区域的权威信息，包括主DNS服务器、域名负责人的电子邮箱、zone序列号以及与刷新zone相关的几个计时器(refresh, retry, expire, minimum)。
+```
+
+(2) mail字段表示域名负责人的电子邮箱，在mail字段中使用“.”来替代电子邮件中的“@”字符。
+
+(3) status字段的可选值：'on' 表示开启，'off' 表示停用。
+
+(4) resolution_line字段表示解析线路标识，即代表一个ACL。这里需要预先定义各个ACL对应的resolution_line值，例如：
+```text
+'0'：其他网络(默认ACL)。
+'cn'：中国网络。
+'abroad'：国外网络。
+'101'：中国电信网。
+'102'：中国联通网络。
+'103'：中国移动网络。
+'104'：中国教育网络。
+```
+(5) basic字段用来表示其他信息，可选值和具体含义如下：
+```text
+0：可重复的非基础记录（基础记录是指SOA、NS记录，非基础记录是指除SOA、NS之外的记录；重复部分是指host、type、zone_id字段的组合，下面的与此相同）。
+1：可重复的基础记录。
+2：不可重复的基础记录。
+3：被显性URL或者隐性URL记录所关联的RR，被关联的RR为CNAME记录。
+200：隐性URL记录，type字段的值为'TXT'。
+301：301重定向显性URL记录，type字段的值为'TXT'。
+302：302重定向显性URL记录，type字段的值为'TXT'。
+```
+(6) associate_rr_id字段用于保存显性URL或隐性URL记录所关联的RR的id。
 
 
 ## 操作页面
@@ -174,3 +262,6 @@ if query is not None:
     query = query.encode(errors='replace')
 return query
 ```
+
+[^1]: Mark Andrews. BIND 9.4.0 is now available.[EB/OL]．[2023-04-18]．https://lists.isc.org/pipermail/bind-announce/2007-February/000210.html．
+[^2]: BIND 9 Significant Features Matrix [EB/OL]．[2023-04-18]．https://kb.isc.org/docs/aa-01310．
