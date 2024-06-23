@@ -263,5 +263,5 @@ if query is not None:
 return query
 ```
 
-[^1]: Mark Andrews. BIND 9.4.0 is now available.[EB/OL]．[2023-04-18]．https://lists.isc.org/pipermail/bind-announce/2007-February/000210.html．
-[^2]: BIND 9 Significant Features Matrix [EB/OL]．[2023-04-18]．https://kb.isc.org/docs/aa-01310．
+[^1]: Mark Andrews. BIND 9.4.0 is now available.[EB/OL]．[2023-04-18]．https://lists.isc.org/pipermail/bind-announce/2007-February/000210.html
+[^2]: BIND 9 Significant Features Matrix [EB/OL]．[2023-04-18]．https://kb.isc.org/docs/aa-01310
