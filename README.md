@@ -146,7 +146,6 @@ URL转发器用于实现显性URL和隐性URL记录的转发。
 (2) 为提高查询效率，可基于zone_name字段创建索引。
 
 * record 表设计
-
 |序号|字段            |数据类型   |长度 |默认值 |非空  |描述                              |
 |:--|:--             |:--      |:-- |:--  |:--  |:--                                |
 |1  |id              |bigint   |    |     |是   |主键，自动递增                    |
@@ -156,16 +155,16 @@ URL转发器用于实现显性URL和隐性URL记录的转发。
 |5  |ttl             |int      |    |     |     |TTL存活时间（秒）                 |
 |6  |mx_priority     |int      |    |     |     |MX优先级（1-50），值越小越优先    |
 |7  |refresh         |int      |    |     |     |SOA记录的同步间隔时间（秒）       |
-|8  |retry           |         |    |     |     |SOA记录的同步失败的重试时间（秒） |
+|8  |retry           |int      |    |     |     |SOA记录的同步失败的重试时间（秒） |
 |9  |expire          |int      |    |     |     |SOA记录的过期时间（秒）           |
 |10 |minimum         |int      |    |     |     |SOA记录的最小默认TTL值（秒）      |
-|11 |serial          |int      |    |     |     |SOA记录的序列号                   |
+|11 |serial          |bigint   |    |     |     |SOA记录的序列号，范围[0, 4294967295][^3] |
 |12 |mail            |varchar  |255 |     |     |域名负责人邮箱（SOA记录）         |
 |13 |primary_ns      |varchar  |255 |     |     |SOA记录的主DNS服务器              |
 |14 |status          |varchar  |3   |'on' |是   |RR的启/停状态                     |
 |15 |resolution_line |varchar  |32  |'0'  |是   |解析线路标识                      |
 |16 |basic           |int      |    |0    |是   |其他信息                          |
-|17 |associate_rr_id |int      |    |     |     |关联record的id                    |
+|17 |associate_rr_id |bigint   |    |     |     |关联record的id                    |
 |18 |zone_id         |bigint   |    |     |是   |外键，关联zone的id                |
 |19 |create_time     |datetime |    |     |     |创建时间                          |
 |20 |update_time     |datetime |    |     |     |最近更新时间                      |
@@ -268,5 +267,6 @@ if query is not None:
 return query
 ```
 
-[^1]: Mark Andrews. BIND 9.4.0 is now available.[EB/OL]．[2023-04-18]．https://lists.isc.org/pipermail/bind-announce/2007-February/000210.html
-[^2]: BIND 9 Significant Features Matrix [EB/OL]．[2023-04-18]．https://kb.isc.org/docs/aa-01310
+[^1]: Mark Andrews. BIND 9.4.0 is now available [EB/OL]. [2023-04-18]. https://lists.isc.org/pipermail/bind-announce/2007-February/000210.html
+[^2]: BIND 9 Significant Features Matrix [EB/OL]. [2023-04-18]. https://kb.isc.org/docs/aa-01310
+[^3]: Serial Number Arithmetic [EB/OL]. [2023-06-23]. https://www.rfc-editor.org/rfc/rfc1982.txt#:~:text=The%20serial%20number%20in%20the,a%2032%20bit%20unsigned%20integer.
