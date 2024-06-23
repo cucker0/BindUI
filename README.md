@@ -15,7 +15,7 @@ docker run -d --name dns \
  -p 127.0.0.1:953:953/tcp \
  -p 80:80/tcp \
  -p 8000:8000/tcp \
- cucker/dns:all-2.2
+ cucker/dns:latest
 ```
 
 * BindUI Account Info
@@ -36,7 +36,8 @@ docker run -d --name dns \
     ```
 * Database
   ```bash
-  ## database：dns
+  ## PostgreSQL 11
+  database：dns
   user2：'dns_wr'@'%'
   password：Ww123456!
   
