@@ -212,6 +212,10 @@ SOA：zone的起始授权记录，一个zone在同一个view下有且仅有一�
 ```
 (6) associate_rr_id字段用于保存显性URL或隐性URL记录所关联的RR的id。
 
+## 性能
+* `BIND 9.12.1/BIND 9.12.4` + `PostgreSQL 11` QPS 可达 40000+.
+* `BIND 9.16.36` + `MySQL 8` QPS 可达 1000+.
+* `BIND 9.16.36` + `PostgreSQL 15` QPS 可达 1250+.
 
 ## 操作页面
 ![image](https://github.com/cucker0/file_store/blob/master/BindUI/01.png)  
