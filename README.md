@@ -252,7 +252,7 @@ AttributeError: 'str' object has no attribute 'decode'
 
 **解决方法**
   
-修改python安装根目录}/lib/python3.7/site-packages/django/db/backends/mysql/operations.py 146行，decode改为encode
+修改 {python安装根目录}/lib/python3.7/site-packages/django/db/backends/mysql/operations.py 146行，decode改为encode
 
 ```python
 if query is not None:
