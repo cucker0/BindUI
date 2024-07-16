@@ -381,7 +381,7 @@ def set_style(name, height, bold=False):
     """
     excel样式
     :param name: 字体名
-    :param height: 调度
+    :param height: 高度
     :param bold: 边框
     :return:
     """
