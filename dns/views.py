@@ -1103,10 +1103,11 @@ def record_mod(req):
         if type(data) != dict:
             return HttpResponse(COMMON_MSG['req_use_post'])
         if _type == 'status':        # 修改status，开启、停用DNS记录
-            if data['id_list']:
-                record_obj_set = models.Record.objects.filter(id__in=data['id_list'])
-                if not record_obj_set:
-                    return HttpResponse(COMMON_MSG['req_use_post'])
+            if not data['id_list']:
+                return HttpResponse(COMMON_MSG['req_use_post'])
+            record_obj_set = models.Record.objects.filter(id__in=data['id_list'])
+            if not record_obj_set:
+                return HttpResponse(COMMON_MSG['req_use_post'])
             try:
                 record_obj_set.update(status=action2status(data['action']))
 
