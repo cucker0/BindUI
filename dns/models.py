@@ -37,7 +37,7 @@ class Record(BasicModel):
     id = models.BigAutoField(primary_key=True, null=False)
     host = models.CharField('host', max_length=255, default='@', db_index=True, help_text='Host name or IP address')
     type = models.CharField('type', max_length=64, choices=record_type_choices, default='A', help_text='DNS data type')
-    data = models.CharField('data', max_length=255, help_text='IP address / Host name / Full domain name')
+    data = models.CharField('data', max_length=4096, help_text='IP address / Host name / Full domain name')
     ttl = models.IntegerField('ttl', null=True, blank=True, default=None, help_text='Time to live')
     mx_priority = models.IntegerField('mx_priority', null=True, blank=True, default=None, help_text='MX Priority')
     refresh = models.IntegerField('refresh', null=True, blank=True, default=None, help_text='Refresh time for SOA record,Slave DNS向Master DNS进行Serial对比同步间隔时间,Master DNSnotify参数关闭时有效')

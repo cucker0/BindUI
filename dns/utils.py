@@ -2,6 +2,7 @@
 # -*- coding:utf-8 -*-
 
 import datetime, IPy, re
+import math
 from bindUI import dns_conf
 
 
@@ -278,3 +279,45 @@ def action2status(action: str) -> str:
     if action == '_turnOff':
         return 'off'
     return 'on'
+
+
+def split_txt(txt: str) -> str:
+    """ 超过 255 个字符的文本分割为多个字符串，使用 “ ” 连接分割的各个部分
+
+    :param txt: str
+        需要进行处理的文本字符串
+    :return: str
+        处理后的文本。
+        因为 bind-dlz 查询 RR 的 SQL 对于 TXT 类型的记录，在查询出来的值首尾两边添加了 `“`（请参考 BIND 的配置 关于 dlz SQL 部分），
+        所以这里不需要在处理后的文本的首尾添加`"`
+
+    因为 BIND 对于 TXT 记录的值最大限制为 255个字符，如果超过则需要分割为多个字符串。
+    参考 https://kb.isc.org/docs/aa-00356
+
+    3.1.3.  Multiple Strings in a Single DNS record
+
+    As defined in [RFC1035] sections 3.3.14 and 3.3, a single text DNS record (either TXT or SPF RR types) can be composed of more than one string. If a published record contains multiple strings, then the record MUST be treated as if those strings are concatenated together without adding spaces.  For example:
+
+           IN TXT "v=spf1 .... first" "second string..."
+
+      MUST be treated as equivalent to
+
+           IN TXT "v=spf1 .... firstsecond string..."
+
+    SPF or TXT records containing multiple strings are useful in constructing records that would exceed the 255-byte maximum length of a string within a single TXT or SPF RR record.
+    """
+    if len(txt) <= 255:
+        return txt
+
+    tmp_txt = ''
+    i = 0
+    n = 255
+    while i < math.ceil(len(txt) / n):
+        start = i * n
+        end = (1 + i) * n
+        if end > len(txt):
+            end = len(txt)
+        tmp_txt += txt[start: end] + '" "'
+        i += 1
+    tmp_txt = tmp_txt.rstrip('" "')
+    return tmp_txt
