@@ -288,7 +288,7 @@ def split_txt(txt: str) -> str:
         需要进行处理的文本字符串
     :return: str
         处理后的文本。
-        因为 bind-dlz 查询 RR 的 SQL 对于 TXT 类型的记录，在查询出来的值首尾两边添加了 `“`（请参考 BIND 的配置 关于 dlz SQL 部分），
+        因为 bind-dlz 查询 RR 的 SQL 对于 TXT 类型的记录，在查询出来的值首尾两边添加了 `"`（请参考 BIND 的配置 关于 dlz SQL 部分），
         所以这里不需要在处理后的文本的首尾添加`"`
 
     因为 BIND 对于 TXT 记录的值最大限制为 255个字符，如果超过则需要分割为多个字符串。
