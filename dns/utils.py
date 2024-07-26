@@ -282,7 +282,7 @@ def action2status(action: str) -> str:
 
 
 def split_txt(txt: str) -> str:
-    """ 超过 255 个字符的文本分割为多个字符串，使用 “ ” 连接分割的各个部分
+    """ 超过 255 个字符的文本分割为多个字符串，使用 " " 连接分割的各个部分
 
     :param txt: str
         需要进行处理的文本字符串
