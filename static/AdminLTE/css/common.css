@@ -93,6 +93,10 @@ ul li {
 
 table {
     cursor: default;
+    /* 防止长文本内容把td标签撑大 */
+    table-layout: fixed;
+    word-break: break-all;
+    word-wrap: break-word;
 }
 
 .maintain_group_select {
