@@ -309,6 +309,10 @@ def split_txt(txt: str) -> str:
     if len(txt) <= 255:
         return txt
 
+    # 对于修改更新 TXT 记录的情况
+    if txt.find('" "') != -1:
+        txt = txt.replace('" "', '')
+
     tmp_txt = ''
     i = 0
     n = 255
