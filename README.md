@@ -73,12 +73,31 @@ url-forwarder 项目：https://gitee.com/cucker/url-forwarder
 * BIND  
 BIND 是一个开源的DNS软件，负责DNS的解析。
 
-* **系统架构示意图**
+### 系统架构示意图
 ![image](https://github.com/cucker0/file_store/blob/master/BindUI/%E5%9F%9F%E5%90%8D%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84.png)  
 
 
-* **组件功能**
-![image](https://github.com/cucker0/file_store/blob/master/BindUI/%E7%BB%84%E4%BB%B6%E5%8A%9F%E8%83%BD%E8%AE%BE%E8%AE%A1.png)
+### 组件功能
+* BindUI系统功能
+    * 域名管理
+        * 域名(zone)的增、查、改、删
+        * 域名(zone)的启用/暂停
+    * RR管理
+        * RR的增、查、改、删
+        * RR的启用/暂停
+        * RR的批量导入/导出，支持Text和Excel格式
+    * 用户管理
+        * 新建用户
+        * 用户的登录/注销
+        * 用户自助管理（更改密码、头像）
+* url-forwarder系统功能
+    * HTTP URL的转发
+        * 302显性URL
+        * 301显性URL
+        * 隐性URL
+* BIND系统功能
+    * 基于View的智能DNS解析
+    * 基于bind-dlz的动态DNS解析
 
 ### 工作原理
 * 为什么 BIND 可以从数据库中加载 zone 数据？
@@ -152,7 +171,7 @@ URL转发器用于实现显性URL和隐性URL记录的转发。
 |1  |id              |bigint   |    |     |是   |主键，自动递增                    |
 |2  |host            |varchar  |255 |'@'  |是   |主机                              |
 |3  |type            |varchar  |64  |'A'  |是   |RR类型                            |
-|4  |data            |varchar  |255 |     |是   |RR值                              |
+|4  |data            |varchar  |4096|     |是   |RR值                              |
 |5  |ttl             |int      |    |     |     |TTL存活时间（秒）                 |
 |6  |mx_priority     |int      |    |     |     |MX优先级（1-50），值越小越优先    |
 |7  |refresh         |int      |    |     |     |SOA记录的同步间隔时间（秒）       |
