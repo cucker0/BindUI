@@ -313,7 +313,7 @@ def split_txt(txt: str) -> str:
     if txt.find('" "') != -1:
         txt = txt.replace('" "', '')
 
-    tmp_txt = ''
+    tmp_txt = []
     i = 0
     n = 255
     while i < math.ceil(len(txt) / n):
@@ -321,7 +321,6 @@ def split_txt(txt: str) -> str:
         end = (1 + i) * n
         if end > len(txt):
             end = len(txt)
-        tmp_txt += txt[start: end] + '" "'
+        tmp_txt.append(txt[start: end])
         i += 1
-    tmp_txt = tmp_txt.rstrip('" "')
-    return tmp_txt
+    return '" "'.join(tmp_txt)
