@@ -303,7 +303,7 @@ var _recordPlaceholder = {
     data: {
         cname: "填写一个域名，例如：www.dns.com.",
         mx: "填写邮件服务器地址，如：mx2.dns.com.",
-        txt: "填写文本，字符长度限制255，如：v=spf1 include:spf.mail.qq.com -all",
+        txt: "填写文本（>255个字符将自动分割成多个字符串），如：v=spf1 include:spf.mail.qq.com -all",
         ns: "填写DNS域名，例如：ns1.google.com.",
         aaaa: "填写一个IPv6地址，例如：ff06:0:0:0:0:0:0:c3",
         srv: "格式为：优先级 权重 端口 主机名，例如：5 0 5269 example.dns.com.",
