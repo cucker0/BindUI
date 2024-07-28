@@ -5,7 +5,6 @@ import datetime, IPy, re
 import math
 from bindUI import dns_conf
 
-
 """
 msg = {'status': code}
 status 响应状态
@@ -13,11 +12,12 @@ status 响应状态
     500：失败
 """
 
-COMMON_MSG = {'req_use_post':'use POST request method please.',
-              'data_type_error':'data type is error!',
+COMMON_MSG = {'req_use_post': 'use POST request method please.',
+              'data_type_error': 'data type is error!',
               }
 # dns记录的字段列表
-record_key = ['zone', 'host', 'type', 'data', 'ttl', 'mx_priority', 'refresh', 'retry', 'expire', 'minimum', 'serial', 'mail', 'primary_ns', 'comment',]
+record_key = ['zone', 'host', 'type', 'data', 'ttl', 'mx_priority', 'refresh', 'retry', 'expire', 'minimum', 'serial',
+              'mail', 'primary_ns', 'comment', ]
 # 多个DNS记录类型通用的必填字段列表 
 COMMON_FIELD = ['zone', 'host', 'type', 'data', 'ttl', 'resolution_line', 'comment']
 # 每个DNS记录类型必填的字段
@@ -30,7 +30,8 @@ record_request_field = {
     'AAAA': COMMON_FIELD,
     'SRV': COMMON_FIELD,
     'PTR': COMMON_FIELD,
-    'SOA': ['zone', 'host', 'type', 'data', 'ttl', 'refresh', 'retry', 'expire', 'minimum', 'serial', 'mail', 'primary_ns', 'comment'],
+    'SOA': ['zone', 'host', 'type', 'data', 'ttl', 'refresh', 'retry', 'expire', 'minimum', 'serial', 'mail',
+            'primary_ns', 'comment'],
     'CAA': COMMON_FIELD,
     'URI': COMMON_FIELD,
 }
@@ -39,7 +40,8 @@ record_lower_field = ['host', 'mail', 'primary_ns']
 # DNS记录类型列表
 record_type = ('A', 'CNAME', 'MX', 'TXT', 'NS', 'AAAA', 'SRV', 'PTR', 'SOA', 'CAA', 'URI',)
 
-def check_ipv4(ip:str) -> bool:
+
+def check_ipv4(ip: str) -> bool:
     """ 查检IP是否为合法的 IPv4
 
     :param ip:
@@ -146,7 +148,8 @@ def a_record_data_filter(rr: dict) -> bool:
     更新或创建 record 根据type过滤 data key，把非必要字段都留空,把type字段转为大写，CharField字段要求小写的转为小写
     :param rr: dict
         需要过滤的RR
-        格式：{"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data, "mx_priority":_mx, "ttl":_ttl, "comment":_comment, "zone": zone_obj }
+        格式：{"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data,
+            "mx_priority":_mx, "ttl":_ttl, "comment":_comment, "zone": zone_obj }
     :return: bool
         数据是否合格，True：合格，False: 不合格
     """
@@ -216,10 +219,12 @@ def a_record_data_filter(rr: dict) -> bool:
             pass
     return True
 
+
 def serial(num=0):
     """ 10位序列号的生成与修改
     
-    用于SOA记录的serial字段，要求长度为10位的数字
+    用于SOA记录的serial字段，要求长度为10位的数字。
+    serial 字段在 BIND 中数据类型为 32 位无符号整数，范围[0, 4294967295]
     格式：YYYYxxxxxx
     :param num:
     :return:
@@ -252,6 +257,7 @@ def serial(num=0):
 
     return num
 
+
 def get_url_forwarder_fqdn() -> str:
     """ 获取 显性URL、隐性URL转发的主机名(完整域名/完全限定域名)
 
@@ -259,7 +265,8 @@ def get_url_forwarder_fqdn() -> str:
     """
     return endwith_dot(dns_conf.URL_FORWARDER_DOMAIN)
 
-def endwith_dot(fqdn:str) -> str:
+
+def endwith_dot(fqdn: str) -> str:
     """ 使给定的字符串 以"."结尾
 
     :param fqdn:
