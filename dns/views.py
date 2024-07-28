@@ -73,9 +73,10 @@ def domain_status_mod(req):
     msg = {'status': 500}
     if req.method == 'POST':
         data = json.loads(req.POST.get('data'))
-        if data['id_list']:
+        if not data['id_list']:
             # print(data['id_list'], type(data['id_list']))
-            zone_set = models.Zone.objects.filter(id__in=data['id_list'])
+            return msg
+        zone_set = models.Zone.objects.filter(id__in=data['id_list'])
         try:
             if data['action'] == '_turnOff':
                 zone_set.update(status='off')
@@ -161,6 +162,7 @@ def domain_add(req):
         data = json.loads(req.POST.get('data'))
     except Exception as e:
         print(e)
+        return msg
     rr_raw = data['rr']
     rr_raw['type'] = 'SOA'
     rr_raw['basic'] = 2  # 标识为不可重复的基础记录
@@ -384,7 +386,8 @@ def import_dns(req):
         return render(req, 'bind/tmp/import_dns_table_tmp.html',
                       {'content_list': content_list,
                        'DNS_RESOLUTION_LINE': dns_conf.DNS_RESOLUTION_LINE
-                       })
+                       }
+                      )
 
 
 def set_style(name, height, bold=False):
@@ -533,20 +536,22 @@ def dlist_page(req):
     :param req: 用户请求
     :return: render模板
     """
-    if req.method == 'POST':
-        data = json.loads(req.POST.get('data'))
-        zone_obj_list = None
-        search_key = ''
-        if data['action'] == 'pagination':
-            zone_obj_list = models.Zone.objects.all().order_by('id')
-        elif data['action'] == 'search':
-            try:
-                search_key = data['other']['search_key']
-                zone_obj_list = models.Zone.objects.filter(
-                    Q(zone_name__icontains=search_key) | Q(comment__icontains=search_key)).order_by('id')
-            except Exception as e:
-                print(e)
-        zone_obj_perpage_list, pagination_html = MyPaginator(zone_obj_list, data['page'], data['perpage_num'])
+    if req.method != 'POST':
+        return
+    data = json.loads(req.POST.get('data'))
+    zone_obj_list = None
+    search_key = ''
+    if data['action'] == 'pagination':
+        zone_obj_list = models.Zone.objects.all().order_by('id')
+    elif data['action'] == 'search':
+        try:
+            search_key = data['other']['search_key']
+            zone_obj_list = models.Zone.objects.filter(
+                Q(zone_name__icontains=search_key) | Q(comment__icontains=search_key)
+            ).order_by('id')
+        except Exception as e:
+            print(e)
+    zone_obj_perpage_list, pagination_html = MyPaginator(zone_obj_list, data['page'], data['perpage_num'])
 
     ret = render(req, 'bind/tmp/domain_table_tmp.html',
                  {'zone_obj_list': zone_obj_perpage_list,
@@ -575,7 +580,8 @@ def domain_resolution_page(req):
             try:
                 search_key = data['other']['search_key']
                 zone_obj_list = models.Zone.objects.filter(
-                    Q(zone_name__icontains=search_key) | Q(comment__icontains=search_key)).order_by('id')
+                    Q(zone_name__icontains=search_key) | Q(comment__icontains=search_key)
+                ).order_by('id')
             except Exception as e:
                 print(e)
         zone_obj_perpage_list, pagination_html = MyPaginator(zone_obj_list, data['page'], data['perpage_num'])
@@ -908,30 +914,41 @@ def rlist_page(req):
     :param req:
     :return: render模板
     """
-    if req.method == 'POST':
-        data = json.loads(req.POST.get('data'))
-        zone_obj = models.Zone.objects.get(id=data['zone_id'])
-        record_obj_list = None
-        search_key = data['other']['search_key'] or ''
+    if req.method != 'POST':
+        return
+    data = json.loads(req.POST.get('data'))
+    zone_obj = models.Zone.objects.get(id=data['zone_id'])
+    record_obj_list = None
+    search_key = data['other']['search_key'] or ''
 
-        # 查询出符合条件的 Record
-        if data['action'] == 'pagination':
-            if search_key == '':
-                # basic code 含义 0:可重复非基础记录, 1:可重复基础记录， 2:不可重复基础记录，3:被显性URL或隐性URL关联的记录 ，200:隐性URL转发，301:显性URL 301重定向，302:显性URL 302重定向
-                record_obj_list = zone_obj.record_set.filter(basic__in=dns_conf.BASIC_SET2SHOW).order_by('id')
-            else:
-                record_obj_list = zone_obj.record_set.filter(Q(basic__in=dns_conf.BASIC_SET2SHOW) & (
-                        Q(host__icontains=search_key) | Q(data__icontains=search_key) | Q(
-                    comment__icontains=search_key))).order_by('id')
-        elif data['action'] == 'search':
-            try:
-                record_obj_list = zone_obj.record_set.filter(Q(basic__in=dns_conf.BASIC_SET2SHOW) & (
-                        Q(host__icontains=search_key) | Q(data__icontains=search_key) | Q(
-                    comment__icontains=search_key))).order_by('id')
+    # 查询出符合条件的 Record
+    if data['action'] == 'pagination':
+        if search_key == '':
+            # basic code 含义 0:可重复非基础记录, 1:可重复基础记录， 2:不可重复基础记录，3:被显性URL或隐性URL关联的记录 ，200:隐性URL转发，301:显性URL 301重定向，302:显性URL 302重定向
+            record_obj_list = zone_obj.record_set.filter(basic__in=dns_conf.BASIC_SET2SHOW).order_by('id')
+        else:
+            record_obj_list = zone_obj.record_set.filter(
+                Q(basic__in=dns_conf.BASIC_SET2SHOW)
+                & (
+                        Q(host__icontains=search_key)
+                        | Q(data__icontains=search_key)
+                        | Q(comment__icontains=search_key)
+                )
+            ).order_by('id')
+    elif data['action'] == 'search':
+        try:
+            record_obj_list = zone_obj.record_set.filter(
+                Q(basic__in=dns_conf.BASIC_SET2SHOW)
+                & (
+                        Q(host__icontains=search_key)
+                        | Q(data__icontains=search_key)
+                        | Q(comment__icontains=search_key)
+                )
+            ).order_by('id')
 
-            except Exception as e:
-                print(e)
-        record_obj_perpage_list, pagination_html = MyPaginator(record_obj_list, data['page'], data['perpage_num'])
+        except Exception as e:
+            print(e)
+    record_obj_perpage_list, pagination_html = MyPaginator(record_obj_list, data['page'], data['perpage_num'])
 
     ret = render(req, 'bind/tmp/domain_record_table_tmp.html',
                  {'record_obj_list': record_obj_perpage_list,
