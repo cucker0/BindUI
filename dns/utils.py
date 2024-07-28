@@ -124,7 +124,7 @@ def records_data_filter(data):
                 except Exception as e:
                     data[i] = None
                     print(e)
-            elif data[i]['type'] == 'TXT':  # TXT 长度处理，超过 255 个字符的文本分割为多个字符串，使用 " " 连接分割的各个部分
+            elif data[i]['type'] == 'TXT':  # TXT 类型的 RR 的值超过 255 个字符时需要分割成多个字符串，使用 " " 连接分割的各个部分
                 data[i]['data'] = split_txt(data[i]['data'])
             elif data[i]['type'] in ('CNAME', 'NS', 'SOA', 'PTR'):
                 # 要求为域名，如www.abc.com. 或 www.abc.com
@@ -198,7 +198,7 @@ def a_record_data_filter(rr: dict) -> bool:
             except Exception as e:
                 print(e)
                 return False
-        elif rr['type'] == 'TXT':  # TXT 长度处理，超过 255 个字符的文本分割为多个字符串，使用 " " 连接分割的各个部分
+        elif rr['type'] == 'TXT':  # TXT 类型的 RR 的值超过 255 个字符时需要分割成多个字符串，使用 " " 连接分割的各个部分
             rr['data'] = split_txt(rr['data'])
         elif rr['type'] in ('CNAME', 'NS', 'SOA', 'PTR'):
             # 要求为域名，如www.abc.com. 或 www.abc.com
