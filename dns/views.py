@@ -1040,9 +1040,6 @@ def record_add(req):
                         obj = associate_cname_rr_add(rr_raw)
                         rr_raw['associate_rr_id'] = obj.id
                 # 新建 显性URL、隐性URL 记录时，需要创建一条关联的 CNAME 记录  --end
-                # TXT 类型的 RR 的值超过 255 个字符时需要分割成多个字符串
-                if rr_raw['type'] == 'TXT':
-                    rr_raw['data'] = split_txt(rr_raw['data'])
                 # 创建 RR
                 models.Record.objects.update_or_create(**rr_raw)
                 msg['success_total'] += 1
@@ -1136,9 +1133,6 @@ def record_mod(req):
                 if 'zone_id' in data.keys():  # 因为 data['zone'] = zone_obj 也包含了字段 ‘zone_id’
                     del(data['zone_id'])
                 data['zone'] = zone_obj
-                # TXT 类型的 RR 的值超过 255 个字符需要分割成多个字符串
-                if data['type'] == 'TXT':
-                    data['data'] = split_txt(data['data'])
                 # 更新 RR
                 record_set.update(**data)
 
