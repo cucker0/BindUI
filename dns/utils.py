@@ -72,9 +72,12 @@ def records_data_filter(data):
     """ 多条 rr 数据过滤
 
     更新或创建 record 根据type过滤 data key,把非必要字段都留空,把type字段转为大写，CharField字段要求小写的转为小写
-    :param data: 接收到 web 端的数据，格式：[{"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data, "mx_priority":_mx, "ttl":_ttl, "comment":_comment, "zone":_zone_name }]
-        要更新或创建 的 record数据
-    :return: 返回过滤后的data或业务处理异常消息
+    :param data: list[dict]
+        接收到 web 端的数据，
+        格式：[{"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data, "mx_priority":_mx, "ttl":_ttl, "comment":_comment, "zone":_zone_name }]
+        要更新 或 创建 的多条 record 数据
+    :return: list[dict] or any
+        返回过滤后的data或业务处理异常消息
     """
 
     if type(data) != list:
@@ -121,7 +124,8 @@ def records_data_filter(data):
                 except Exception as e:
                     data[i] = None
                     print(e)
-            # elif data['type'] == 'CNAME' or (data['type'] == 'NS') or data['type'] == 'SOA' or data['type'] == 'PTR':
+            elif data[i]['type'] == 'TXT':  # TXT 长度处理，超过 255 个字符的文本分割为多个字符串，使用 " " 连接分割的各个部分
+                data[i]['data'] = split_txt(data[i]['data'])
             elif data[i]['type'] in ('CNAME', 'NS', 'SOA', 'PTR'):
                 # 要求为域名，如www.abc.com. 或 www.abc.com
                 data[i]['data'] = endwith_dot(data[i]['data'])
@@ -135,12 +139,16 @@ def records_data_filter(data):
                 pass
     return data
 
-def a_record_data_filter(rr:dict) -> bool:
+
+def a_record_data_filter(rr: dict) -> bool:
     """ 单个 rr 数据过滤
 
     更新或创建 record 根据type过滤 data key，把非必要字段都留空,把type字段转为大写，CharField字段要求小写的转为小写
-    :param rr: 格式：{"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data, "mx_priority":_mx, "ttl":_ttl, "comment":_comment, "zone": zone_obj }
-    :return: 数据是否合格，True：合格，False: 不合格
+    :param rr: dict
+        需要过滤的RR
+        格式：{"type":_type, "host":_host, "resolution_line":_resolution_line, "data":_data, "mx_priority":_mx, "ttl":_ttl, "comment":_comment, "zone": zone_obj }
+    :return: bool
+        数据是否合格，True：合格，False: 不合格
     """
     if type(rr) != dict:
         print(COMMON_MSG['data_type_error'])
@@ -190,6 +198,8 @@ def a_record_data_filter(rr:dict) -> bool:
             except Exception as e:
                 print(e)
                 return False
+        elif rr['type'] == 'TXT':  # TXT 长度处理，超过 255 个字符的文本分割为多个字符串，使用 " " 连接分割的各个部分
+            rr['data'] = split_txt(rr['data'])
         elif rr['type'] in ('CNAME', 'NS', 'SOA', 'PTR'):
             # 要求为域名，如www.abc.com. 或 www.abc.com
             rr['data'] = endwith_dot(rr['data'])
