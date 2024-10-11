@@ -65,7 +65,7 @@ Bind 9.12.1 | Bind 9.16.39 (任选一个)
 本系统包含3个组件，分别是BindUI、url-forwarder 和 BIND。
 
 * BindUI  
-  BindUI 是一个基于 Django 架构的 WEB 项目，负责域名管理的可视化图形界面操作；
+  BindUI 是一个基于 Django 架构的 WEB 项目，负责域名管理的可视化图形界面操作。
 * url-forwarder  
 url-forwarder 是一个 URL 转发器，一个基于 Spring Boot 架构的 WEB 项目，负责 显性 URL、隐性 URL 记录的转发。
 
@@ -100,9 +100,7 @@ BIND 是一个开源的DNS软件，负责DNS的解析。
     * 基于bind-dlz的动态DNS解析
 
 ### 工作原理
-* 为什么 BIND 可以从数据库中加载 zone 数据？
-
-答：  
+#### 为什么 BIND 可以从数据库中加载 zone 数据？
 是因为 BIND 扩展了 DLZ 驱动。
   
 DLZ 允许 BIND 直接从外部数据库检索 zone 数据。
@@ -111,38 +109,42 @@ DLZ 驱动程序支持多种数据库后端，包括 PostgreSQL、MySQL 和 LDA 
 
 说明：DLZ是BIND 9的扩展驱动（从BIND 9.4.0开始默认集成了DLZ drivers[^1]，从BIND 9.17.19开始弃用DLZ drivers，从BIND 9.18开始移除DLZ drivers[^2]
 
-* 多线路智能DNS解析是如何实现的？
-
-答：  
+#### 多线路智能DNS解析是如何实现的？
 BIND 中可配置多个 view，一个线路配置一个 view。  
 当配置了多个 view 时，则是按照配置文件中 view 的位置顺序从上往下逐个匹配，当客户的 IP 与 view 的 match-clients 子句所指定的 ACL 匹配时，则该客户IP与此view匹配，应用此 view，并停止匹配其他 view。
 
 如果希望把一个view作为默认的view(当没有匹配到任何的view时，就应用默认的view。例如定义名为default的view)，则在配置文件中把该view放到所有view的后面。
 
 **关于ACL**  
-用户可以自定义 ACL， 一个 ACL 中可定义了若干个网络。
+用户可以自定义 ACL， 一个 ACL 中可定义若干个网络。
 
 BIND 内置了4个ACL，分别是any、none、localhost 和 localnets ACL。
 
+#### 显性 URL、隐性 URL是什么？
+显性 URL、隐性 URL是实现DNS URL转发的两种不同的方式。  
+DNS URL转发是一种**将一个域名的所有或部分请求重定向到另一个URL的技术**。  
 
-* 显性 URL、隐性 URL 是怎样工作的？
+**DNS URL转发的适用场景：**
+1. ‌网站迁移‌  
+当网站从旧域名迁移到新域名时，通过DNS URL转发可以保持用户的访问流量，确保用户仍然能够访问到新的网站地址‌。 
+2. 品牌保护  
+‌企业可以注册与品牌相关的多个域名，并通过DNS URL转发将它们统一到主网站上，以保护品牌并避免用户混淆。
+3. 简化网址‌  
+有时企业可能拥有一个较长或复杂的网址，通过DNS URL转发，可以提供一个简短易记的域名，方便用户访问‌。 
+4. 市场推广‌  
+在进行市场推广活动时，企业可能会创建专门的推广域名，通过DNS URL转发将流量引导到特定的着陆页‌。
 
-答：  
-**DNS层：**  
-一条显性URL 或 一条隐性URL记录都是由两条相关联的记录共同实现的。
+#### 显性 URL、隐性 URL 是怎样工作的？
+* DNS层：
+    * 一条显性URL 或 一条隐性URL记录都是由两条相关联的记录共同实现的。
+    * 一条是type字段为 'CNAME' 的记录（CNAME记录），主要用于查找URL转发器地址。data字段的值为URL转发器地址（URL转发服务器的A记录的FQDN值），该记录的basic字段值为3。
+    * 另一条是type字段为 'TXT' 的记录（TXT记录），主要用于保存要转发的目标HTTP URL。该记录的data字段的值为要转发的目标HTTP URL，associate_rr_id字段的值为关联的CNAME记录的id。
+    * basic字段的值是根据type类型和转发需求来确定，具体参考 "record 表设计" 的 basic 字段说明。
 
-一条是type字段为 'CNAME' 的记录（CNAME记录），主要用于查找URL转发器地址。data字段的值为URL转发器地址（URL转发服务器的A记录的FQDN值），该记录的basic字段值为3。
-
-另一条是type字段为 'TXT' 的记录（TXT记录），主要用于保存要转发的目标HTTP URL。该记录的data字段的值为要转发的目标HTTP URL，associate_rr_id字段的值为关联的CNAME记录的id。
-
-basic字段的值是根据type类型和转发需求来确定，具体参考 "record 表设计" 的 basic 字段说明。
-
-**WEB层：**  
-URL转发器用于实现显性URL和隐性URL记录的转发。
-
-显性URL记录使用URL重定向技术实现，包含302 URL重定向 和 301 URL重定向。
-
-隐性URL记录使用 HTML iframe 内联框架技术实现。
+* WEB层：
+    * URL转发器用于实现显性URL和隐性URL记录的转发。
+    * 显性URL记录使用URL重定向技术实现，包含302 URL重定向 和 301 URL重定向。
+    * 隐性URL记录使用 HTML iframe 内联框架技术实现。
 
 ## 数据模型设计
 主要的表有 record、zone 表，record 表用于保存 RR 数据，zone 表用于保存 zone（区域）数据。
