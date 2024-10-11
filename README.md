@@ -56,9 +56,9 @@ Bind 9.12.1 | Bind 9.16.39 (任选一个)
 ```
 
 ## 系统部署
-* 参考 [部署智能 DNS 域名管理系](https://www.yuque.com/cucker/udwka0/cdx5ec7do39ov1c1?singleDoc#)
+* [部署智能 DNS 域名管理系](https://www.yuque.com/cucker/udwka0/cdx5ec7do39ov1c1?singleDoc#)
 
-## 手册
+## 使用指南
 * [BindUI 智能 DNS 域名管理系使用文档](https://www.yuque.com/cucker/udwka0/emk0i5bcgfrcv4m9?singleDoc#)
 
 ## 系统架构、组件功能
