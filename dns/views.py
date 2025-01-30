@@ -286,7 +286,7 @@ def domain_ns(req):
 
             ns_todele_obj_set = models.Record.objects.filter(data__in=ns_todelete_set)
             ns_todele_obj_set.delete()
-            for i in ns_toadd_set:
+            for i in ns_todelete_set:
                 msg['msg'] += "domain ns:%s delete success; " % (i.strip())
 
             # 更新 update_time
